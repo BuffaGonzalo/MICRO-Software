@@ -405,7 +405,11 @@ void MainWindow::sendDataSerial(){
         if(!ok)
             return;
         dato[indice++] = w.ui8[0];
-        dato[NBYTES]= 0x03;
+        w.i32 = QInputDialog::getInt(this, "PWM_MIN", "Valor: ", 0, 0, 200, 1, &ok);
+        if(!ok)
+            return;
+        dato[indice++] = w.ui8[0];
+        dato[NBYTES]= 0x04;
         break;
     default:
         return;
@@ -726,7 +730,11 @@ void MainWindow::sendDataUDP(){
         if(!ok)
             return;
         dato[indice++] = w.ui8[0];
-        dato[NBYTES]= 0x03;
+        w.i32 = QInputDialog::getInt(this, "PWM_MIN", "Valor: ", 0, 0, 200, 1, &ok);
+        if(!ok)
+            return;
+        dato[indice++] = w.ui8[0];
+        dato[NBYTES]= 0x04;
         break;
     default:
         return;
