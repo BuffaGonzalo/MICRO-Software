@@ -312,8 +312,22 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
 
         break;
     case SETPWM:
+        if(datosRx[2]==ACK){
+            str="MODIFICACION PARAMETROS PWM - VELOCIDAD MOTOR!!!";
+            ui->textBrowserProcessed->append(str);
+        }
         break;
     case SETPID:
+        if(datosRx[2]==ACK){
+            str="MODIFICACION PARAMETROS PID!!!";
+            ui->textBrowserProcessed->append(str);
+        }
+        break;
+    case SETPWMLIMIT:
+        if(datosRx[2]==ACK){
+            str="MODIFICACION VELOCIDAD MAXIMA PID!!!";
+            ui->textBrowserProcessed->append(str);
+        }
         break;
     default:
         str = str + "Comando DESCONOCIDO!!!!";
