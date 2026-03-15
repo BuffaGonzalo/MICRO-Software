@@ -50,6 +50,14 @@ private slots:
     void getData();
 
     /**
+     * @brief buildPayload - Construye la carga útil del comando leyendo la UI
+     * @param payload - Puntero al buffer donde se guardarán los datos
+     * @param length - Referencia a la variable que guardará la longitud final
+     * @return true si el usuario completó los datos, false si canceló
+     */
+    bool buildPayload(uint8_t *payload, uint8_t &length);
+
+    /**
      * @brief sendSerial - Comando utilizado para enviar datos por el puerto serial en segundo plano
      * @param buf - Comando enviado por serial
      * @param length - longitud del comando en bytes
@@ -64,55 +72,12 @@ private slots:
      */
     void sendUdp(uint8_t *buf, uint8_t length);
 
-    //void getData();
-
     bool eventFilter(QObject *watched, QEvent *event);
 
-    // void on_pushButton_actRadar_clicked();
-
-    /**
-     * @brief radar - Funcion encargada de dibujar el radar en pantalla
-     *
-     */
-    // void radar();
-
-    // void carStatus();
-
-    /**
-     * @brief onTimer4 - Funcion encargada de obtener distancia para el radar
-     */
-
-    //    void onTimer4();
-
-    //    /**
-    //     * @brief onTimer5 - Funcion encargada de mover el servo
-    //     */
-
-    //    void onTimer5();
-
-    //    /**
-    // * @brief onTimer7 - Funcion utilizada para pintar el radar del widget una vez al principio
-    // */
-    //    void onTimer7();
-
-    // /**
-    //  * @brief resizeEvent - Funcion utilizada para aumentar el tamaño del widget dependiedo de la resolucion
-    //  * @param event
-    //  */
-    // void resizeEvent(QResizeEvent *event) override;
-
-    // /**
-    //  * @brief paintEvent - Funcion utilizada para pintar el widget
-    //  * @param event
-    //  */
-
-    // void paintEvent(QPaintEvent *event) override;
 
 private:
     Ui::MainWindow *ui;
     QSerialPort *QSerialPort1;
-    // QPaintBox *QPaintBox1;
-    // QPaintBox *QPaintBox2;
     QLabel *statusMode;
 
     //Debug *myDebug;
@@ -120,11 +85,6 @@ private:
     //timers
     QTimer  *timer1;
     QTimer  *timer2;
-    // QTimer  *timer3;
-    // QTimer  *timer4;
-    // QTimer  *timer5;
-    // QTimer  *timer6;
-    // QTimer  *timer7;
 
     //variables comunicacion udp
     QUdpSocket *QUdpSocket1;
@@ -139,24 +99,9 @@ private:
     bool firRadarExe;
     int contadorAlive=0;
     int angle;
-    // int32_t servoAngle; //variable utilizada para controlar el angulo del servo en la animacion
-    // uint32_t distance;
-    // uint16_t lftIrValue;
-    // uint16_t cntIrValue;
-    // uint16_t rhtIrValue;
-    // uint16_t blackIrValue;
-    // uint16_t whiteIrValue;
 
     uint32_t lftEncData;
     uint32_t rhtEncData;
-
-    // //variables del servo
-    // uint16_t minMsServo;
-    // uint16_t maxMsServo;
-
-    // //canales de RGB utilizados para pintar la velocidad de las ruedas
-    // uint8_t redChannel;
-    // uint8_t greenChannel;
 
     typedef enum{
         START,
@@ -182,24 +127,10 @@ private:
         SETPWM=0xF4,
         SETPID=0XF5,
         SETPWMLIMIT=0xF6,
+        SETLINECTRL=0xF7,
         UNKNOWCMD=0xFF,
         GETFLANKS=0xA8,
         POSITION=0xA9,
-        // SETLEDS=0x10,
-        // GETSWITCHES=0x12,
-        // GETANALOGSENSORS=0xA0,
-        // SETMOTORTEST=0xA1,
-        // SETSERVOANGLE=0xA2,
-        // SERVOMOVESTOP=0x0A,
-        // GETDISTANCE=0xA3,
-        // GETSPEED=0xA4,
-        // SETSERVOLIMITS=0xA5,
-        // SETBLACKCOLOR=0xA6,
-        // SETWHITECOLOR=0xA7,
-        // PATHLENGHT=0xA8,
-        // CURRMODE=0xA9,
-        // CURRLEVEL=0x20,
-        // CURRMSSERVO = 0x21,
         OTHERS
     }_eCmd;
 

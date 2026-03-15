@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->comboBox_CMD->addItem("SETPWM", 0xF4);
     ui->comboBox_CMD->addItem("SETPID", 0xF5);
     ui->comboBox_CMD->addItem("SETPWMLIMIT", 0xF6);
+    ui->comboBox_CMD->addItem("SETLINECTRL", 0xF7);
     ui->comboBox_CMD->addItem("*", 0xA9);
 
     //inicializamos
@@ -335,110 +336,6 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     }
 }
 
-void MainWindow::sendDataSerial(){
-    uint8_t cmdId;
-    _udat   w;
-    bool ok;
-
-    unsigned char dato[256];
-    unsigned char indice=0, chk=0;
-
-    QString str="";
-
-    dato[indice++]='U';
-    dato[indice++]='N';
-    dato[indice++]='E';
-    dato[indice++]='R';
-    dato[indice++]=0x00;
-    dato[indice++]=':';
-    cmdId = ui->comboBox_CMD->currentData().toInt();
-    switch (cmdId) {
-    case GETALIVE:
-    case GETMPU:
-    case GETADC:
-    case GETFIRMWARE:// GETFIRMWARE=0xF1
-        dato[indice++]=cmdId;
-        dato[NBYTES]=0x02;
-        break;
-    case SETPWM:
-        dato[indice++] =SETPWM;
-        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 1:", 0, 0, 100, 1, &ok);
-        if(!ok)
-            return;
-        dato[indice++] = w.ui8[0];
-        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 2:", 0, 0, 100, 1, &ok);
-        if(!ok)
-            break;
-        dato[indice++] = w.ui8[0];
-        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 3:", 0, 0, 100, 1, &ok);
-        if(!ok)
-            break;
-        dato[indice++] = w.ui8[0];
-        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 4:", 0, 0, 100, 1, &ok);
-        if(!ok)
-            break;
-        dato[indice++] = w.ui8[0];
-        dato[NBYTES]= 0x06;
-        break;
-    case SETPID:
-        dato[indice++] =SETPID;
-        w.i32 = QInputDialog::getInt(this, "PID", "Kp", 0, 0, 5000, 1, &ok);
-        if(!ok)
-            return;
-        dato[indice++] = w.ui8[0];
-        dato[indice++] = w.ui8[1];
-        w.i32 = QInputDialog::getInt(this, "PID", "Ki", 0, 0, 5000, 1, &ok);
-        if(!ok)
-            return;
-        dato[indice++] = w.ui8[0];
-        dato[indice++] = w.ui8[1];
-        w.i32 = QInputDialog::getInt(this, "PID", "Kd", 0, 0, 5000, 1, &ok);
-        if(!ok)
-            return;
-        dato[indice++] = w.ui8[0];
-        dato[indice++] = w.ui8[1];
-        dato[NBYTES]= 0x08;
-        break;
-    case SETPWMLIMIT:
-        dato[indice++] =SETPWMLIMIT;
-        w.i32 = QInputDialog::getInt(this, "PWM_MAX", "Valor: ", 0, 0, 200, 1, &ok);
-        if(!ok)
-            return;
-        dato[indice++] = w.ui8[0];
-        w.i32 = QInputDialog::getInt(this, "PWM_MIN", "Valor: ", 0, 0, 200, 1, &ok);
-        if(!ok)
-            return;
-        dato[indice++] = w.ui8[0];
-        dato[NBYTES]= 0x04;
-        break;
-    default:
-        return;
-    }
-
-    for(int a=0 ;a<indice;a++)
-        chk^=dato[a]; //calculamos el checksum
-    dato[indice]=chk; //colocamos el checksum en la ultima posicion
-
-    if(QSerialPort1->isWritable()){
-        QSerialPort1->write(reinterpret_cast<char *>(dato),dato[NBYTES]+PAYLOAD);
-    }
-
-    for(int i=0; i<=indice; i++){
-        if(isalnum(dato[i]))
-            str = str + QString("%1").arg(char(dato[i]));
-        else
-            str = str +"{" + QString("%1").arg(dato[i],2,16,QChar('0')) + "}";
-    }
-
-    uint16_t valor=dato[NBYTES]+PAYLOAD;
-    ui->textBrowserProcessed->append("***COMANDO NUEVO***");
-    ui->textBrowserProcessed->append("INDICE ** " +QString().number(indice,10) + " **" );
-    ui->textBrowserProcessed->append("NUMERO DE DATOS ** " +QString().number(valor,10) + " **" );
-    ui->textBrowserProcessed->append("CHECKSUM ** " +QString().number(chk,16) + " **" );
-    ui->textBrowserUnProcessed->append("PC--SERIAL-->MBED ( " + str + " )");
-
-}
-
 void MainWindow::sendSerial(uint8_t *buf, uint8_t length){
     uint8_t tx[24];
     uint8_t cks, i;
@@ -546,6 +443,109 @@ void MainWindow::sendUdp(uint8_t *buf, uint8_t length){
     str=str + clientAddress.toString() + "  " +  QString().number(puertoremoto,10);
 
     ui->textBrowserUnProcessed->append("PC--UDP-->MBED ( " + str + " )");
+}
+
+void MainWindow::sendDataSerial(){
+    uint8_t payload[256];
+    uint8_t length = 0;
+
+    // Si el usuario completa los datos correctamente, lo enviamos
+    if (buildPayload(payload, length)) {
+        sendSerial(payload, length);
+        ui->textBrowserProcessed->append("***COMANDO ENVIADO POR SERIAL***");
+    }
+}
+
+void MainWindow::sendDataUDP(){
+    uint8_t payload[256];
+    uint8_t length = 0;
+
+    // Si el usuario completa los datos correctamente, lo enviamos
+    if (buildPayload(payload, length)) {
+        sendUdp(payload, length);
+        ui->textBrowserProcessed->append("***COMANDO ENVIADO POR UDP***");
+    }
+}
+
+bool MainWindow::buildPayload(uint8_t *payload, uint8_t &length) {
+    uint8_t cmdId = ui->comboBox_CMD->currentData().toInt();
+    _udat w;
+    bool ok;
+    uint8_t index = 0;
+
+    switch (cmdId) {
+    case GETALIVE:
+    case GETADC:
+    case GETMPU:
+    case GETFIRMWARE:
+        payload[index++] = cmdId;
+        break;
+    case SETPWM:
+        payload[index++] = SETPWM;
+        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 1:", 0, 0, 100, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+
+        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 2:", 0, 0, 100, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+
+        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 3:", 0, 0, 100, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+
+        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 4:", 0, 0, 100, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+        break;
+    case SETPID:
+        payload[index++] = SETPID;
+        w.i32 = QInputDialog::getInt(this, "PID", "Kp", 0, 0, 5000, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+        payload[index++] = w.ui8[1];
+
+        w.i32 = QInputDialog::getInt(this, "PID", "Ki", 0, 0, 5000, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+        payload[index++] = w.ui8[1];
+
+        w.i32 = QInputDialog::getInt(this, "PID", "Kd", 0, 0, 5000, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+        payload[index++] = w.ui8[1];
+        break;
+    case SETPWMLIMIT:
+        payload[index++] = SETPWMLIMIT;
+        w.i32 = QInputDialog::getInt(this, "PWM_MAX", "Valor: ", 0, 0, 200, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+
+        w.i32 = QInputDialog::getInt(this, "PWM_MIN", "Valor: ", 0, 0, 200, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+        break;
+    case SETLINECTRL:
+        payload[index++] = SETLINECTRL;
+        w.i32 = QInputDialog::getInt(this, "Line Control", "Kp_line:", 0, 0, 200, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+
+        w.i32 = QInputDialog::getInt(this, "Line Control", "Kd_line:", 0, 0, 200, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+
+        w.i32 = QInputDialog::getInt(this, "Line Control", "Setpoint (ej: 150 = 1.5 grados):", 0, -2000, 2000, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.i16[0];
+
+        break;
+    default:
+        return false; // Comando desconocido
+    }
+
+    length = index; // Guardamos la cantidad de bytes que conforman el payload
+    return true;
 }
 
 void MainWindow::timeOut(){
@@ -658,111 +658,6 @@ void MainWindow::OnUdpRxData(){
 
 }
 
-
-
-
-void MainWindow::sendDataUDP(){
-    uint8_t cmdId;
-    _udat w;
-    unsigned char dato[256];
-    unsigned char indice=0, chk=0;
-    QString str;
-    int puerto=0;
-    bool ok;
-
-    dato[indice++]='U';
-    dato[indice++]='N';
-    dato[indice++]='E';
-    dato[indice++]='R';
-    dato[indice++]=0x00;
-    dato[indice++]=':';
-    cmdId = ui->comboBox_CMD->currentData().toInt();
-    switch (cmdId) {
-    case GETALIVE:
-    case GETADC:
-    case GETMPU:
-    case GETFIRMWARE:// GETFIRMWARE=0xF1
-        dato[indice++]=cmdId;
-        dato[NBYTES]=0x02;
-        break;
-    case SETPWM:
-        dato[indice++] =SETPWM;
-        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 1:", 0, 0, 100, 1, &ok);
-        if(!ok)
-            return;
-        dato[indice++] = w.ui8[0];
-        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 2:", 0, 0, 100, 1, &ok);
-        if(!ok)
-            break;
-        dato[indice++] = w.ui8[0];
-        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 3:", 0, 0, 100, 1, &ok);
-        if(!ok)
-            break;
-        dato[indice++] = w.ui8[0];
-        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 4:", 0, 0, 100, 1, &ok);
-        if(!ok)
-            break;
-        dato[indice++] = w.ui8[0];
-        dato[NBYTES]= 0x06;
-        break;
-    case SETPID:
-        dato[indice++] =SETPID;
-        w.i32 = QInputDialog::getInt(this, "PID", "Kp", 0, 0, 5000, 1, &ok);
-        if(!ok)
-            return;
-        dato[indice++] = w.ui8[0];
-        dato[indice++] = w.ui8[1];
-        w.i32 = QInputDialog::getInt(this, "PID", "Ki", 0, 0, 5000, 1, &ok);
-        if(!ok)
-            return;
-        dato[indice++] = w.ui8[0];
-        dato[indice++] = w.ui8[1];
-        w.i32 = QInputDialog::getInt(this, "PID", "Kd", 0, 0, 5000, 1, &ok);
-        if(!ok)
-            return;
-        dato[indice++] = w.ui8[0];
-        dato[indice++] = w.ui8[1];
-        dato[NBYTES]= 0x08;
-        break;
-    case SETPWMLIMIT:
-        dato[indice++] =SETPWMLIMIT;
-        w.i32 = QInputDialog::getInt(this, "PWM_MAX", "Valor: ", 0, 0, 200, 1, &ok);
-        if(!ok)
-            return;
-        dato[indice++] = w.ui8[0];
-        w.i32 = QInputDialog::getInt(this, "PWM_MIN", "Valor: ", 0, 0, 200, 1, &ok);
-        if(!ok)
-            return;
-        dato[indice++] = w.ui8[0];
-        dato[NBYTES]= 0x04;
-        break;
-    default:
-        return;
-        break;
-    }
-
-    puerto=ui->lineEdit_device_port->text().toInt();
-    puertoremoto=puerto;
-    for(int a=0 ;a<indice;a++)
-        chk^=dato[a];
-    dato[indice]=chk;
-    if(clientAddress.isNull())
-        clientAddress.setAddress(ui->lineEdit_device_ip->text());
-    if(puertoremoto==0)
-        puertoremoto=puerto;
-    if(QUdpSocket1->isOpen()){
-        QUdpSocket1->writeDatagram(reinterpret_cast<const char *>(dato), (dato[4]+7), clientAddress, puertoremoto);
-    }
-
-    for(int i=0; i<=indice; i++){
-        if(isalnum(dato[i]))
-            str = str + QString("%1").arg(char(dato[i]));
-        else
-            str = str +"{" + QString("%1").arg(dato[i],2,16,QChar('0')) + "}";
-    }
-    str=str + clientAddress.toString() + "  " +  QString().number(puertoremoto,10);
-    ui->textBrowserUnProcessed->append("PC--UDP-->MBED ( " + str + " )");
-}
 
 void MainWindow::getData(){
     uint8_t cmd, buf[24];
