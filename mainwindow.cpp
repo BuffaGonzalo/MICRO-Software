@@ -9,6 +9,18 @@ MainWindow::MainWindow(QWidget *parent)
     timer1 = new QTimer(this);
     timer2 = new QTimer(this);
 
+    // Instanciar el widget contenedor
+    view3D = new QQuickWidget(this);
+    view3D->setSource(QUrl(QStringLiteral("qrc:/Scene3D.qml")));
+    view3D->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    view3D->setMinimumSize(QSize(300, 300));
+
+    // Puedes mostrarlo como ventana flotante por ahora:
+    view3D->setWindowTitle("Orientación del Vehículo");
+    view3D->setWindowFlag(Qt::Window); // La independiza visualmente
+    view3D->move(500, 200); // Ahora las coordenadas 500,200 son relativas a la pantalla de tu PC
+    view3D->show();
+
     //comunicacion
     QSerialPort1 = new QSerialPort(this);
     QUdpSocket1 = new QUdpSocket(this);
@@ -52,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
     statusMode = new QLabel(ui->statusBar);
 
     timer1->start(100);
-    //timer2->start(500);
+    timer2->start(500);
 }
 
 MainWindow::~MainWindow()
@@ -200,12 +212,13 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         }
         ui->textBrowserProcessed->append(str);
         break;
-    case GETMPU:
+    case GETMPU:{
 
         //Datos acelerometro
         w.i8[0] = datosRx[2];
         w.i8[1] = datosRx[3];
 
+        float ax = w.i16[0];
         str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
         strOut = "Ax: " + str;
         ui->textBrowserProcessed->append(strOut);
@@ -214,6 +227,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         w.i8[0] = datosRx[4];
         w.i8[1] = datosRx[5];
 
+        float ay = w.i16[0];
         str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
         strOut = "Ay: " + str;
         ui->textBrowserProcessed->append(strOut);
@@ -222,6 +236,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         w.i8[0] = datosRx[6];
         w.i8[1] = datosRx[7];
 
+        float az = w.i16[0];
         str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
         strOut = "Az: " + str;
         ui->textBrowserProcessed->append(strOut);
@@ -247,12 +262,30 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         w.i8[0] = datosRx[12];
         w.i8[1] = datosRx[13];
 
+        float gz = w.i16[0];
         str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
         strOut = "Gz: " + str;
         ui->textBrowserProcessed->append(strOut);
         ui->gz_data->setText(str);
 
+        // 2. Calcular ángulos
+        float pitch = atan2(ay, sqrt(ax * ax + az * az)) * 180.0 / M_PI;
+        float roll = atan2(-ax, sqrt(ay * ay + az * az)) * 180.0 / M_PI;
+
+        // (Opcional) Calcular Yaw integrando el giroscopio
+        float gz_grados_seg = gz / 131.0f; // Asumiendo escala de +/- 250deg/s
+        if (abs(gz_grados_seg) > 1.0f) {
+            yawAcumulado += gz_grados_seg * 0.1f; // asumiendo 100ms de muestreo de tu timer1
+        }
+
+        // 3. Enviar los ángulos a Qt Quick 3D
+        if (view3D && view3D->rootObject()) {
+            view3D->rootObject()->setProperty("carPitch", pitch);
+            view3D->rootObject()->setProperty("carRoll", roll);
+            view3D->rootObject()->setProperty("carYaw", yawAcumulado);
+        }
         break;
+    }
     case GETADC:
         //Datos acelerometro
         w.ui8[0] = datosRx[2];
@@ -530,14 +563,17 @@ bool MainWindow::buildPayload(uint8_t *payload, uint8_t &length) {
         w.i32 = QInputDialog::getInt(this, "Line Control", "Kp_line:", 0, 0, 200, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
+        payload[index++] = w.ui8[1];
 
         w.i32 = QInputDialog::getInt(this, "Line Control", "Kd_line:", 0, 0, 200, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
+        payload[index++] = w.ui8[1];
 
-        w.i32 = QInputDialog::getInt(this, "Line Control", "Setpoint (ej: 150 = 1.5 grados):", 0, -2000, 2000, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "Line Control", "Setpoint (ej: 150 = 1.5 grados):", 0, -200, 200, 1, &ok);
         if(!ok) return false;
-        payload[index++] = w.i16[0];
+        payload[index++] = w.i8[0];
+        payload[index++] = w.i8[1];
 
         break;
     default:

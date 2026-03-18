@@ -1,0 +1,44 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Scene3D.qml</file>
+        <file>resources/AutoMicroSimplify.qml</file>
+        <file>resources/meshes/solid1_mesh.mesh</file>
+        <file>resources/meshes/srf1_mesh.mesh</file>
+        <file>resources/meshes/srf2_mesh.mesh</file>
+        <file>resources/meshes/srf3_mesh.mesh</file>
+        <file>resources/meshes/srf4_mesh.mesh</file>
+        <file>resources/meshes/srf5_mesh.mesh</file>
+        <file>resources/meshes/srf6_mesh.mesh</file>
+        <file>resources/meshes/srf7_mesh.mesh</file>
+        <file>resources/meshes/srf8_mesh.mesh</file>
+        <file>resources/meshes/srf9_mesh.mesh</file>
+        <file>resources/meshes/srf10_mesh.mesh</file>
+        <file>resources/meshes/srf11_mesh.mesh</file>
+        <file>resources/meshes/srf12_mesh.mesh</file>
+        <file>resources/meshes/srf13_mesh.mesh</file>
+        <file>resources/meshes/srf14_mesh.mesh</file>
+        <file>resources/meshes/srf15_mesh.mesh</file>
+        <file>resources/meshes/srf16_mesh.mesh</file>
+        <file>resources/meshes/srf17_mesh.mesh</file>
+        <file>resources/meshes/srf18_mesh.mesh</file>
+        <file>resources/meshes/srf19_mesh.mesh</file>
+        <file>resources/meshes/srf20_mesh.mesh</file>
+        <file>resources/meshes/srf21_mesh.mesh</file>
+        <file>resources/meshes/srf22_mesh.mesh</file>
+        <file>resources/meshes/srf23_mesh.mesh</file>
+        <file>resources/meshes/srf24_mesh.mesh</file>
+        <file>resources/meshes/srf25_mesh.mesh</file>
+        <file>resources/meshes/srf26_mesh.mesh</file>
+        <file>resources/meshes/srf27_mesh.mesh</file>
+        <file>resources/meshes/srf28_mesh.mesh</file>
+        <file>resources/meshes/srf29_mesh.mesh</file>
+        <file>resources/meshes/srf30_mesh.mesh</file>
+        <file>resources/meshes/srf31_mesh.mesh</file>
+        <file>resources/meshes/srf32_mesh.mesh</file>
+        <file>resources/meshes/srf33_mesh.mesh</file>
+        <file>resources/meshes/srf34_mesh.mesh</file>
+        <file>resources/maps/textureData.png</file>
+        <file>resources/maps/textureData62.png</file>
+        <file>resources/maps/textureData89.png</file>
+    </qresource>
+</RCC>

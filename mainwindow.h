@@ -13,6 +13,10 @@
 #include <QTime>
 #include <QSerialPortInfo>
 
+#include <QQuickWidget>
+#include <QQuickItem>
+
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -158,5 +162,10 @@ private:
     }_udat;
 
     _udat myWord;
+
+
+    QQuickWidget *view3D;
+    float yawAcumulado = 0.0f; // Para acumular la rotación del giroscopio
+
 };
 #endif // MAINWINDOW_H
