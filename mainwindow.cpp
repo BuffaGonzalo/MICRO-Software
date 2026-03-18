@@ -9,17 +9,8 @@ MainWindow::MainWindow(QWidget *parent)
     timer1 = new QTimer(this);
     timer2 = new QTimer(this);
 
-    // Instanciar el widget contenedor
-    view3D = new QQuickWidget(this);
-    view3D->setSource(QUrl(QStringLiteral("qrc:/Scene3D.qml")));
-    view3D->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    view3D->setMinimumSize(QSize(300, 300));
-
-    // Puedes mostrarlo como ventana flotante por ahora:
-    view3D->setWindowTitle("Orientación del Vehículo");
-    view3D->setWindowFlag(Qt::Window); // La independiza visualmente
-    view3D->move(500, 200); // Ahora las coordenadas 500,200 son relativas a la pantalla de tu PC
-    view3D->show();
+    ui->AutoWidget->setSource(QUrl(QStringLiteral("qrc:/Scene3D.qml")));
+    ui->AutoWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
 
     //comunicacion
     QSerialPort1 = new QSerialPort(this);
@@ -275,14 +266,16 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         // (Opcional) Calcular Yaw integrando el giroscopio
         float gz_grados_seg = gz / 131.0f; // Asumiendo escala de +/- 250deg/s
         if (abs(gz_grados_seg) > 1.0f) {
-            yawAcumulado += gz_grados_seg * 0.1f; // asumiendo 100ms de muestreo de tu timer1
+            yawAcumulado += gz_grados_seg * 0.5f; // asumiendo 100ms de muestreo de tu timer1
         }
+        // Añade esta línea para imprimir los ángulos finales en la consola de Qt Creator
+        qDebug() << "Angulos Calculados -> Pitch:" << pitch << " | Roll:" << roll << " | Yaw:" << yawAcumulado;
 
         // 3. Enviar los ángulos a Qt Quick 3D
-        if (view3D && view3D->rootObject()) {
-            view3D->rootObject()->setProperty("carPitch", pitch);
-            view3D->rootObject()->setProperty("carRoll", roll);
-            view3D->rootObject()->setProperty("carYaw", yawAcumulado);
+        if (ui->AutoWidget && ui->AutoWidget->rootObject()) {
+            ui->AutoWidget->rootObject()->setProperty("carPitch", pitch);
+            ui->AutoWidget->rootObject()->setProperty("carRoll", roll);
+            ui->AutoWidget->rootObject()->setProperty("carYaw", yawAcumulado);
         }
         break;
     }
