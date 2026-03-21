@@ -265,8 +265,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         ui->gz_data->setText(str);
 
         // 2. Calcular ángulos
-        float pitch = atan2(ay, sqrt(ax * ax + az * az)) * 180.0 / M_PI;
-        float roll = atan2(-ax, sqrt(ay * ay + az * az)) * 180.0 / M_PI;
+        float roll = atan2(ay, sqrt(ax * ax + az * az)) * 180.0 / M_PI;
+        float pitch = atan2(-ax, sqrt(ay * ay + az * az)) * 180.0 / M_PI;
 
         // ---- NUEVO: Enviar a la gráfica ----
         // Obtenemos el tiempo en segundos
@@ -288,8 +288,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
 
         // 3. Enviar los ángulos a Qt Quick 3D
         if (ui->AutoWidget && ui->AutoWidget->rootObject()) {
-            ui->AutoWidget->rootObject()->setProperty("carPitch", pitch);
-            ui->AutoWidget->rootObject()->setProperty("carRoll", roll);
+            ui->AutoWidget->rootObject()->setProperty("carPitch", roll);
+            ui->AutoWidget->rootObject()->setProperty("carRoll", pitch);
             ui->AutoWidget->rootObject()->setProperty("carYaw", yawAcumulado);
         }
         break;
