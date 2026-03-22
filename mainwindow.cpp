@@ -769,7 +769,7 @@ void MainWindow::getData(){
 
     wifiMef++;
     if (wifiMef > 3) {
-        wifiMef = 0;
+        wifiMef = 1;
     }
 
     sendSerial(buf, 1);
