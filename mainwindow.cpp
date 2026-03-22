@@ -55,7 +55,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_sendUdp->setEnabled(false);
     ui->pushButton_sendSerial->setEnabled(false);
 
-    statusMode = new QLabel(ui->statusBar);
+    statusMode = new QLabel(this);
+    ui->statusBar->addWidget(statusMode);
 
     runtimeTimer.start();
 
@@ -405,6 +406,17 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         // Enviar a la ventana gráfica
         if (myGraphics) {
             myGraphics->updateTelemetry(t, anguloActual, setpointGrados, errorLinea, giroPWM, sumaIR, estadoLinea);
+
+            // Actualizar Labels
+            ui->lblReflectancia->setText(QString("Reflectancia (SUM): %1").arg(sumaIR));
+
+            if (!estadoLinea) {
+                ui->lblEstado->setText("Estado: BUSCANDO LÍNEA (Rojo)");
+                ui->lblEstado->setStyleSheet("QLabel { color : red; font-weight: bold; }");
+            } else {
+                ui->lblEstado->setText("Estado: SIGUIENDO LÍNEA (Verde)");
+                ui->lblEstado->setStyleSheet("QLabel { color : green; font-weight: bold; }");
+            }
         }
         break;
     }
@@ -764,8 +776,12 @@ void MainWindow::getData(){
     sendUdp(buf, 1);
 
     if(!QSerialPort1->isOpen() && !QUdpSocket1->isOpen()) //colocamos un estadopredeterminado en caso de no estar conectado
-        statusMode->setText("CURRENT STATE --> IDLE");
-
+        statusMode->setText("CURRENT STATE --> DESCONECTADO");
+    else
+        if(QSerialPort1->isOpen())
+            statusMode->setText("CURRENT STATE --> CONNECTADO SERIE");
+        else if (QUdpSocket1->isOpen())
+            statusMode->setText("CURRENT STATE --> CONNECTADO UDP");
 }
 
 bool MainWindow::eventFilter(QObject *watched, QEvent *event){ //utilizado para mostrar los puestos disponibles

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>768</width>
-    <height>498</height>
+    <width>1040</width>
+    <height>774</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,8 +36,8 @@
     <rect>
      <x>30</x>
      <y>50</y>
-     <width>711</width>
-     <height>201</height>
+     <width>991</width>
+     <height>291</height>
     </rect>
    </property>
   </widget>
@@ -45,36 +45,10 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>270</y>
-     <width>711</width>
-     <height>211</height>
+     <y>350</y>
+     <width>991</width>
+     <height>281</height>
     </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="lblReflectancia">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>20</y>
-     <width>141</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>TextLabel</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="lblEstado">
-   <property name="geometry">
-    <rect>
-     <x>290</x>
-     <y>20</y>
-     <width>171</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>TextLabel</string>
    </property>
   </widget>
  </widget>

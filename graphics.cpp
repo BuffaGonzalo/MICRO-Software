@@ -20,7 +20,7 @@ graphics::graphics(QWidget *parent)
     chartBalance->layout()->setContentsMargins(0,0,0,0);
 
     axisX_bal = new QValueAxis(); axisX_bal->setRange(0, 10);
-    axisY_bal = new QValueAxis(); axisY_bal->setRange(-15, 15); // Ajusta según tu necesidad
+    axisY_bal = new QValueAxis(); axisY_bal->setRange(-90, 90); // Ajusta según tu necesidad
 
     chartBalance->addAxis(axisX_bal, Qt::AlignBottom);
     chartBalance->addAxis(axisY_bal, Qt::AlignLeft);
@@ -71,16 +71,5 @@ void graphics::updateTelemetry(double time, double angle, double setpoint, int l
     if (time > 10.0) {
         axisX_bal->setRange(time - 10.0, time);
         axisX_line->setRange(time - 10.0, time);
-    }
-
-    // Actualizar Labels
-    ui->lblReflectancia->setText(QString("Reflectancia (SUM): %1").arg(sumIR));
-
-    if (state == 0) {
-        ui->lblEstado->setText("Estado: BUSCANDO LÍNEA (Rojo)");
-        ui->lblEstado->setStyleSheet("QLabel { color : red; font-weight: bold; }");
-    } else {
-        ui->lblEstado->setText("Estado: SIGUIENDO LÍNEA (Verde)");
-        ui->lblEstado->setStyleSheet("QLabel { color : green; font-weight: bold; }");
     }
 }

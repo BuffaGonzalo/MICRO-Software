@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>873</width>
-    <height>770</height>
+    <width>861</width>
+    <height>816</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -775,6 +775,42 @@
      <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
     </property>
    </widget>
+   <widget class="QLabel" name="lblReflectancia">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>740</y>
+      <width>141</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Reflectancia</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblEstado">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>740</y>
+      <width>171</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Estado</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QMenuBar" name="menuBar">
@@ -782,7 +818,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>873</width>
+     <width>861</width>
      <height>25</height>
     </rect>
    </property>
