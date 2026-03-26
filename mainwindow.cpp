@@ -271,11 +271,11 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
 
         // ---- NUEVO: Enviar a la gráfica ----
         // Obtenemos el tiempo en segundos
-        double t = runtimeTimer.elapsed() / 1000.0;
+        //double t = runtimeTimer.elapsed() / 1000.0;
 
         // (Por ahora ponemos el setpoint manual, luego puedes leerlo del STM32)
-        double currentSetpoint = 0.5;
-        double currentPwm = 0.0;      // Necesitarás enviarlo desde el STM32
+        //double currentSetpoint = 0.5;
+        //double currentPwm = 0.0;      // Necesitarás enviarlo desde el STM32
 
         // (Opcional) Calcular Yaw integrando el giroscopio
         float gz_grados_seg = gz / 131.0f; // Asumiendo escala de +/- 250deg/s
@@ -572,62 +572,73 @@ bool MainWindow::buildPayload(uint8_t *payload, uint8_t &length) {
         break;
     case SETPWM:
         payload[index++] = SETPWM;
-        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 1:", 0, 0, 100, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "Settear_PWM", "Channel 1:", 0, 0, 100, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
 
-        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 2:", 0, 0, 100, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "Settear_PWM", "Channel 2:", 0, 0, 100, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
 
-        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 3:", 0, 0, 100, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "Settear_PWM", "Channel 3:", 0, 0, 100, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
 
-        w.i32 = QInputDialog::getInt(this, "PWM", "Channel 4:", 0, 0, 100, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "Settear_PWM", "Channel 4:", 0, 0, 100, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         break;
     case SETPID:
         payload[index++] = SETPID;
-        w.i32 = QInputDialog::getInt(this, "PID", "Kp", 0, 0, 5000, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "PID_Balancin", "Kp", 0, 0, 5000, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
 
-        w.i32 = QInputDialog::getInt(this, "PID", "Ki", 0, 0, 5000, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "PID_Balancin", "Ki", 0, 0, 5000, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
 
-        w.i32 = QInputDialog::getInt(this, "PID", "Kd", 0, 0, 5000, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "PID_Balancin", "Kd", 0, 0, 5000, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
         break;
     case SETPWMLIMIT:
         payload[index++] = SETPWMLIMIT;
-        w.i32 = QInputDialog::getInt(this, "PWM_MAX", "Valor: ", 0, 0, 200, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "Intervalo_PWM", "PWM_MAX: ", 0, 0, 200, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
 
-        w.i32 = QInputDialog::getInt(this, "PWM_MIN", "Valor: ", 0, 0, 200, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "Intervalo_PWM", "PWM_MIN", 0, 0, 200, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         break;
     case SETLINECTRL:
         payload[index++] = SETLINECTRL;
-        w.i32 = QInputDialog::getInt(this, "Line Control", "Kp_line:", 0, -1000, 1000, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "PID_Seguidor_Linea", "Kp_line:", 0, -1000, 1000, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
 
-        w.i32 = QInputDialog::getInt(this, "Line Control", "Kd_line:", 0, -1000, 1000, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "PID_Seguidor_Linea", "Kd_line:", 0, -1000, 1000, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
 
-        w.i32 = QInputDialog::getInt(this, "Line Control", "Setpoint base (ej: 100 = 1.0 grado):", 80, -1000, 1000, 10, &ok);
+        w.i32 = QInputDialog::getInt(this, "PID_Lazo_Velocidad", "Kp_vel:", 0, -1000, 1000, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+        payload[index++] = w.ui8[1];
+
+        w.i32 = QInputDialog::getInt(this, "PID_Lazo_Velocidad", "Ki_vel:", 0, -1000, 1000, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+        payload[index++] = w.ui8[1];
+
+
+        w.i32 = QInputDialog::getInt(this, "Angulo Setpoint", "Setpoint base (ej: 100 = 1.0 grado):", 80, -5000, 5000, 10, &ok);
         if(!ok) return false;
         payload[index++] = w.i8[0];
         payload[index++] = w.i8[1];
