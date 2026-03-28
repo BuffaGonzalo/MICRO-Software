@@ -85,7 +85,7 @@ void MainWindow::dataReceived(){
 
     QString str="";
 
-    for(int i=0; i<=count; i++){
+    for(int i=0; i<count; i++){
         if(isalnum(incomingBuffer[i]))
             str = str + QString("%1").arg((char)incomingBuffer[i]);
         else
@@ -420,86 +420,86 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         }
         break;
     }
-    case GETPIDDATA:{ // Recuerda definir GETPIDDATA = 0xF8
-        // 1. acc_angle_hr
-        w.ui8[0] = datosRx[2];
-        w.ui8[1] = datosRx[3];
-        w.ui8[2] = datosRx[4];
-        w.ui8[3] = datosRx[5];
-        str = QString("%1").arg(w.i32, 5, 10, QChar('0')); // Cambiado a w.i32
-        ui->acc_angle_hr_data->setText(str);
+    case GETPIDDATA: {
+        w.ui8[0] = datosRx[2]; w.ui8[1] = datosRx[3]; w.ui8[2] = datosRx[4]; w.ui8[3] = datosRx[5];
+        ui->acc_angle_hr_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
 
-        // 2. gyro_delta_hr
-        w.ui8[0] = datosRx[6];
-        w.ui8[1] = datosRx[7];
-        w.ui8[2] = datosRx[8];
-        w.ui8[3] = datosRx[9];
-        str = QString("%1").arg(w.i32, 5, 10, QChar('0'));
-        ui->gyro_angle_hr_data->setText(str);
+        w.ui8[0] = datosRx[6]; w.ui8[1] = datosRx[7]; w.ui8[2] = datosRx[8]; w.ui8[3] = datosRx[9];
+        ui->gyro_angle_hr_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
 
-        // 3. current_angle_hr
-        w.ui8[0] = datosRx[10];
-        w.ui8[1] = datosRx[11];
-        w.ui8[2] = datosRx[12];
-        w.ui8[3] = datosRx[13];
-        str = QString("%1").arg(w.i32, 5, 10, QChar('0'));
-        ui->current_angle_hr_data->setText(str);
+        w.ui8[0] = datosRx[10]; w.ui8[1] = datosRx[11]; w.ui8[2] = datosRx[12]; w.ui8[3] = datosRx[13];
+        ui->current_angle_hr_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
+        ui->current_angle_data->setText(QString("%1").arg(w.i32/100, 5, 10, QChar('0')));
 
-        // 4. setpoint_dinamico
-        w.ui8[0] = datosRx[14];
-        w.ui8[1] = datosRx[15];
-        w.ui8[2] = datosRx[16];
-        w.ui8[3] = datosRx[17];
-        str = QString("%1").arg(w.i32, 5, 10, QChar('0'));
-        ui->setpoint_dinamico_data->setText(str);
+        w.ui8[0] = datosRx[14]; w.ui8[1] = datosRx[15]; w.ui8[2] = datosRx[16]; w.ui8[3] = datosRx[17];
+        ui->setpoint_dinamico_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
 
-        // 5. error_vel
-        w.ui8[0] = datosRx[18];
-        w.ui8[1] = datosRx[19];
-        w.ui8[2] = datosRx[20];
-        w.ui8[3] = datosRx[21];
-        str = QString("%1").arg(w.i32, 5, 10, QChar('0'));
-        ui->error_vel_data->setText(str);
+        w.ui8[0] = datosRx[18]; w.ui8[1] = datosRx[19]; w.ui8[2] = datosRx[20]; w.ui8[3] = datosRx[21];
+        ui->error_vel_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
 
-        // 6. error
-        w.ui8[0] = datosRx[22];
-        w.ui8[1] = datosRx[23];
-        w.ui8[2] = datosRx[24];
-        w.ui8[3] = datosRx[25];
-        str = QString("%1").arg(w.i32, 5, 10, QChar('0'));
-        ui->error_data->setText(str);
+        w.ui8[0] = datosRx[22]; w.ui8[1] = datosRx[23]; w.ui8[2] = datosRx[24]; w.ui8[3] = datosRx[25];
+        ui->error_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
 
-        // 7. integral
-        w.ui8[0] = datosRx[26];
-        w.ui8[1] = datosRx[27];
-        w.ui8[2] = datosRx[28];
-        w.ui8[3] = datosRx[29];
-        str = QString("%1").arg(w.i32, 5, 10, QChar('0'));
-        ui->integral_data->setText(str);
+        w.ui8[0] = datosRx[26]; w.ui8[1] = datosRx[27]; w.ui8[2] = datosRx[28]; w.ui8[3] = datosRx[29];
+        ui->integral_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
 
-        // 8. derivative
-        w.ui8[0] = datosRx[30];
-        w.ui8[1] = datosRx[31];
-        w.ui8[2] = datosRx[32];
-        w.ui8[3] = datosRx[33];
-        str = QString("%1").arg(w.i32, 5, 10, QChar('0'));
-        ui->derivative_data->setText(str);
+        w.ui8[0] = datosRx[30]; w.ui8[1] = datosRx[31]; w.ui8[2] = datosRx[32]; w.ui8[3] = datosRx[33];
+        ui->derivative_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
 
-        // 9. last_error
-        w.ui8[0] = datosRx[34];
-        w.ui8[1] = datosRx[35];
-        w.ui8[2] = datosRx[36];
-        w.ui8[3] = datosRx[37];
-        str = QString("%1").arg(w.i32, 5, 10, QChar('0'));
-        ui->last_error_data->setText(str);
+        w.ui8[0] = datosRx[34]; w.ui8[1] = datosRx[35]; w.ui8[2] = datosRx[36]; w.ui8[3] = datosRx[37];
+        ui->last_error_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
 
-        // 10. output
-        w.ui8[0] = datosRx[38];
-        w.ui8[1] = datosRx[39];
-        w.ui8[2] = datosRx[40];
-        w.ui8[3] = datosRx[41];
-        str = QString("%1").arg(w.i32, 5, 10, QChar('0'));
-        ui->output_data->setText(str);
+        w.ui8[0] = datosRx[38]; w.ui8[1] = datosRx[39]; w.ui8[2] = datosRx[40]; w.ui8[3] = datosRx[41];
+        ui->output_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
+
+        // NUEVAS de 32 bits
+        // 11. integral_vel
+        w.ui8[0] = datosRx[42]; w.ui8[1] = datosRx[43]; w.ui8[2] = datosRx[44]; w.ui8[3] = datosRx[45];
+        ui->integral_vel_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
+
+        // 12. salida_vel
+        w.ui8[0] = datosRx[46]; w.ui8[1] = datosRx[47]; w.ui8[2] = datosRx[48]; w.ui8[3] = datosRx[49];
+        ui->salida_vel_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
+
+        // 13. setpoint
+        w.ui8[0] = datosRx[50]; w.ui8[1] = datosRx[51]; w.ui8[2] = datosRx[52]; w.ui8[3] = datosRx[53];
+        ui->setpointData->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
+
+        // --- 2. Bloque de 16 Bits ---
+        // Kp_stable
+        w.ui8[0] = datosRx[54]; w.ui8[1] = datosRx[55];
+        ui->kpStableData->setText(QString("%1").arg(w.i16[0], 5, 10, QChar('0')));
+
+        // Ki_stable
+        w.ui8[0] = datosRx[56]; w.ui8[1] = datosRx[57];
+        ui->kiStableData->setText(QString("%1").arg(w.i16[0], 5, 10, QChar('0')));
+
+        // Kd_stable
+        w.ui8[0] = datosRx[58]; w.ui8[1] = datosRx[59];
+        ui->kdStableData->setText(QString("%1").arg(w.i16[0], 5, 10, QChar('0')));
+
+        // Kp_line
+        w.ui8[0] = datosRx[60]; w.ui8[1] = datosRx[61];
+        ui->kpLineData->setText(QString("%1").arg(w.i16[0], 5, 10, QChar('0')));
+
+        // Kd_line
+        w.ui8[0] = datosRx[62]; w.ui8[1] = datosRx[63];
+        ui->kdLineData->setText(QString("%1").arg(w.i16[0], 5, 10, QChar('0')));
+
+        // Kp_vel
+        w.ui8[0] = datosRx[64]; w.ui8[1] = datosRx[65];
+        ui->kpVelData->setText(QString("%1").arg(w.i16[0], 5, 10, QChar('0')));
+
+        // Ki_vel
+        w.ui8[0] = datosRx[66]; w.ui8[1] = datosRx[67];
+        ui->kiVelData->setText(QString("%1").arg(w.i16[0], 5, 10, QChar('0')));
+
+        // --- 3. Bloque de 8 Bits ---
+        // maxPWM
+        ui->maxPwmData->setText(QString("%1").arg(datosRx[68], 5, 10, QChar('0')));
+
+        // minPWM
+        ui->minPwmData->setText(QString("%1").arg(datosRx[69], 5, 10, QChar('0')));
 
         ui->textBrowserProcessed->append("LOG PID ACTUALIZADO");
     break;
@@ -680,38 +680,26 @@ bool MainWindow::buildPayload(uint8_t *payload, uint8_t &length) {
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
-        str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
-        ui->kpStableData->setText(str);
-
 
         w.i32 = QInputDialog::getInt(this, "PID_Balancin", "Kd", 0, 0, 5000, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
-        str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
-        ui->kdStableData->setText(str);
 
         w.i32 = QInputDialog::getInt(this, "PID_Balancin", "Ki", 0, 0, 5000, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
-        str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
-        ui->kiStableData->setText(str);
-
         break;
     case SETPWMLIMIT:
         payload[index++] = SETPWMLIMIT;
         w.i32 = QInputDialog::getInt(this, "Intervalo_PWM", "PWM_MAX: ", 0, 0, 200, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
-        str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
-        ui->maxPwmData->setText(str);
 
         w.i32 = QInputDialog::getInt(this, "Intervalo_PWM", "PWM_MIN", 0, 0, 200, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
-        str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
-        ui->minPwmData->setText(str);
 
         break;
     case SETLINECTRL:
@@ -720,39 +708,26 @@ bool MainWindow::buildPayload(uint8_t *payload, uint8_t &length) {
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
-        str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
-        ui->kpLineData->setText(str);
-
 
         w.i32 = QInputDialog::getInt(this, "PID_Seguidor_Linea", "Kd_line:", 0, -1000, 1000, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
-        str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
-        ui->kdLineData->setText(str);
 
         w.i32 = QInputDialog::getInt(this, "PID_Lazo_Velocidad", "Kp_vel:", 0, -1000, 1000, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
-        str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
-        ui->kpVelData->setText(str);
-
 
         w.i32 = QInputDialog::getInt(this, "PID_Lazo_Velocidad", "Ki_vel:", 0, -1000, 1000, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
-        str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
-        ui->kiVelData->setText(str);
-
 
         w.i32 = QInputDialog::getInt(this, "Angulo Setpoint", "Setpoint base (ej: 100 = 1.0 grado):", 80, -5000, 5000, 10, &ok);
         if(!ok) return false;
         payload[index++] = w.i8[0];
         payload[index++] = w.i8[1];
-        str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
-        ui->setpointData->setText(str);
 
         break;
     default:
@@ -786,7 +761,7 @@ void MainWindow::OnUdpRxData(){
         return;
 
     QString str="";
-    for(int i=0; i<=count; i++){
+    for(int i=0; i<count; i++){
         if(isalnum(incomingBuffer[i]))
             str = str + QString("%1").arg(char(incomingBuffer[i]));
         else

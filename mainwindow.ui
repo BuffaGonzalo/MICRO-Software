@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1277</width>
-    <height>816</height>
+    <width>1446</width>
+    <height>835</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -691,7 +691,7 @@
      </font>
     </property>
     <property name="text">
-     <string>CUSTOM VALUES</string>
+     <string>VALUES PID</string>
     </property>
    </widget>
    <widget class="QWidget" name="layoutWidget">
@@ -1128,14 +1128,14 @@
      </font>
     </property>
     <property name="text">
-     <string>PID VALUES</string>
+     <string>INTERNAL PID</string>
     </property>
    </widget>
    <widget class="Line" name="line_7">
     <property name="geometry">
      <rect>
       <x>1070</x>
-      <y>320</y>
+      <y>390</y>
       <width>211</width>
       <height>20</height>
      </rect>
@@ -1150,7 +1150,7 @@
       <x>1080</x>
       <y>44</y>
       <width>161</width>
-      <height>281</height>
+      <height>351</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -1293,6 +1293,56 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QLabel" name="error_vel_2">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>salida_vel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="salida_vel_data">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>DATA</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="setpoint_dinamico_2">
+         <property name="font">
+          <font>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>integral_vel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="integral_vel_data">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>DATA</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>
@@ -1300,10 +1350,10 @@
    <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>1081</x>
-      <y>341</y>
+      <x>1080</x>
+      <y>410</y>
       <width>161</width>
-      <height>321</height>
+      <height>341</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -1482,7 +1532,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1277</width>
+     <width>1446</width>
      <height>25</height>
     </rect>
    </property>
