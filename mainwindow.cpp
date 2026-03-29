@@ -425,7 +425,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         ui->acc_angle_hr_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
 
         w.ui8[0] = datosRx[6]; w.ui8[1] = datosRx[7]; w.ui8[2] = datosRx[8]; w.ui8[3] = datosRx[9];
-        ui->gyro_angle_hr_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
+        ui->gyro_delta_hr_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
 
         w.ui8[0] = datosRx[10]; w.ui8[1] = datosRx[11]; w.ui8[2] = datosRx[12]; w.ui8[3] = datosRx[13];
         ui->current_angle_hr_data->setText(QString("%1").arg(w.i32, 5, 10, QChar('0')));
