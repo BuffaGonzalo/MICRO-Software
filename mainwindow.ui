@@ -500,19 +500,19 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="kpVel">
+      <widget class="QLabel" name="ramp_step">
        <property name="font">
         <font>
          <bold>true</bold>
         </font>
        </property>
        <property name="text">
-        <string>KP_VEL</string>
+        <string>RAMP_STEP</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="kpVelData">
+      <widget class="QLabel" name="ramp_step_data">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -520,49 +520,24 @@
         </font>
        </property>
        <property name="text">
-        <string>KP_DATA</string>
+        <string>RAMP_DATA</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="kiVel">
+      <widget class="QLabel" name="max_offset">
        <property name="font">
         <font>
          <bold>true</bold>
         </font>
        </property>
        <property name="text">
-        <string>KI_VEL</string>
+        <string>TARGET_OFFSET</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="kiVelData">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>KI_DATA</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="kpLine">
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>KP_LINE</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="kpLineData">
+      <widget class="QLabel" name="max_offset_data">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -570,32 +545,7 @@
         </font>
        </property>
        <property name="text">
-        <string>KP_DATA</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="kdLine">
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>KP_LINE</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="kdLineData">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>KP_DATA</string>
+        <string>OFFSET_DATA</string>
        </property>
       </widget>
      </item>
@@ -1131,397 +1081,240 @@
      <string>INTERNAL PID</string>
     </property>
    </widget>
-   <widget class="Line" name="line_7">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>1070</x>
-      <y>390</y>
-      <width>211</width>
-      <height>20</height>
+      <x>1081</x>
+      <y>46</y>
+      <width>130</width>
+      <height>605</height>
      </rect>
     </property>
-    <property name="orientation">
-     <enum>Qt::Orientation::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>1080</x>
-      <y>44</y>
-      <width>161</width>
-      <height>341</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_9">
+    <layout class="QVBoxLayout" name="verticalLayout_6">
      <item>
-      <widget class="QLabel" name="label_sensors_5">
+      <widget class="QLabel" name="acc_angle_hr">
        <property name="font">
         <font>
          <bold>true</bold>
         </font>
        </property>
        <property name="text">
-        <string>PI_VEL</string>
+        <string>acc_angle_hr</string>
        </property>
       </widget>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
-       <item>
-        <widget class="QLabel" name="acc_angle_hr">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>acc_angle_hr</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="acc_angle_hr_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="gyro_delta_hr">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>gyro_delta_hr</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="gyro_delta_hr_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="current_angle_hr">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>current_angle_hr</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="current_angle_hr_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="setpoint_dinamico">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>setpoint_dinamico</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="setpoint_dinamico_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="error_vel">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>error_vel</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="error_vel_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="error_vel_2">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>salida_vel</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="salida_vel_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="setpoint_dinamico_2">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>integral_vel</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="integral_vel_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="acc_angle_hr_data">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>DATA</string>
+       </property>
+      </widget>
      </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>1080</x>
-      <y>410</y>
-      <width>161</width>
-      <height>341</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_8">
      <item>
-      <widget class="QLabel" name="label_sensors_6">
+      <widget class="QLabel" name="gyro_delta_hr">
        <property name="font">
         <font>
          <bold>true</bold>
         </font>
        </property>
        <property name="text">
-        <string>PID_STABLE</string>
+        <string>gyro_delta_hr</string>
        </property>
       </widget>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_7">
-       <item>
-        <widget class="QLabel" name="error">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>error</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="error_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="current_angle">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>current_angle</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="current_angle_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="integral">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>integral</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="integral_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="derivative">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>derivative</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="derivative_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="last_error">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>last_error</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="last_error_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="output">
-         <property name="font">
-          <font>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>output</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="output_data">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>DATA</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="gyro_delta_hr_data">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>DATA</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="setpoint_dinamico">
+       <property name="font">
+        <font>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>setpoint_dinamico</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="setpoint_dinamico_data">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>DATA</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="error">
+       <property name="font">
+        <font>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>error</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="error_data">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>DATA</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="current_angle_hr">
+       <property name="font">
+        <font>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>current_angle_hr</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="current_angle_hr_data">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>DATA</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="current_angle">
+       <property name="font">
+        <font>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>current_angle</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="current_angle_data">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>DATA</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="integral">
+       <property name="font">
+        <font>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>integral</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="integral_data">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>DATA</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="derivative">
+       <property name="font">
+        <font>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>derivative</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="derivative_data">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>DATA</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="output">
+       <property name="font">
+        <font>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>output</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="output_data">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>DATA</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
