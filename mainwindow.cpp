@@ -427,6 +427,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         ui->maxPwmData->setText(QString().number(datosRx[48]));
         ui->minPwmData->setText(QString().number(datosRx[49]));
 
+        ui->impulseLenght_data->setText(QString().number(datosRx[50]));
+
         ui->textBrowserProcessed->append("TELEMETRÍA ACTUALIZADA");
         break;
     }
@@ -632,13 +634,13 @@ bool MainWindow::buildPayload(uint8_t *payload, uint8_t &length) {
         payload[index++] = SETSPEED;
 
         // 1. Ramp Step
-        w.i32 = QInputDialog::getInt(this, "Config Rampa", "Ramp Step (ej: 4):", 4, 1, 50, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "Config Rampa", "Ramp Step (ej: 4):", 10, 1, 500, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
 
         // 2. Max Offset
-        w.i32 = QInputDialog::getInt(this, "Config Rampa", "Max Offset (ej: 250):", 250, 0, 1000, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "Config Rampa", "Max Offset (ej: 250):", 200, 0, 10000, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.ui8[0];
         payload[index++] = w.ui8[1];
@@ -650,10 +652,16 @@ bool MainWindow::buildPayload(uint8_t *payload, uint8_t &length) {
         payload[index++] = w.i8[1];
 
         // 4. Dirección / Custom Speed
-        w.i32 = QInputDialog::getInt(this, "Movimiento", "Direccion (-1=Av, 1=Re, 0=Stop):", 0, -10000, 10000, 1, &ok);
+        w.i32 = QInputDialog::getInt(this, "Movimiento", "Direccion (-1=Av, 1=Re, 0=Stop):", -1, -10000, 10000, 1, &ok);
         if(!ok) return false;
         payload[index++] = w.i8[0];
         payload[index++] = w.i8[1];
+
+        // 5. Duración del Impulso (NUEVO PARAMETRO)
+        w.i32 = QInputDialog::getInt(this, "Dedo Digital", "Ciclos de pulso (ej: 6 = 120ms):", 6, 0, 100, 1, &ok);
+        if(!ok) return false;
+        payload[index++] = w.ui8[0];
+
         break;
     default:
         return false; // Comando desconocido
