@@ -98,6 +98,15 @@ private slots:
     void on_sendCustomTurn_clicked();
     void on_sendCounterAngle_clicked();
 
+    void on_sendFrontDistance_clicked();
+    void on_sendSideDistance_clicked();
+    void on_sendLostDistance_clicked();
+    void on_sendStopCycles_clicked();
+    void on_sendCornerDist_clicked();
+    void on_sendAlignDist_clicked();
+    void on_sendPWMLROT_clicked();
+    void on_sendPWMRROT_clicked();
+
     void on_P1toP3_clicked();
 
     void on_P1toP2_clicked();
@@ -224,6 +233,16 @@ private:
         SETCUSTOMTURN = 0xB0, //Valor de rotacion al seguir linea
         SETSPEED = 0xB1, //angulo de ataque movimiento
         SETBKANG = 0xB2, //angulo contra para evitar el aumento de velocidad
+
+        SETFRONTDIST = 0xB3,
+        SETSIDEDIST = 0xB4,
+        SETLOSTDIST = 0xB5,
+        SETSTOPCYCLES = 0xB6,
+        SETCORNERDIST = 0xB7,
+        SETALIGNDIST = 0xB8,
+
+        SETPWMLROT = 0xB9,
+        SETPWMRROT = 0xC0,
 
         UNKNOWCMD=0xFF,
         OTHERS

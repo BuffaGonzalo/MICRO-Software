@@ -525,6 +525,18 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             w.ui8[0] = datosRx[26]; w.ui8[1] = datosRx[27]; ui->setAttackSetpoint->setValue(w.i16[0]);
             w.ui8[0] = datosRx[28]; w.ui8[1] = datosRx[29]; ui->setCounterAngle->setValue(w.i16[0]);
 
+            // 4. Esquivador (indices 30 a 39)
+            w.ui8[0] = datosRx[30]; w.ui8[1] = datosRx[31]; ui->setFrontDistance->setValue(w.ui16[0]);
+            w.ui8[0] = datosRx[32]; w.ui8[1] = datosRx[33]; ui->setSideDistance->setValue(w.ui16[0]);
+            w.ui8[0] = datosRx[34]; w.ui8[1] = datosRx[35]; ui->setLostDistance->setValue(w.ui16[0]);
+            w.ui8[0] = datosRx[36]; w.ui8[1] = datosRx[37]; ui->setStopCycles->setValue(w.ui16[0]);
+            w.ui8[0] = datosRx[38]; w.ui8[1] = datosRx[39]; ui->setCornerDist->setValue(w.ui16[0]);
+            w.ui8[0] = datosRx[40]; w.ui8[1] = datosRx[41]; ui->setAlignDist->setValue(w.ui16[0]);
+            
+            // 5. Rotación (indices 42 a 45)
+            w.ui8[0] = datosRx[42]; w.ui8[1] = datosRx[43]; ui->setPWMLROT->setValue(w.ui16[0]);
+            w.ui8[0] = datosRx[44]; w.ui8[1] = datosRx[45]; ui->setPWMRROT->setValue(w.ui16[0]);
+
             paramsSynced = true;
             addLogEntry("***PARÁMETROS SINCRONIZADOS DESDE STM32***", "RX");
             ui->textBrowserProcessed->append("***PARÁMETROS SINCRONIZADOS DESDE STM32***");
@@ -583,6 +595,14 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETCUSTOMTURN:
     case SETSPEED:
     case SETBKANG:
+    case SETFRONTDIST:
+    case SETSIDEDIST:
+    case SETLOSTDIST:
+    case SETSTOPCYCLES:
+    case SETCORNERDIST:
+    case SETALIGNDIST:
+    case SETPWMLROT:
+    case SETPWMRROT:
         if(datosRx[2]==ACK){
             str="COMANDO ACEPTADO Y GUARDADO (ACK)!!!";
             addLogEntry(str, "RX");
@@ -1294,3 +1314,85 @@ void MainWindow::resetInterface() {
         lcd->display(0);
     }
 }
+
+void MainWindow::on_sendFrontDistance_clicked() {
+    uint8_t buf[3];
+    _udat w;
+    w.i16[0] = ui->setFrontDistance->value();
+    buf[0] = SETFRONTDIST;
+    buf[1] = w.ui8[0];
+    buf[2] = w.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendSideDistance_clicked() {
+    uint8_t buf[3];
+    _udat w;
+    w.i16[0] = ui->setSideDistance->value();
+    buf[0] = SETSIDEDIST;
+    buf[1] = w.ui8[0];
+    buf[2] = w.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendLostDistance_clicked() {
+    uint8_t buf[3];
+    _udat w;
+    w.i16[0] = ui->setLostDistance->value();
+    buf[0] = SETLOSTDIST;
+    buf[1] = w.ui8[0];
+    buf[2] = w.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendStopCycles_clicked() {
+    uint8_t buf[3];
+    _udat w;
+    w.i16[0] = ui->setStopCycles->value();
+    buf[0] = SETSTOPCYCLES;
+    buf[1] = w.ui8[0];
+    buf[2] = w.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendCornerDist_clicked() {
+    uint8_t buf[3];
+    _udat w;
+    w.i16[0] = ui->setCornerDist->value();
+    buf[0] = SETCORNERDIST;
+    buf[1] = w.ui8[0];
+    buf[2] = w.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendAlignDist_clicked() {
+    uint8_t buf[3];
+    _udat w;
+    w.i16[0] = ui->setAlignDist->value();
+    buf[0] = SETALIGNDIST;
+    buf[1] = w.ui8[0];
+    buf[2] = w.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendPWMLROT_clicked() {
+    uint8_t buf[3];
+    _udat w;
+    w.i16[0] = ui->setPWMLROT->value();
+    buf[0] = SETPWMLROT;
+    buf[1] = w.ui8[0];
+    buf[2] = w.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendPWMRROT_clicked() {
+    uint8_t buf[3];
+    _udat w;
+    w.i16[0] = ui->setPWMRROT->value();
+    buf[0] = SETPWMRROT;
+    buf[1] = w.ui8[0];
+    buf[2] = w.ui8[1];
+    sendCommand(buf, 3);
+}
+
+
