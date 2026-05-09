@@ -106,6 +106,8 @@ private slots:
     void on_sendAlignDist_clicked();
     void on_sendPWMLROT_clicked();
     void on_sendPWMRROT_clicked();
+    void on_sendStaticOff_clicked();
+    void on_sendMovingOff_clicked();
 
     void on_P1toP3_clicked();
 
@@ -243,6 +245,9 @@ private:
 
         SETPWMLROT = 0xB9,
         SETPWMRROT = 0xC0,
+
+        SETSTATICOFF = 0xC1,
+        SETMOVINGOFF = 0xC2,
 
         UNKNOWCMD=0xFF,
         OTHERS

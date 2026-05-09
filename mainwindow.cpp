@@ -536,6 +536,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             // 5. Rotación (indices 42 a 45)
             w.ui8[0] = datosRx[42]; w.ui8[1] = datosRx[43]; ui->setPWMLROT->setValue(w.ui16[0]);
             w.ui8[0] = datosRx[44]; w.ui8[1] = datosRx[45]; ui->setPWMRROT->setValue(w.ui16[0]);
+            w.ui8[0] = datosRx[46]; w.ui8[1] = datosRx[47]; ui->setStaticOff->setValue(w.ui16[0]);
+            w.ui8[0] = datosRx[48]; w.ui8[1] = datosRx[49]; ui->setMovingOff->setValue(w.ui16[0]);
 
             paramsSynced = true;
             addLogEntry("***PARÁMETROS SINCRONIZADOS DESDE STM32***", "RX");
@@ -603,6 +605,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETALIGNDIST:
     case SETPWMLROT:
     case SETPWMRROT:
+    case SETSTATICOFF:
+    case SETMOVINGOFF:
         if(datosRx[2]==ACK){
             str="COMANDO ACEPTADO Y GUARDADO (ACK)!!!";
             addLogEntry(str, "RX");
@@ -1390,6 +1394,26 @@ void MainWindow::on_sendPWMRROT_clicked() {
     _udat w;
     w.i16[0] = ui->setPWMRROT->value();
     buf[0] = SETPWMRROT;
+    buf[1] = w.ui8[0];
+    buf[2] = w.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendStaticOff_clicked() {
+    uint8_t buf[3];
+    _udat w;
+    w.i16[0] = ui->setStaticOff->value();
+    buf[0] = SETSTATICOFF;
+    buf[1] = w.ui8[0];
+    buf[2] = w.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendMovingOff_clicked() {
+    uint8_t buf[3];
+    _udat w;
+    w.i16[0] = ui->setMovingOff->value();
+    buf[0] = SETMOVINGOFF;
     buf[1] = w.ui8[0];
     buf[2] = w.ui8[1];
     sendCommand(buf, 3);
