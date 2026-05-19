@@ -108,6 +108,10 @@ private slots:
     void on_sendPWMRROT_clicked();
     void on_sendStaticOff_clicked();
     void on_sendMovingOff_clicked();
+    void on_sendTurnDivisor_clicked();
+    void on_sendLimitAngle_clicked();
+    void on_sendSaveMin_clicked();
+    void on_sendSaveMax_clicked();
 
     void on_P1toP3_clicked();
 
@@ -248,6 +252,10 @@ private:
 
         SETSTATICOFF = 0xC1,
         SETMOVINGOFF = 0xC2,
+        SETTURNDIV = 0xC3,
+        SETLIMITANG = 0xC4,
+        SETPOINTSAVEMIN = 0xC5,
+        SETPOINTSAVEMAX = 0xC6,
 
         UNKNOWCMD=0xFF,
         OTHERS

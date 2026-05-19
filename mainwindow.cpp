@@ -503,6 +503,9 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         break;
     }
     case GETINTERNALDATA: {
+        w.ui8[0] = datosRx[58]; w.ui8[1] = datosRx[59]; w.ui8[2] = datosRx[60]; w.ui8[3] = datosRx[61];
+        float hr_angle = w.i32 / 10000.0f;
+        ui->angle_hr_data->display(QString::number(hr_angle, 'f', 4));
         if (!paramsSynced) {
             // 1. PID Balancín (indices 2 a 11)
             w.ui8[0] = datosRx[2];  w.ui8[1] = datosRx[3];  ui->setBalanceKp->setValue(w.i16[0]);
@@ -538,6 +541,10 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             w.ui8[0] = datosRx[44]; w.ui8[1] = datosRx[45]; ui->setPWMRROT->setValue(w.ui16[0]);
             w.ui8[0] = datosRx[46]; w.ui8[1] = datosRx[47]; ui->setStaticOff->setValue(w.ui16[0]);
             w.ui8[0] = datosRx[48]; w.ui8[1] = datosRx[49]; ui->setMovingOff->setValue(w.ui16[0]);
+            w.ui8[0] = datosRx[50]; w.ui8[1] = datosRx[51]; ui->setTurnDivisor->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[52]; w.ui8[1] = datosRx[53]; ui->setLimitAngle->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[54]; w.ui8[1] = datosRx[55]; ui->setSaveMin->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[56]; w.ui8[1] = datosRx[57]; ui->setSaveMax->setValue(w.i16[0]);
 
             paramsSynced = true;
             addLogEntry("***PARÁMETROS SINCRONIZADOS DESDE STM32***", "RX");
@@ -561,6 +568,11 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         // 4. Extraer Output
         w.ui8[0] = datosRx[14]; w.ui8[1] = datosRx[15]; w.ui8[2] = datosRx[16]; w.ui8[3] = datosRx[17];
         int32_t current_output = w.i32;
+
+        // 5. Extraer Angulo Real del STM32 (Nuevo)
+        w.ui8[0] = datosRx[18]; w.ui8[1] = datosRx[19]; w.ui8[2] = datosRx[20]; w.ui8[3] = datosRx[21];
+        float stm_angle = w.i32 / 100.0f; // Escala x100 -> real
+        ui->angle_data->display(QString::number(stm_angle, 'f', 2));
 
         // 5. Leer constantes actuales desde la Interfaz de Qt
         // (Como paramsSynced se encarga de poblarlas, siempre tendremos el valor real aquí)
@@ -586,6 +598,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETPWMR:
     case SETPWMMINR:
     case SETPWMMINL:
+    case SETPOINTSAVEMIN:
+    case SETPOINTSAVEMAX:
     case SETBALANCEKP:
     case SETBALANCEKD:
     case SETBALANCEKI:
@@ -607,6 +621,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETPWMRROT:
     case SETSTATICOFF:
     case SETMOVINGOFF:
+    case SETTURNDIV:
+    case SETLIMITANG:
         if(datosRx[2]==ACK){
             str="COMANDO ACEPTADO Y GUARDADO (ACK)!!!";
             addLogEntry(str, "RX");
@@ -1420,3 +1436,38 @@ void MainWindow::on_sendMovingOff_clicked() {
 }
 
 
+void MainWindow::on_sendTurnDivisor_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETTURNDIV;
+    myWord.i16[0] = ui->setTurnDivisor->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendLimitAngle_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETLIMITANG;
+    myWord.i16[0] = ui->setLimitAngle->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendSaveMin_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETPOINTSAVEMIN;
+    myWord.i16[0] = ui->setSaveMin->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendSaveMax_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETPOINTSAVEMAX;
+    myWord.i16[0] = ui->setSaveMax->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+}

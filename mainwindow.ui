@@ -462,10 +462,10 @@
         <x>790</x>
         <y>20</y>
         <width>171</width>
-        <height>451</height>
+        <height>759</height>
        </rect>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_20" stretch="0,2,2,2,2,2,2,2,2,2,2">
+      <layout class="QVBoxLayout" name="verticalLayout_20" stretch="0,2,2,2,2,2,2,2,2,2,2,0">
        <item>
         <widget class="QLabel" name="label_sensors_3">
          <property name="font">
@@ -629,163 +629,193 @@
         </layout>
        </item>
        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_14">
-          <item>
-           <widget class="QLabel" name="label_sensors_21">
-            <property name="font">
-             <font>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>OFFSET RIGHT</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_22">
-            <item>
-             <widget class="QSpinBox" name="setOFFSETR"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="sendOFFSETR">
-              <property name="text">
-               <string>ENVIAR</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_PWM_LROT">
-          <item>
-           <widget class="QLabel" name="label_sensors_31">
-            <property name="font">
-             <font>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>PWM LROT</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_PWM_LROT">
-            <item>
-             <widget class="QSpinBox" name="setPWMLROT"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="sendPWMLROT">
-              <property name="text">
-               <string>ENVIAR</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_PWM_RROT">
-          <item>
-           <widget class="QLabel" name="label_sensors_32">
-            <property name="font">
-             <font>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>PWM RROT</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_PWM_RROT">
-            <item>
-             <widget class="QSpinBox" name="setPWMRROT"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="sendPWMRROT">
-              <property name="text">
-               <string>ENVIAR</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_STATIC_OFF">
-          <item>
-           <widget class="QLabel" name="label_staticOff">
-            <property name="font">
-             <font>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>STATIC OFF</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_staticOff">
-            <item>
-             <widget class="QSpinBox" name="setStaticOff">
-              <property name="maximum">
-               <number>9999</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="sendStaticOff">
-              <property name="text">
-               <string>ENVIAR</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_MOVING_OFF">
-          <item>
-           <widget class="QLabel" name="label_movingOff">
-            <property name="font">
-             <font>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>MOVING OFF</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_movingOff">
-            <item>
-             <widget class="QSpinBox" name="setMovingOff">
-              <property name="maximum">
-               <number>9999</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="sendMovingOff">
-              <property name="text">
-               <string>ENVIAR</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
+        <layout class="QVBoxLayout" name="verticalLayout_14">
+         <item>
+          <widget class="QLabel" name="label_sensors_21">
+           <property name="font">
+            <font>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>OFFSET RIGHT</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_22">
+           <item>
+            <widget class="QSpinBox" name="setOFFSETR"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sendOFFSETR">
+             <property name="text">
+              <string>ENVIAR</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_PWM_LROT">
+         <item>
+          <widget class="QLabel" name="label_sensors_31">
+           <property name="font">
+            <font>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>PWM LROT</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_PWM_LROT">
+           <item>
+            <widget class="QSpinBox" name="setPWMLROT"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sendPWMLROT">
+             <property name="text">
+              <string>ENVIAR</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_PWM_RROT">
+         <item>
+          <widget class="QLabel" name="label_sensors_32">
+           <property name="font">
+            <font>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>PWM RROT</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_PWM_RROT">
+           <item>
+            <widget class="QSpinBox" name="setPWMRROT"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sendPWMRROT">
+             <property name="text">
+              <string>ENVIAR</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_STATIC_OFF">
+         <item>
+          <widget class="QLabel" name="label_staticOff">
+           <property name="font">
+            <font>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>STATIC OFF</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_staticOff">
+           <item>
+            <widget class="QSpinBox" name="setStaticOff">
+             <property name="maximum">
+              <number>9999</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sendStaticOff">
+             <property name="text">
+              <string>ENVIAR</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_MOVING_OFF">
+         <item>
+          <widget class="QLabel" name="label_movingOff">
+           <property name="font">
+            <font>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>MOVING OFF</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_movingOff">
+           <item>
+            <widget class="QSpinBox" name="setMovingOff">
+             <property name="maximum">
+              <number>9999</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sendMovingOff">
+             <property name="text">
+              <string>ENVIAR</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_LimitAngle">
+         <item>
+          <widget class="QLabel" name="label_limitAngle">
+           <property name="font">
+            <font>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>LIMIT ANGLE</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_limitAngle" stretch="2,0">
+           <item>
+            <widget class="QSpinBox" name="setLimitAngle"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sendLimitAngle">
+             <property name="text">
+              <string>ENVIAR</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
      <widget class="Line" name="line_2">
@@ -916,6 +946,33 @@
            </item>
            <item>
             <widget class="QLCDNumber" name="gz_data"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="angle_label">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>ANGLE (STM)</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLCDNumber" name="angle_data"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="angle_hr_label">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>ANGLE HR</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -1243,6 +1300,74 @@
            </item>
           </layout>
          </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_saveMin">
+           <item>
+            <widget class="QLabel" name="label_saveMin">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>ANTI COLAPSO (BACK)</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_saveMin" stretch="2,0">
+             <item>
+              <widget class="QSpinBox" name="setSaveMin">
+               <property name="maximum">
+                <number>9000</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="sendSaveMin">
+               <property name="text">
+                <string>ENVIAR</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_saveMax">
+           <item>
+            <widget class="QLabel" name="label_saveMax">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>ANTI COLAPSO (FWD)</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_saveMax" stretch="2,0">
+             <item>
+              <widget class="QSpinBox" name="setSaveMax">
+               <property name="maximum">
+                <number>9000</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="sendSaveMax">
+               <property name="text">
+                <string>ENVIAR</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
         </layout>
        </item>
       </layout>
@@ -1253,7 +1378,7 @@
         <x>580</x>
         <y>20</y>
         <width>181</width>
-        <height>381</height>
+        <height>426</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_16" stretch="0,2">
@@ -1412,6 +1537,40 @@
              </item>
              <item>
               <widget class="QPushButton" name="sendCounterAngle">
+               <property name="text">
+                <string>ENVIAR</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_TurnDivisor">
+           <item>
+            <widget class="QLabel" name="label_turnDivisor">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>TURN DIVISOR</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_turnDivisor">
+             <item>
+              <widget class="QSpinBox" name="setTurnDivisor">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="sendTurnDivisor">
                <property name="text">
                 <string>ENVIAR</string>
                </property>
@@ -1637,8 +1796,17 @@
          </item>
         </layout>
        </item>
-
       </layout>
+     </widget>
+     <widget class="QLCDNumber" name="angle_hr_data">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>740</y>
+        <width>331</width>
+        <height>37</height>
+       </rect>
+      </property>
      </widget>
     </widget>
    </widget>
