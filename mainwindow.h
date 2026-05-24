@@ -96,6 +96,7 @@ private slots:
     void on_sendOFFSETL_clicked();
     void on_sendOFFSETR_clicked();
     void on_sendCustomTurn_clicked();
+    void on_sendTurnDivisor_clicked();
     void on_sendCounterAngle_clicked();
 
     void on_sendFrontDistance_clicked();
@@ -108,10 +109,12 @@ private slots:
     void on_sendPWMRROT_clicked();
     void on_sendStaticOff_clicked();
     void on_sendMovingOff_clicked();
-    void on_sendTurnDivisor_clicked();
     void on_sendLimitAngle_clicked();
     void on_sendSaveMin_clicked();
     void on_sendSaveMax_clicked();
+    void on_sendVelDampDiv_clicked();
+    void on_sendVelDampLim_clicked();
+    void on_sendTurnLimit_clicked();
 
     void on_P1toP3_clicked();
 
@@ -237,6 +240,7 @@ private:
         SETOFFSETR=0xAF,
 
         SETCUSTOMTURN = 0xB0, //Valor de rotacion al seguir linea
+        SETTURNDIV = 0xC3, //Divisor del calculo de offset de giro
         SETSPEED = 0xB1, //angulo de ataque movimiento
         SETBKANG = 0xB2, //angulo contra para evitar el aumento de velocidad
 
@@ -252,10 +256,12 @@ private:
 
         SETSTATICOFF = 0xC1,
         SETMOVINGOFF = 0xC2,
-        SETTURNDIV = 0xC3,
         SETLIMITANG = 0xC4,
         SETPOINTSAVEMIN = 0xC5,
         SETPOINTSAVEMAX = 0xC6,
+        SETVELDAMPDIV = 0xC7,
+        SETVELDAMPLIM = 0xC8,
+        SETTURNLIMIT = 0xC9,
 
         UNKNOWCMD=0xFF,
         OTHERS

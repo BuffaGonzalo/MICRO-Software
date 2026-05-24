@@ -963,6 +963,21 @@
             <widget class="QLCDNumber" name="angle_data"/>
            </item>
            <item>
+            <widget class="QLabel" name="turn_offset_label">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>TURN OFFSET</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLCDNumber" name="turn_offset_data"/>
+           </item>
+           <item>
             <widget class="QLabel" name="angle_hr_label">
              <property name="font">
               <font>
@@ -973,6 +988,24 @@
               <string>ANGLE HR</string>
              </property>
             </widget>
+           </item>
+           <item>
+            <widget class="QLCDNumber" name="angle_hr_data"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="dt_ms_label">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>DT (MS)</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLCDNumber" name="dt_ms_data"/>
            </item>
           </layout>
          </item>
@@ -1159,10 +1192,10 @@
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>580</x>
-        <y>441</y>
+        <x>1190</x>
+        <y>210</y>
         <width>181</width>
-        <height>292</height>
+        <height>660</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_26" stretch="0,2">
@@ -1368,6 +1401,117 @@
            </item>
           </layout>
          </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_velDampDiv">
+           <item>
+            <widget class="QLabel" name="label_velDampDiv">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>VEL DAMP DIVISOR</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_velDampDiv" stretch="2,0">
+             <item>
+              <widget class="QSpinBox" name="setVelDampDiv">
+               <property name="minimum">
+                <number>-9000</number>
+               </property>
+               <property name="maximum">
+                <number>9000</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="sendVelDampDiv">
+               <property name="text">
+                <string>ENVIAR</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_velDampLim">
+           <item>
+            <widget class="QLabel" name="label_velDampLim">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>VEL DAMP LIMIT</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_velDampLim" stretch="2,0">
+             <item>
+              <widget class="QSpinBox" name="setVelDampLim">
+               <property name="minimum">
+                <number>-9000</number>
+               </property>
+               <property name="maximum">
+                <number>9000</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="sendVelDampLim">
+               <property name="text">
+                <string>ENVIAR</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_turnLimit">
+           <item>
+            <widget class="QLabel" name="label_turnLimit">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>LIMIT DE GIRO</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_turnLimit" stretch="2,0">
+             <item>
+              <widget class="QSpinBox" name="setTurnLimit">
+               <property name="minimum">
+                <number>-9000</number>
+               </property>
+               <property name="maximum">
+                <number>9000</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="sendTurnLimit">
+               <property name="text">
+                <string>ENVIAR</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
         </layout>
        </item>
       </layout>
@@ -1563,11 +1707,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_turnDivisor">
              <item>
-              <widget class="QSpinBox" name="setTurnDivisor">
-               <property name="minimum">
-                <number>1</number>
-               </property>
-              </widget>
+              <widget class="QSpinBox" name="setTurnDivisor"/>
              </item>
              <item>
               <widget class="QPushButton" name="sendTurnDivisor">
@@ -1797,16 +1937,6 @@
         </layout>
        </item>
       </layout>
-     </widget>
-     <widget class="QLCDNumber" name="angle_hr_data">
-      <property name="geometry">
-       <rect>
-        <x>100</x>
-        <y>740</y>
-        <width>331</width>
-        <height>37</height>
-       </rect>
-      </property>
      </widget>
     </widget>
    </widget>

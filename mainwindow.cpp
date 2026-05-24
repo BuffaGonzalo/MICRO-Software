@@ -541,10 +541,13 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             w.ui8[0] = datosRx[44]; w.ui8[1] = datosRx[45]; ui->setPWMRROT->setValue(w.ui16[0]);
             w.ui8[0] = datosRx[46]; w.ui8[1] = datosRx[47]; ui->setStaticOff->setValue(w.ui16[0]);
             w.ui8[0] = datosRx[48]; w.ui8[1] = datosRx[49]; ui->setMovingOff->setValue(w.ui16[0]);
-            w.ui8[0] = datosRx[50]; w.ui8[1] = datosRx[51]; ui->setTurnDivisor->setValue(w.i16[0]);
-            w.ui8[0] = datosRx[52]; w.ui8[1] = datosRx[53]; ui->setLimitAngle->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[50]; w.ui8[1] = datosRx[51]; ui->setLimitAngle->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[52]; w.ui8[1] = datosRx[53]; ui->setTurnDivisor->setValue(w.i16[0]);
             w.ui8[0] = datosRx[54]; w.ui8[1] = datosRx[55]; ui->setSaveMin->setValue(w.i16[0]);
             w.ui8[0] = datosRx[56]; w.ui8[1] = datosRx[57]; ui->setSaveMax->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[62]; w.ui8[1] = datosRx[63]; ui->setVelDampDiv->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[64]; w.ui8[1] = datosRx[65]; ui->setVelDampLim->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[66]; w.ui8[1] = datosRx[67]; ui->setTurnLimit->setValue(w.i16[0]);
 
             paramsSynced = true;
             addLogEntry("***PARÁMETROS SINCRONIZADOS DESDE STM32***", "RX");
@@ -574,7 +577,17 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         float stm_angle = w.i32 / 100.0f; // Escala x100 -> real
         ui->angle_data->display(QString::number(stm_angle, 'f', 2));
 
-        // 5. Leer constantes actuales desde la Interfaz de Qt
+        // 5b. Extraer Turn Offset del STM32 (Nuevo)
+        w.ui8[0] = datosRx[22]; w.ui8[1] = datosRx[23]; w.ui8[2] = datosRx[24]; w.ui8[3] = datosRx[25];
+        int32_t current_turn_offset = w.i32;
+        ui->turn_offset_data->display(current_turn_offset);
+
+        // 5c. Extraer Delta-time Medido en milisegundos (Nuevo)
+        w.ui8[0] = datosRx[26]; w.ui8[1] = datosRx[27]; w.ui8[2] = datosRx[28]; w.ui8[3] = datosRx[29];
+        int32_t current_dt_ms = w.i32;
+        ui->dt_ms_data->display(current_dt_ms);
+
+        // 6. Leer constantes actuales desde la Interfaz de Qt
         // (Como paramsSynced se encarga de poblarlas, siempre tendremos el valor real aquí)
         int16_t kp = ui->setBalanceKp->value();
         int16_t ki = ui->setBalanceKi->value();
@@ -623,6 +636,9 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETMOVINGOFF:
     case SETTURNDIV:
     case SETLIMITANG:
+    case SETVELDAMPDIV:
+    case SETVELDAMPLIM:
+    case SETTURNLIMIT:
         if(datosRx[2]==ACK){
             str="COMANDO ACEPTADO Y GUARDADO (ACK)!!!";
             addLogEntry(str, "RX");
@@ -1204,6 +1220,18 @@ void MainWindow::on_sendCustomTurn_clicked() {
     ui->textBrowserProcessed->append("***CUSTOM TURN ACTUALIZADO***");
 }
 
+void MainWindow::on_sendTurnDivisor_clicked() {
+    uint8_t payload[10];
+    uint8_t index = 0;
+    _udat w;
+    payload[index++] = SETTURNDIV;
+    w.i16[0] = ui->setTurnDivisor->value();
+    payload[index++] = w.ui8[0];
+    payload[index++] = w.ui8[1];
+    sendCommand(payload, index);
+    ui->textBrowserProcessed->append("***TURN DIVISOR ACTUALIZADO***");
+}
+
 void MainWindow::on_sendCounterAngle_clicked() {
     uint8_t payload[10];
     uint8_t index = 0;
@@ -1435,16 +1463,6 @@ void MainWindow::on_sendMovingOff_clicked() {
     sendCommand(buf, 3);
 }
 
-
-void MainWindow::on_sendTurnDivisor_clicked() {
-    uint8_t buf[3];
-    buf[0] = SETTURNDIV;
-    myWord.i16[0] = ui->setTurnDivisor->value();
-    buf[1] = myWord.ui8[0];
-    buf[2] = myWord.ui8[1];
-    sendCommand(buf, 3);
-}
-
 void MainWindow::on_sendLimitAngle_clicked() {
     uint8_t buf[3];
     buf[0] = SETLIMITANG;
@@ -1470,4 +1488,32 @@ void MainWindow::on_sendSaveMax_clicked() {
     buf[1] = myWord.ui8[0];
     buf[2] = myWord.ui8[1];
     sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendVelDampDiv_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETVELDAMPDIV;
+    myWord.i16[0] = ui->setVelDampDiv->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendVelDampLim_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETVELDAMPLIM;
+    myWord.i16[0] = ui->setVelDampLim->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendTurnLimit_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETTURNLIMIT;
+    myWord.i16[0] = ui->setTurnLimit->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+    ui->textBrowserProcessed->append("***TURN LIMIT ACTUALIZADO***");
 }
