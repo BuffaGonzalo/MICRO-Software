@@ -506,6 +506,39 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         w.ui8[0] = datosRx[58]; w.ui8[1] = datosRx[59]; w.ui8[2] = datosRx[60]; w.ui8[3] = datosRx[61];
         float hr_angle = w.i32 / 10000.0f;
         ui->angle_hr_data->display(QString::number(hr_angle, 'f', 4));
+
+        // Unpack raw IR values (IR1, IR3, IR5)
+        w.ui8[0] = datosRx[68]; w.ui8[1] = datosRx[69];
+        uint16_t rawIr1 = w.ui16[0];
+        ui->raw_ir1_lcd->display(rawIr1);
+        w.ui8[0] = datosRx[70]; w.ui8[1] = datosRx[71];
+        uint16_t rawIr3 = w.ui16[0];
+        ui->raw_ir3_lcd->display(rawIr3);
+        w.ui8[0] = datosRx[72]; w.ui8[1] = datosRx[73];
+        uint16_t rawIr5 = w.ui16[0];
+        ui->raw_ir5_lcd->display(rawIr5);
+
+        // Unpack calibrated IR values (IR1, IR3, IR5)
+        w.ui8[0] = datosRx[74]; w.ui8[1] = datosRx[75];
+        uint16_t calIr1 = w.ui16[0];
+        ui->cal_ir1_lcd->display(calIr1);
+        w.ui8[0] = datosRx[76]; w.ui8[1] = datosRx[77];
+        uint16_t calIr3 = w.ui16[0];
+        ui->cal_ir3_lcd->display(calIr3);
+        w.ui8[0] = datosRx[78]; w.ui8[1] = datosRx[79];
+        uint16_t calIr5 = w.ui16[0];
+        ui->cal_ir5_lcd->display(calIr5);
+
+        // --- Acumular muestra en buffer circular IR (último minuto) ---
+        IrSample sample;
+        sample.timestamp = QDateTime::currentDateTime();
+        sample.ir1 = rawIr1; // Guardar el valor sin procesar (raw)
+        sample.ir3 = rawIr3; // Guardar el valor sin procesar (raw)
+        sample.ir5 = rawIr5; // Guardar el valor sin procesar (raw)
+        m_irBuffer.append(sample);
+        if (m_irBuffer.size() > IR_BUFFER_SIZE)
+            m_irBuffer.removeFirst();
+
         if (!paramsSynced) {
             // 1. PID Balancín (indices 2 a 11)
             w.ui8[0] = datosRx[2];  w.ui8[1] = datosRx[3];  ui->setBalanceKp->setValue(w.i16[0]);
@@ -607,6 +640,13 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         // qDebug() << "P:" << term_P << "I:" << term_I << "D:" << term_D << "Out:" << term_Out;
         break;
     }
+    case EXPORTIRCSV:
+        if (datosRx[2] == ACK) {
+            // Leer número de exportación devuelto por el STM32 (big-endian)
+            m_irExportCount = ((int)datosRx[3] << 8) | datosRx[4];
+            exportIrCsvToFile();
+        }
+        break;
     case SETPWML:
     case SETPWMR:
     case SETPWMMINR:
@@ -1516,4 +1556,55 @@ void MainWindow::on_sendTurnLimit_clicked() {
     buf[2] = myWord.ui8[1];
     sendCommand(buf, 3);
     ui->textBrowserProcessed->append("***TURN LIMIT ACTUALIZADO***");
+}
+
+// ---------------------------------------------------------------------------
+// Exportar CSV de Sensores IR (último minuto)
+// ---------------------------------------------------------------------------
+void MainWindow::exportIrCsvToFile() {
+    QString defaultName = "ir_sensors_" +
+        QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".csv";
+    QString fileName = QFileDialog::getSaveFileName(
+        this, "Exportar Sensores IR - CSV", defaultName,
+        "Archivos CSV (*.csv)");
+    if (fileName.isEmpty()) return;
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "No se pudo crear el archivo CSV.");
+        return;
+    }
+
+    QTextStream out(&file);
+    // Línea 1: número de guía de exportación
+    out << "ExportNum;" << m_irExportCount << "\n";
+    // Línea 2: encabezado de columnas
+    out << "Timestamp;IR1 (Der-Raw);IR3 (Cen-Raw);IR5 (Izq-Raw);Promedio\n";
+    // Datos: una fila por muestra
+    for (const IrSample &s : m_irBuffer) {
+        uint32_t avg = ((uint32_t)s.ir1 + s.ir3 + s.ir5) / 3;
+        out << s.timestamp.toString("hh:mm:ss.zzz") << ";"
+            << s.ir1 << ";"
+            << s.ir3 << ";"
+            << s.ir5 << ";"
+            << avg   << "\n";
+    }
+    file.close();
+
+    QMessageBox::information(this, "Exportación IR exitosa",
+        QString("Exportación N° %1\n%2 muestras guardadas en:\n%3")
+        .arg(m_irExportCount)
+        .arg(m_irBuffer.size())
+        .arg(fileName));
+}
+
+void MainWindow::on_pushButton_exportIrCsv_clicked() {
+    if (m_irBuffer.isEmpty()) {
+        QMessageBox::warning(this, "Sin datos",
+            "El buffer está vacío. Conectate al robot y esperá que lleguen datos de telemetría.");
+        return;
+    }
+    // Enviar comando EXPORTIRCSV al STM32 para obtener el número de exportación
+    uint8_t cmd[2] = { (uint8_t)EXPORTIRCSV, 0x00 };
+    sendCommand(cmd, 2);
 }

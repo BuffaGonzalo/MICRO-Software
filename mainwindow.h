@@ -129,6 +129,7 @@ private slots:
     void on_P2toP3_clicked();
 
     void on_pushButton_exportExcel_clicked();
+    void on_pushButton_exportIrCsv_clicked();
     void on_pushButton_exportTxt_clicked();
 
 private:
@@ -138,6 +139,19 @@ private:
         QString type; // "RX", "TX", "UNKNOWN", "CHK_ERROR"
     };
     QList<LogEntry> m_logHistory;
+
+    // --- Buffer circular de IR para exportación CSV ---
+    static const int IR_BUFFER_SIZE = 3000; // ~1 minuto a ~50Hz
+    struct IrSample {
+        QDateTime timestamp;
+        uint16_t ir1; // Sensor derecho (calibrado)
+        uint16_t ir3; // Sensor centro (calibrado)
+        uint16_t ir5; // Sensor izquierdo (calibrado)
+    };
+    QVector<IrSample> m_irBuffer;
+    int m_irExportCount = 0;  // Número de exportación devuelto por el STM32
+
+    void exportIrCsvToFile();
 
     // Estadísticas
     int m_countSent = 0;
@@ -262,6 +276,7 @@ private:
         SETVELDAMPDIV = 0xC7,
         SETVELDAMPLIM = 0xC8,
         SETTURNLIMIT = 0xC9,
+        EXPORTIRCSV  = 0xCA,
 
         UNKNOWCMD=0xFF,
         OTHERS

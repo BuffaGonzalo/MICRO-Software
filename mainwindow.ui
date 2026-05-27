@@ -49,7 +49,7 @@
      </size>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="MAIN">
      <widget class="Line" name="line_3">
@@ -403,6 +403,27 @@
        <string>📄 TEXTO (.txt)</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="pushButton_exportIrCsv">
+      <property name="geometry">
+       <rect>
+        <x>58</x>
+        <y>730</y>
+        <width>461</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton { background-color: #e65100; color: white; border-radius: 5px; } QPushButton:hover { background-color: #ef6c00; }</string>
+      </property>
+      <property name="text">
+       <string>📡 EXPORTAR IR CSV (último minuto)</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="GRAF">
      <widget class="QQuickWidget" name="AutoWidget">
@@ -451,6 +472,158 @@
         <y>30</y>
         <width>841</width>
         <height>381</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="header_ir5">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>450</y>
+        <width>250</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSOR DERECHO (IR5)</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="header_ir3">
+      <property name="geometry">
+       <rect>
+        <x>540</x>
+        <y>450</y>
+        <width>250</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSOR CENTRO (IR3)</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="header_ir1">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>450</y>
+        <width>250</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSOR IZQUIERDO (IR1)</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_raw_title">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>490</y>
+        <width>180</width>
+        <height>60</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>VALORES CRUDOS (RAW):</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="raw_ir5_lcd">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>490</y>
+        <width>250</width>
+        <height>60</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="raw_ir3_lcd">
+      <property name="geometry">
+       <rect>
+        <x>540</x>
+        <y>490</y>
+        <width>250</width>
+        <height>60</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="raw_ir1_lcd">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>490</y>
+        <width>250</width>
+        <height>60</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_cal_title">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>570</y>
+        <width>180</width>
+        <height>60</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>CALIBRADOS (PID):</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="cal_ir5_lcd">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>570</y>
+        <width>250</width>
+        <height>60</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="cal_ir3_lcd">
+      <property name="geometry">
+       <rect>
+        <x>540</x>
+        <y>570</y>
+        <width>250</width>
+        <height>60</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="cal_ir1_lcd">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>570</y>
+        <width>250</width>
+        <height>60</height>
        </rect>
       </property>
      </widget>
