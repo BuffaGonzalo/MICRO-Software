@@ -90,6 +90,7 @@ private slots:
     void on_sendPWMMINR_clicked();
     void on_sendSetpoint_clicked();
     void on_sendAttackSetpoint_clicked();
+    void on_setAttackSetpoint_valueChanged(int arg1);
 
     void on_sendPWML_clicked();
     void on_sendPWMR_clicked();
@@ -97,7 +98,6 @@ private slots:
     void on_sendOFFSETR_clicked();
     void on_sendCustomTurn_clicked();
     void on_sendTurnDivisor_clicked();
-    void on_sendCounterAngle_clicked();
 
     void on_sendFrontDistance_clicked();
     void on_sendSideDistance_clicked();
@@ -110,8 +110,10 @@ private slots:
     void on_sendStaticOff_clicked();
     void on_sendMovingOff_clicked();
     void on_sendLimitAngle_clicked();
-    void on_sendSaveMin_clicked();
-    void on_sendSaveMax_clicked();
+    void on_sendRecoveryLimit_clicked();
+    void on_sendRecoveryAngle_clicked();
+    void on_setRecoveryLimit_valueChanged(int arg1);
+    void on_setRecoveryAngle_valueChanged(int arg1);
     void on_sendVelDampDiv_clicked();
     void on_sendVelDampLim_clicked();
     void on_sendTurnLimit_clicked();

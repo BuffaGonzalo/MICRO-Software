@@ -558,8 +558,10 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             w.ui8[0] = datosRx[20]; w.ui8[1] = datosRx[21]; ui->setOFFSETL->setValue(w.i16[0]);
             w.ui8[0] = datosRx[22]; w.ui8[1] = datosRx[23]; ui->setOFFSETR->setValue(w.i16[0]);
             w.ui8[0] = datosRx[24]; w.ui8[1] = datosRx[25]; ui->setCustomTurn->setValue(w.i16[0]);
-            w.ui8[0] = datosRx[26]; w.ui8[1] = datosRx[27]; ui->setAttackSetpoint->setValue(w.i16[0]);
-            w.ui8[0] = datosRx[28]; w.ui8[1] = datosRx[29]; ui->setCounterAngle->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[26]; w.ui8[1] = datosRx[27];
+            ui->setAttackSetpoint->blockSignals(true);
+            ui->setAttackSetpoint->setValue(w.i16[0]);
+            ui->setAttackSetpoint->blockSignals(false);
 
             // 4. Esquivador (indices 30 a 39)
             w.ui8[0] = datosRx[30]; w.ui8[1] = datosRx[31]; ui->setFrontDistance->setValue(w.ui16[0]);
@@ -576,8 +578,15 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             w.ui8[0] = datosRx[48]; w.ui8[1] = datosRx[49]; ui->setMovingOff->setValue(w.ui16[0]);
             w.ui8[0] = datosRx[50]; w.ui8[1] = datosRx[51]; ui->setLimitAngle->setValue(w.i16[0]);
             w.ui8[0] = datosRx[52]; w.ui8[1] = datosRx[53]; ui->setTurnDivisor->setValue(w.i16[0]);
-            w.ui8[0] = datosRx[54]; w.ui8[1] = datosRx[55]; ui->setSaveMin->setValue(w.i16[0]);
-            w.ui8[0] = datosRx[56]; w.ui8[1] = datosRx[57]; ui->setSaveMax->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[54]; w.ui8[1] = datosRx[55];
+            ui->setRecoveryLimit->blockSignals(true);
+            ui->setRecoveryLimit->setValue(w.i16[0]);
+            ui->setRecoveryLimit->blockSignals(false);
+
+            w.ui8[0] = datosRx[56]; w.ui8[1] = datosRx[57];
+            ui->setRecoveryAngle->blockSignals(true);
+            ui->setRecoveryAngle->setValue(w.i16[0]);
+            ui->setRecoveryAngle->blockSignals(false);
             w.ui8[0] = datosRx[62]; w.ui8[1] = datosRx[63]; ui->setVelDampDiv->setValue(w.i16[0]);
             w.ui8[0] = datosRx[64]; w.ui8[1] = datosRx[65]; ui->setVelDampLim->setValue(w.i16[0]);
             w.ui8[0] = datosRx[66]; w.ui8[1] = datosRx[67]; ui->setTurnLimit->setValue(w.i16[0]);
@@ -1200,6 +1209,11 @@ void MainWindow::on_sendAttackSetpoint_clicked() {
     ui->textBrowserProcessed->append("***ATTACK SETPOINT ACTUALIZADO***");
 }
 
+void MainWindow::on_setAttackSetpoint_valueChanged(int arg1) {
+    (void)arg1;
+    on_sendAttackSetpoint_clicked();
+}
+
 void MainWindow::on_sendPWML_clicked() {
     uint8_t payload[10];
     uint8_t index = 0;
@@ -1272,17 +1286,6 @@ void MainWindow::on_sendTurnDivisor_clicked() {
     ui->textBrowserProcessed->append("***TURN DIVISOR ACTUALIZADO***");
 }
 
-void MainWindow::on_sendCounterAngle_clicked() {
-    uint8_t payload[10];
-    uint8_t index = 0;
-    _udat w;
-    payload[index++] = SETBKANG;
-    w.i32 = ui->setCounterAngle->value();
-    payload[index++] = w.ui8[0];
-    payload[index++] = w.ui8[1];
-    sendCommand(payload, index);
-    ui->textBrowserProcessed->append("***COUNTER ANGLE ACTUALIZADO***");
-}
 
 
 void MainWindow::on_P1toP3_clicked()
@@ -1512,22 +1515,34 @@ void MainWindow::on_sendLimitAngle_clicked() {
     sendCommand(buf, 3);
 }
 
-void MainWindow::on_sendSaveMin_clicked() {
+void MainWindow::on_sendRecoveryLimit_clicked() {
     uint8_t buf[3];
     buf[0] = SETPOINTSAVEMIN;
-    myWord.i16[0] = ui->setSaveMin->value();
+    myWord.i16[0] = ui->setRecoveryLimit->value();
     buf[1] = myWord.ui8[0];
     buf[2] = myWord.ui8[1];
     sendCommand(buf, 3);
+    ui->textBrowserProcessed->append("***GATILLO RECUPERACION ACTUALIZADO***");
 }
 
-void MainWindow::on_sendSaveMax_clicked() {
+void MainWindow::on_sendRecoveryAngle_clicked() {
     uint8_t buf[3];
     buf[0] = SETPOINTSAVEMAX;
-    myWord.i16[0] = ui->setSaveMax->value();
+    myWord.i16[0] = ui->setRecoveryAngle->value();
     buf[1] = myWord.ui8[0];
     buf[2] = myWord.ui8[1];
     sendCommand(buf, 3);
+    ui->textBrowserProcessed->append("***ANGULO RECUPERACION ACTUALIZADO***");
+}
+
+void MainWindow::on_setRecoveryLimit_valueChanged(int arg1) {
+    (void)arg1;
+    on_sendRecoveryLimit_clicked();
+}
+
+void MainWindow::on_setRecoveryAngle_valueChanged(int arg1) {
+    (void)arg1;
+    on_sendRecoveryAngle_clicked();
 }
 
 void MainWindow::on_sendVelDampDiv_clicked() {
