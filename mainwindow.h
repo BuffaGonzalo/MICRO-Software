@@ -97,7 +97,7 @@ private slots:
     void on_sendOFFSETL_clicked();
     void on_sendOFFSETR_clicked();
     void on_sendCustomTurn_clicked();
-    void on_sendTurnDivisor_clicked();
+    void on_sendKpCascada_clicked();
 
     void on_sendFrontDistance_clicked();
     void on_sendSideDistance_clicked();
@@ -110,10 +110,8 @@ private slots:
     void on_sendStaticOff_clicked();
     void on_sendMovingOff_clicked();
     void on_sendLimitAngle_clicked();
-    void on_sendRecoveryLimit_clicked();
-    void on_sendRecoveryAngle_clicked();
-    void on_setRecoveryLimit_valueChanged(int arg1);
-    void on_setRecoveryAngle_valueChanged(int arg1);
+    void on_sendKiCascada_clicked();
+    void on_sendFilterLPF_clicked();
     void on_sendVelDampDiv_clicked();
     void on_sendVelDampLim_clicked();
     void on_sendTurnLimit_clicked();
@@ -182,13 +180,47 @@ private:
     QLineSeries  *pid_iSeries;
     QLineSeries  *pid_dSeries;
     QLineSeries  *pid_outSeries;
+    QLineSeries  *pid_pLineSeries;
+    QLineSeries  *pid_dLineSeries;
+    QLineSeries  *pid_outLineSeries;
+
+    // Series de MPU
+    QLineSeries  *pid_axSeries;
+    QLineSeries  *pid_aySeries;
+    QLineSeries  *pid_azSeries;
+    QLineSeries  *pid_gxSeries;
+    QLineSeries  *pid_gySeries;
+    QLineSeries  *pid_gzSeries;
+
+    // Series de Ángulos
+    QLineSeries  *pid_pitchSeries;
+    QLineSeries  *pid_rollSeries;
+    QLineSeries  *pid_yawSeries;
+
+    // Series de 8 Sensores IR
+    QLineSeries  *pid_ir1Series;
+    QLineSeries  *pid_ir2Series;
+    QLineSeries  *pid_ir3Series;
+    QLineSeries  *pid_ir4Series;
+    QLineSeries  *pid_ir5Series;
+    QLineSeries  *pid_ir6Series;
+    QLineSeries  *pid_ir7Series;
+    QLineSeries  *pid_ir8Series;
     QValueAxis   *pid_axisX;
     QValueAxis   *pid_axisY;
     double        pid_yMin = -10.0;
     double        pid_yMax =  10.0;
 
+    // Valores calibrados guardados para cálculo del PID del seguidor
+    uint16_t      m_calIr1 = 0;
+    uint16_t      m_calIr3 = 0;
+    uint16_t      m_calIr5 = 0;
+
     void initPIDChart();
-    void updatePIDChart(double time, double p, double i, double d, double out);
+    void updatePIDChart(double time, double p, double i, double d, double out, double pLine, double dLine, double outLine);
+    void updateMPUChart(double time, double ax, double ay, double az, double gx, double gy, double gz, double pitch, double roll, double yaw);
+    void updateIRChart(double time, double ir1, double ir2, double ir3, double ir4, double ir5, double ir6, double ir7, double ir8);
+    void updatePIDChartRange();
     void resetInterface();
 
     //variables comunicacion udp
@@ -256,7 +288,7 @@ private:
         SETOFFSETR=0xAF,
 
         SETCUSTOMTURN = 0xB0, //Valor de rotacion al seguir linea
-        SETTURNDIV = 0xC3, //Divisor del calculo de offset de giro
+        SET_KP_EXT = 0xC3, // Ganancia proporcional de lazo externo (x1000)
         SETSPEED = 0xB1, //angulo de ataque movimiento
         SETBKANG = 0xB2, //angulo contra para evitar el aumento de velocidad
 
@@ -273,8 +305,8 @@ private:
         SETSTATICOFF = 0xC1,
         SETMOVINGOFF = 0xC2,
         SETLIMITANG = 0xC4,
-        SETPOINTSAVEMIN = 0xC5,
-        SETPOINTSAVEMAX = 0xC6,
+        SET_KI_EXT = 0xC5, // Ganancia integral de lazo externo (x10000)
+        SET_ALFA_LPF = 0xC6, // Coeficiente alfa del filtro LPF (0-100)
         SETVELDAMPDIV = 0xC7,
         SETVELDAMPLIM = 0xC8,
         SETTURNLIMIT = 0xC9,

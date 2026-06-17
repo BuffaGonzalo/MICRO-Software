@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "internal_data.h"
+#include <limits>
 #include <QSpinBox>
 #include <QFile>
 #include <QTextStream>
@@ -21,6 +22,31 @@ MainWindow::MainWindow(QWidget *parent)
     ui->textBrowserUnProcessed->document()->setMaximumBlockCount(50);
 
     initPIDChart();
+    // Conectar checkboxes para activar/desactivar curvas de la gráfica PID
+    connect(ui->checkBox_P, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_I, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_D, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Out, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_P_line, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_D_line, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Out_line, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Pitch, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Roll, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Yaw, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Ax, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Ay, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Az, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Gx, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Gy, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Gz, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Ir1, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Ir2, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Ir3, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Ir4, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Ir5, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Ir6, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Ir7, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+    connect(ui->checkBox_Ir8, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
     timer1 = new QTimer(this);
     timer2 = new QTimer(this);
 
@@ -375,6 +401,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         w.i8[0] = datosRx[8];
         w.i8[1] = datosRx[9];
 
+        float gx = w.i16[0];
         str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
         strOut = "Gx: " + str;
         addLogEntry(strOut, "RX");
@@ -384,6 +411,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         w.i8[0] = datosRx[10];
         w.i8[1] = datosRx[11];
 
+        float gy = w.i16[0];
         str = QString("%1").arg(w.i16[0], 5, 10, QChar('0'));
         strOut = "Gy: " + str;
         addLogEntry(strOut, "RX");
@@ -404,14 +432,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         float roll = atan2(ay, sqrt(ax * ax + az * az)) * 180.0 / M_PI;
         float pitch = atan2(-ax, sqrt(ay * ay + az * az)) * 180.0 / M_PI;
 
-        // ---- NUEVO: Enviar a la gráfica ----
-        // Obtenemos el tiempo en segundos
-        //double t = runtimeTimer.elapsed() / 1000.0;
 
-        // (Por ahora ponemos el setpoint manual, luego puedes leerlo del STM32)
-        //double currentSetpoint = 0.5;
-        //double currentPwm = 0.0;      // Necesitarás enviarlo desde el STM32
-
+>>>>>>> 55b47c2 (feat(line_follower): Añadir variables para poder modificar el)
         // (Opcional) Calcular Yaw integrando el giroscopio
         float gz_grados_seg = gz / 131.0f; // Asumiendo escala de +/- 250deg/s
         if (abs(gz_grados_seg) > 1.0f) {
@@ -420,6 +442,9 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         // Añade esta línea para imprimir los ángulos finales en la consola de Qt Creator
         qDebug() << "Angulos Calculados -> Pitch:" << pitch << " | Roll:" << roll << " | Yaw:" << yawAcumulado;
 
+        // ---- NUEVO: Enviar a la gráfica ----
+        double t = runtimeTimer.elapsed() / 1000.0;
+        updateMPUChart(t, ax, ay, az, gx, gy, gz, pitch, roll, yawAcumulado);
         // 3. Enviar los ángulos a Qt Quick 3D
         if (ui->AutoWidget && ui->AutoWidget->rootObject()) {
             ui->AutoWidget->rootObject()->setProperty("carPitch", roll);
@@ -433,6 +458,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         //Datos acelerometro
         w.ui8[0] = datosRx[2];
         w.ui8[1] = datosRx[3];
+        uint16_t ir1 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
         strOut = "IR1: " + str;
         addLogEntry(strOut, "RX");
@@ -441,6 +467,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
 
         w.ui8[0] = datosRx[4];
         w.ui8[1] = datosRx[5];
+        uint16_t ir2 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
         strOut = "IR2: " + str;
         addLogEntry(strOut, "RX");
@@ -450,6 +477,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
 
         w.ui8[0] = datosRx[6];
         w.ui8[1] = datosRx[7];
+        uint16_t ir3 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
         strOut = "IR3: " + str;
         addLogEntry(strOut, "RX");
@@ -458,6 +486,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
 
         w.ui8[0] = datosRx[8];
         w.ui8[1] = datosRx[9];
+        uint16_t ir4 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
         strOut = "IR4: " + str;
         addLogEntry(strOut, "RX");
@@ -467,6 +496,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
 
         w.ui8[0] = datosRx[10];
         w.ui8[1] = datosRx[11];
+        uint16_t ir5 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
         strOut = "IR5: " + str;
         addLogEntry(strOut, "RX");
@@ -475,6 +505,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
 
         w.ui8[0] = datosRx[12];
         w.ui8[1] = datosRx[13];
+        uint16_t ir6 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
         strOut = "IR6: " + str;
         addLogEntry(strOut, "RX");
@@ -486,6 +517,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
 
         w.ui8[0] = datosRx[14];
         w.ui8[1] = datosRx[15];
+        uint16_t ir7 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
         strOut = "IR7: " + str;
         addLogEntry(strOut, "RX");
@@ -494,12 +526,16 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
 
         w.ui8[0] = datosRx[16];
         w.ui8[1] = datosRx[17];
+        uint16_t ir8 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
         strOut = "IR8: " + str;
         addLogEntry(strOut, "RX");
         ui->textBrowserProcessed->append(strOut);
         ui->ir8_data->display(str);
 
+        // ---- NUEVO: Enviar a la gráfica ----
+        double t = runtimeTimer.elapsed() / 1000.0;
+        updateIRChart(t, ir1, ir2, ir3, ir4, ir5, ir6, ir7, ir8);
         break;
     }
     case GETINTERNALDATA: {
@@ -507,27 +543,30 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         float hr_angle = w.i32 / 10000.0f;
         ui->angle_hr_data->display(QString::number(hr_angle, 'f', 4));
 
-        // Unpack raw IR values (IR1, IR3, IR5)
+        // Unpack raw IR values (IR1, IR3, IR5) with correct mapping: index 1 is Left (IR5), index 5 is Right (IR1)
         w.ui8[0] = datosRx[68]; w.ui8[1] = datosRx[69];
-        uint16_t rawIr1 = w.ui16[0];
-        ui->raw_ir1_lcd->display(rawIr1);
+        uint16_t rawIr5 = w.ui16[0];
+        ui->raw_ir5_lcd->display(rawIr5);
         w.ui8[0] = datosRx[70]; w.ui8[1] = datosRx[71];
         uint16_t rawIr3 = w.ui16[0];
         ui->raw_ir3_lcd->display(rawIr3);
         w.ui8[0] = datosRx[72]; w.ui8[1] = datosRx[73];
-        uint16_t rawIr5 = w.ui16[0];
-        ui->raw_ir5_lcd->display(rawIr5);
+        uint16_t rawIr1 = w.ui16[0];
+        ui->raw_ir1_lcd->display(rawIr1);
 
-        // Unpack calibrated IR values (IR1, IR3, IR5)
+        // Unpack calibrated IR values (IR1, IR3, IR5) with correct mapping
         w.ui8[0] = datosRx[74]; w.ui8[1] = datosRx[75];
-        uint16_t calIr1 = w.ui16[0];
-        ui->cal_ir1_lcd->display(calIr1);
+        uint16_t calIr5 = w.ui16[0];
+        ui->cal_ir5_lcd->display(calIr5);
+        m_calIr5 = calIr5;
         w.ui8[0] = datosRx[76]; w.ui8[1] = datosRx[77];
         uint16_t calIr3 = w.ui16[0];
         ui->cal_ir3_lcd->display(calIr3);
+        m_calIr3 = calIr3;
         w.ui8[0] = datosRx[78]; w.ui8[1] = datosRx[79];
-        uint16_t calIr5 = w.ui16[0];
-        ui->cal_ir5_lcd->display(calIr5);
+        uint16_t calIr1 = w.ui16[0];
+        ui->cal_ir1_lcd->display(calIr1);
+        m_calIr1 = calIr1;
 
         // --- Acumular muestra en buffer circular IR (último minuto) ---
         IrSample sample;
@@ -577,16 +616,9 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             w.ui8[0] = datosRx[46]; w.ui8[1] = datosRx[47]; ui->setStaticOff->setValue(w.ui16[0]);
             w.ui8[0] = datosRx[48]; w.ui8[1] = datosRx[49]; ui->setMovingOff->setValue(w.ui16[0]);
             w.ui8[0] = datosRx[50]; w.ui8[1] = datosRx[51]; ui->setLimitAngle->setValue(w.i16[0]);
-            w.ui8[0] = datosRx[52]; w.ui8[1] = datosRx[53]; ui->setTurnDivisor->setValue(w.i16[0]);
-            w.ui8[0] = datosRx[54]; w.ui8[1] = datosRx[55];
-            ui->setRecoveryLimit->blockSignals(true);
-            ui->setRecoveryLimit->setValue(w.i16[0]);
-            ui->setRecoveryLimit->blockSignals(false);
-
-            w.ui8[0] = datosRx[56]; w.ui8[1] = datosRx[57];
-            ui->setRecoveryAngle->blockSignals(true);
-            ui->setRecoveryAngle->setValue(w.i16[0]);
-            ui->setRecoveryAngle->blockSignals(false);
+            w.ui8[0] = datosRx[52]; w.ui8[1] = datosRx[53]; ui->setKpCascada->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[54]; w.ui8[1] = datosRx[55]; ui->setKiCascada->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[56]; w.ui8[1] = datosRx[57]; ui->setFilterLPF->setValue(w.i16[0]);
             w.ui8[0] = datosRx[62]; w.ui8[1] = datosRx[63]; ui->setVelDampDiv->setValue(w.i16[0]);
             w.ui8[0] = datosRx[64]; w.ui8[1] = datosRx[65]; ui->setVelDampLim->setValue(w.i16[0]);
             w.ui8[0] = datosRx[66]; w.ui8[1] = datosRx[67]; ui->setTurnLimit->setValue(w.i16[0]);
@@ -641,9 +673,22 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         double term_D = (kd * current_derivative) / 1000.0;
         double term_Out = current_output;
 
+        // Calcular los Términos de Seguimiento de Línea
+        int32_t sum = m_calIr1 + m_calIr3 + m_calIr5;
+        if (sum == 0) sum = 1;
+        int32_t error_linea = ((-(1000 * (int32_t)m_calIr5) + (1000 * (int32_t)m_calIr1)) / sum) / 10;
+        int32_t abs_error = (error_linea > 0) ? error_linea : -error_linea;
+
+        int16_t kp_line = ui->setLineKp->value();
+        int16_t kq_line = ui->setLineKd->value();
+
+        double term_P_line = kp_line * error_linea;
+        double term_D_line = (kq_line * error_linea * abs_error) / 1000.0;
+        double term_Out_line = current_turn_offset;
+
         // 7. Enviar a la gráfica embebida en MainWindow
         double t = runtimeTimer.elapsed() / 1000.0;
-        updatePIDChart(t, term_P, term_I, term_D, term_Out);
+        updatePIDChart(t, term_P, term_I, term_D, term_Out, term_P_line, term_D_line, term_Out_line);
 
         // Opcional: Imprimir en consola para depurar
         // qDebug() << "P:" << term_P << "I:" << term_I << "D:" << term_D << "Out:" << term_Out;
@@ -660,8 +705,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETPWMR:
     case SETPWMMINR:
     case SETPWMMINL:
-    case SETPOINTSAVEMIN:
-    case SETPOINTSAVEMAX:
+    case SET_KI_EXT:
+    case SET_ALFA_LPF:
     case SETBALANCEKP:
     case SETBALANCEKD:
     case SETBALANCEKI:
@@ -683,7 +728,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETPWMRROT:
     case SETSTATICOFF:
     case SETMOVINGOFF:
-    case SETTURNDIV:
+    case SET_KP_EXT:
     case SETLIMITANG:
     case SETVELDAMPDIV:
     case SETVELDAMPLIM:
@@ -1274,16 +1319,16 @@ void MainWindow::on_sendCustomTurn_clicked() {
     ui->textBrowserProcessed->append("***CUSTOM TURN ACTUALIZADO***");
 }
 
-void MainWindow::on_sendTurnDivisor_clicked() {
+void MainWindow::on_sendKpCascada_clicked() {
     uint8_t payload[10];
     uint8_t index = 0;
     _udat w;
-    payload[index++] = SETTURNDIV;
-    w.i16[0] = ui->setTurnDivisor->value();
+    payload[index++] = SET_KP_EXT;
+    w.i16[0] = ui->setKpCascada->value();
     payload[index++] = w.ui8[0];
     payload[index++] = w.ui8[1];
     sendCommand(payload, index);
-    ui->textBrowserProcessed->append("***TURN DIVISOR ACTUALIZADO***");
+    ui->textBrowserProcessed->append("***KP CASCADA ACTUALIZADO***");
 }
 
 
@@ -1329,17 +1374,68 @@ void MainWindow::on_P2toP3_clicked()
 // -----------------------------------------------------------------------
 void MainWindow::initPIDChart()
 {
-    pid_pSeries   = new QLineSeries(); pid_pSeries->setName("Proporcional (P)");
-    pid_iSeries   = new QLineSeries(); pid_iSeries->setName("Integral (I)");
-    pid_dSeries   = new QLineSeries(); pid_dSeries->setName("Derivativo (D)");
-    pid_outSeries = new QLineSeries(); pid_outSeries->setName("Output Total");
+    pid_pSeries   = new QLineSeries(); pid_pSeries->setName("P Balance");
+    pid_iSeries   = new QLineSeries(); pid_iSeries->setName("I Balance");
+    pid_dSeries   = new QLineSeries(); pid_dSeries->setName("D Balance");
+    pid_outSeries = new QLineSeries(); pid_outSeries->setName("Output Balance");
+
+    pid_pLineSeries   = new QLineSeries(); pid_pLineSeries->setName("P Seguimiento");
+    pid_dLineSeries   = new QLineSeries(); pid_dLineSeries->setName("D Seguimiento");
+    pid_outLineSeries = new QLineSeries(); pid_outLineSeries->setName("Giro Seguimiento");
+
+    // MPU series
+    pid_axSeries = new QLineSeries(); pid_axSeries->setName("Ax");
+    pid_aySeries = new QLineSeries(); pid_aySeries->setName("Ay");
+    pid_azSeries = new QLineSeries(); pid_azSeries->setName("Az");
+    pid_gxSeries = new QLineSeries(); pid_gxSeries->setName("Gx");
+    pid_gySeries = new QLineSeries(); pid_gySeries->setName("Gy");
+    pid_gzSeries = new QLineSeries(); pid_gzSeries->setName("Gz");
+
+    // Angles series
+    pid_pitchSeries = new QLineSeries(); pid_pitchSeries->setName("Pitch");
+    pid_rollSeries  = new QLineSeries(); pid_rollSeries->setName("Roll");
+    pid_yawSeries   = new QLineSeries(); pid_yawSeries->setName("Yaw");
+
+    // IR series
+    pid_ir1Series = new QLineSeries(); pid_ir1Series->setName("IR1");
+    pid_ir2Series = new QLineSeries(); pid_ir2Series->setName("IR2");
+    pid_ir3Series = new QLineSeries(); pid_ir3Series->setName("IR3");
+    pid_ir4Series = new QLineSeries(); pid_ir4Series->setName("IR4");
+    pid_ir5Series = new QLineSeries(); pid_ir5Series->setName("IR5");
+    pid_ir6Series = new QLineSeries(); pid_ir6Series->setName("IR6");
+    pid_ir7Series = new QLineSeries(); pid_ir7Series->setName("IR7");
+    pid_ir8Series = new QLineSeries(); pid_ir8Series->setName("IR8");
 
     chartPID_mw = new QChart();
     chartPID_mw->addSeries(pid_pSeries);
     chartPID_mw->addSeries(pid_iSeries);
     chartPID_mw->addSeries(pid_dSeries);
     chartPID_mw->addSeries(pid_outSeries);
-    chartPID_mw->setTitle("Aportes del PID (Balancín)");
+    chartPID_mw->addSeries(pid_pLineSeries);
+    chartPID_mw->addSeries(pid_dLineSeries);
+    chartPID_mw->addSeries(pid_outLineSeries);
+
+    chartPID_mw->addSeries(pid_axSeries);
+    chartPID_mw->addSeries(pid_aySeries);
+    chartPID_mw->addSeries(pid_azSeries);
+    chartPID_mw->addSeries(pid_gxSeries);
+    chartPID_mw->addSeries(pid_gySeries);
+    chartPID_mw->addSeries(pid_gzSeries);
+
+    chartPID_mw->addSeries(pid_pitchSeries);
+    chartPID_mw->addSeries(pid_rollSeries);
+    chartPID_mw->addSeries(pid_yawSeries);
+
+    chartPID_mw->addSeries(pid_ir1Series);
+    chartPID_mw->addSeries(pid_ir2Series);
+    chartPID_mw->addSeries(pid_ir3Series);
+    chartPID_mw->addSeries(pid_ir4Series);
+    chartPID_mw->addSeries(pid_ir5Series);
+    chartPID_mw->addSeries(pid_ir6Series);
+    chartPID_mw->addSeries(pid_ir7Series);
+    chartPID_mw->addSeries(pid_ir8Series);
+
+    chartPID_mw->setTitle("Curvas de telemetría");
     chartPID_mw->layout()->setContentsMargins(0, 0, 0, 0);
     chartPID_mw->setBackgroundRoundness(0);
 
@@ -1359,33 +1455,202 @@ void MainWindow::initPIDChart()
     pid_dSeries->attachAxis(pid_axisX);   pid_dSeries->attachAxis(pid_axisY);
     pid_outSeries->attachAxis(pid_axisX); pid_outSeries->attachAxis(pid_axisY);
 
+    pid_pLineSeries->attachAxis(pid_axisX);   pid_pLineSeries->attachAxis(pid_axisY);
+    pid_dLineSeries->attachAxis(pid_axisX);   pid_dLineSeries->attachAxis(pid_axisY);
+    pid_outLineSeries->attachAxis(pid_axisX); pid_outLineSeries->attachAxis(pid_axisY);
+
+    pid_axSeries->attachAxis(pid_axisX);   pid_axSeries->attachAxis(pid_axisY);
+    pid_aySeries->attachAxis(pid_axisX);   pid_aySeries->attachAxis(pid_axisY);
+    pid_azSeries->attachAxis(pid_axisX);   pid_azSeries->attachAxis(pid_axisY);
+    pid_gxSeries->attachAxis(pid_axisX);   pid_gxSeries->attachAxis(pid_axisY);
+    pid_gySeries->attachAxis(pid_axisX);   pid_gySeries->attachAxis(pid_axisY);
+    pid_gzSeries->attachAxis(pid_axisX);   pid_gzSeries->attachAxis(pid_axisY);
+
+    pid_pitchSeries->attachAxis(pid_axisX);   pid_pitchSeries->attachAxis(pid_axisY);
+    pid_rollSeries->attachAxis(pid_axisX);    pid_rollSeries->attachAxis(pid_axisY);
+    pid_yawSeries->attachAxis(pid_axisX);     pid_yawSeries->attachAxis(pid_axisY);
+
+    pid_ir1Series->attachAxis(pid_axisX);   pid_ir1Series->attachAxis(pid_axisY);
+    pid_ir2Series->attachAxis(pid_axisX);   pid_ir2Series->attachAxis(pid_axisY);
+    pid_ir3Series->attachAxis(pid_axisX);   pid_ir3Series->attachAxis(pid_axisY);
+    pid_ir4Series->attachAxis(pid_axisX);   pid_ir4Series->attachAxis(pid_axisY);
+    pid_ir5Series->attachAxis(pid_axisX);   pid_ir5Series->attachAxis(pid_axisY);
+    pid_ir6Series->attachAxis(pid_axisX);   pid_ir6Series->attachAxis(pid_axisY);
+    pid_ir7Series->attachAxis(pid_axisX);   pid_ir7Series->attachAxis(pid_axisY);
+    pid_ir8Series->attachAxis(pid_axisX);   pid_ir8Series->attachAxis(pid_axisY);
     ui->PIDchart->setChart(chartPID_mw);
     ui->PIDchart->setRenderHint(QPainter::Antialiasing);
 }
 
-void MainWindow::updatePIDChart(double time, double p, double i, double d, double out)
+void MainWindow::updatePIDChart(double time, double p, double i, double d, double out, double pLine, double dLine, double outLine)
 {
     pid_pSeries->append(time, p);
     pid_iSeries->append(time, i);
     pid_dSeries->append(time, d);
     pid_outSeries->append(time, out);
 
-    // Escala adaptativa del eje Y
-    double values[] = {p, i, d, out};
-    bool changed = false;
-    for (double val : values) {
-        if (val > pid_yMax) { pid_yMax = val; changed = true; }
-        if (val < pid_yMin) { pid_yMin = val; changed = true; }
-    }
-    if (changed) {
-        double margin = (pid_yMax - pid_yMin) * 0.1;
-        if (margin < 1.0) margin = 5.0;
-        pid_axisY->setRange(pid_yMin - margin, pid_yMax + margin);
-    }
+    pid_pLineSeries->append(time, pLine);
+    pid_dLineSeries->append(time, dLine);
+    pid_outLineSeries->append(time, outLine);
+
+    // Limitar la cantidad de puntos para no saturar memoria
+    int maxPoints = 1000;
+    while (pid_pSeries->count() > maxPoints) pid_pSeries->remove(0);
+    while (pid_iSeries->count() > maxPoints) pid_iSeries->remove(0);
+    while (pid_dSeries->count() > maxPoints) pid_dSeries->remove(0);
+    while (pid_outSeries->count() > maxPoints) pid_outSeries->remove(0);
+    while (pid_pLineSeries->count() > maxPoints) pid_pLineSeries->remove(0);
+    while (pid_dLineSeries->count() > maxPoints) pid_dLineSeries->remove(0);
+    while (pid_outLineSeries->count() > maxPoints) pid_outLineSeries->remove(0);
 
     // Scroll del eje X (ventana de 10 segundos)
-    if (time > 10.0)
+    if (time > 10.0) {
         pid_axisX->setRange(time - 10.0, time);
+    } else {
+        pid_axisX->setRange(0, 10.0);
+    }
+
+    // Actualizar visibilidad y rango dinámico adaptativo
+    updatePIDChartRange();
+}
+
+void MainWindow::updateMPUChart(double time, double ax, double ay, double az, double gx, double gy, double gz, double pitch, double roll, double yaw)
+{
+    pid_axSeries->append(time, ax);
+    pid_aySeries->append(time, ay);
+    pid_azSeries->append(time, az);
+    pid_gxSeries->append(time, gx);
+    pid_gySeries->append(time, gy);
+    pid_gzSeries->append(time, gz);
+    pid_pitchSeries->append(time, pitch);
+    pid_rollSeries->append(time, roll);
+    pid_yawSeries->append(time, yaw);
+
+    // Limitar puntos
+    int maxPoints = 1000;
+    while (pid_axSeries->count() > maxPoints) pid_axSeries->remove(0);
+    while (pid_aySeries->count() > maxPoints) pid_aySeries->remove(0);
+    while (pid_azSeries->count() > maxPoints) pid_azSeries->remove(0);
+    while (pid_gxSeries->count() > maxPoints) pid_gxSeries->remove(0);
+    while (pid_gySeries->count() > maxPoints) pid_gySeries->remove(0);
+    while (pid_gzSeries->count() > maxPoints) pid_gzSeries->remove(0);
+    while (pid_pitchSeries->count() > maxPoints) pid_pitchSeries->remove(0);
+    while (pid_rollSeries->count() > maxPoints) pid_rollSeries->remove(0);
+    while (pid_yawSeries->count() > maxPoints) pid_yawSeries->remove(0);
+
+    // Scroll del eje X
+    if (time > 10.0) {
+        pid_axisX->setRange(time - 10.0, time);
+    } else {
+        pid_axisX->setRange(0, 10.0);
+    }
+
+    updatePIDChartRange();
+}
+
+void MainWindow::updateIRChart(double time, double ir1, double ir2, double ir3, double ir4, double ir5, double ir6, double ir7, double ir8)
+{
+    pid_ir1Series->append(time, ir1);
+    pid_ir2Series->append(time, ir2);
+    pid_ir3Series->append(time, ir3);
+    pid_ir4Series->append(time, ir4);
+    pid_ir5Series->append(time, ir5);
+    pid_ir6Series->append(time, ir6);
+    pid_ir7Series->append(time, ir7);
+    pid_ir8Series->append(time, ir8);
+
+    // Limitar puntos
+    int maxPoints = 1000;
+    while (pid_ir1Series->count() > maxPoints) pid_ir1Series->remove(0);
+    while (pid_ir2Series->count() > maxPoints) pid_ir2Series->remove(0);
+    while (pid_ir3Series->count() > maxPoints) pid_ir3Series->remove(0);
+    while (pid_ir4Series->count() > maxPoints) pid_ir4Series->remove(0);
+    while (pid_ir5Series->count() > maxPoints) pid_ir5Series->remove(0);
+    while (pid_ir6Series->count() > maxPoints) pid_ir6Series->remove(0);
+    while (pid_ir7Series->count() > maxPoints) pid_ir7Series->remove(0);
+    while (pid_ir8Series->count() > maxPoints) pid_ir8Series->remove(0);
+
+    // Scroll del eje X
+    if (time > 10.0) {
+        pid_axisX->setRange(time - 10.0, time);
+    } else {
+        pid_axisX->setRange(0, 10.0);
+    }
+
+    updatePIDChartRange();
+}
+
+void MainWindow::updatePIDChartRange()
+{
+    double time = pid_axisX->max();
+    double yMin = std::numeric_limits<double>::max();
+    double yMax = std::numeric_limits<double>::lowest();
+    bool hasPoints = false;
+
+    struct SeriesInfo {
+        QLineSeries* series;
+        bool visible;
+    };
+    QList<SeriesInfo> seriesList = {
+        {pid_pSeries, ui->checkBox_P->isChecked()},
+        {pid_iSeries, ui->checkBox_I->isChecked()},
+        {pid_dSeries, ui->checkBox_D->isChecked()},
+        {pid_outSeries, ui->checkBox_Out->isChecked()},
+        {pid_pLineSeries, ui->checkBox_P_line->isChecked()},
+        {pid_dLineSeries, ui->checkBox_D_line->isChecked()},
+        {pid_outLineSeries, ui->checkBox_Out_line->isChecked()},
+
+        {pid_axSeries, ui->checkBox_Ax->isChecked()},
+        {pid_aySeries, ui->checkBox_Ay->isChecked()},
+        {pid_azSeries, ui->checkBox_Az->isChecked()},
+        {pid_gxSeries, ui->checkBox_Gx->isChecked()},
+        {pid_gySeries, ui->checkBox_Gy->isChecked()},
+        {pid_gzSeries, ui->checkBox_Gz->isChecked()},
+
+        {pid_pitchSeries, ui->checkBox_Pitch->isChecked()},
+        {pid_rollSeries, ui->checkBox_Roll->isChecked()},
+        {pid_yawSeries, ui->checkBox_Yaw->isChecked()},
+
+        {pid_ir1Series, ui->checkBox_Ir1->isChecked()},
+        {pid_ir2Series, ui->checkBox_Ir2->isChecked()},
+        {pid_ir3Series, ui->checkBox_Ir3->isChecked()},
+        {pid_ir4Series, ui->checkBox_Ir4->isChecked()},
+        {pid_ir5Series, ui->checkBox_Ir5->isChecked()},
+        {pid_ir6Series, ui->checkBox_Ir6->isChecked()},
+        {pid_ir7Series, ui->checkBox_Ir7->isChecked()},
+        {pid_ir8Series, ui->checkBox_Ir8->isChecked()}
+    };
+
+    double xMin = qMax(0.0, time - 10.0);
+    double xMax = time;
+
+    for (const auto& info : seriesList) {
+        if (info.series) {
+            info.series->setVisible(info.visible);
+            if (info.visible) {
+                const QList<QPointF> points = info.series->points();
+                for (const QPointF& pt : points) {
+                    if (pt.x() >= xMin && pt.x() <= xMax) {
+                        if (pt.y() < yMin) yMin = pt.y();
+                        if (pt.y() > yMax) yMax = pt.y();
+                        hasPoints = true;
+                    }
+                }
+            }
+        }
+    }
+
+    if (hasPoints) {
+        double margin = (yMax - yMin) * 0.1;
+        if (margin < 1.0) margin = 5.0;
+        pid_axisY->setRange(yMin - margin, yMax + margin);
+        pid_yMin = yMin;
+        pid_yMax = yMax;
+    } else {
+        pid_axisY->setRange(-10.0, 10.0);
+        pid_yMin = -10.0;
+        pid_yMax = 10.0;
+    }
 }
 
 void MainWindow::resetInterface() {
@@ -1515,34 +1780,24 @@ void MainWindow::on_sendLimitAngle_clicked() {
     sendCommand(buf, 3);
 }
 
-void MainWindow::on_sendRecoveryLimit_clicked() {
+void MainWindow::on_sendKiCascada_clicked() {
     uint8_t buf[3];
-    buf[0] = SETPOINTSAVEMIN;
-    myWord.i16[0] = ui->setRecoveryLimit->value();
+    buf[0] = SET_KI_EXT;
+    myWord.i16[0] = ui->setKiCascada->value();
     buf[1] = myWord.ui8[0];
     buf[2] = myWord.ui8[1];
     sendCommand(buf, 3);
-    ui->textBrowserProcessed->append("***GATILLO RECUPERACION ACTUALIZADO***");
+    ui->textBrowserProcessed->append("***KI CASCADA ACTUALIZADO***");
 }
 
-void MainWindow::on_sendRecoveryAngle_clicked() {
+void MainWindow::on_sendFilterLPF_clicked() {
     uint8_t buf[3];
-    buf[0] = SETPOINTSAVEMAX;
-    myWord.i16[0] = ui->setRecoveryAngle->value();
+    buf[0] = SET_ALFA_LPF;
+    myWord.i16[0] = ui->setFilterLPF->value();
     buf[1] = myWord.ui8[0];
     buf[2] = myWord.ui8[1];
     sendCommand(buf, 3);
-    ui->textBrowserProcessed->append("***ANGULO RECUPERACION ACTUALIZADO***");
-}
-
-void MainWindow::on_setRecoveryLimit_valueChanged(int arg1) {
-    (void)arg1;
-    on_sendRecoveryLimit_clicked();
-}
-
-void MainWindow::on_setRecoveryAngle_valueChanged(int arg1) {
-    (void)arg1;
-    on_sendRecoveryAngle_clicked();
+    ui->textBrowserProcessed->append("***FILTRO LPF CASCADA ACTUALIZADO***");
 }
 
 void MainWindow::on_sendVelDampDiv_clicked() {
