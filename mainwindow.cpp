@@ -503,6 +503,42 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         break;
     }
     case GETINTERNALDATA: {
+        w.ui8[0] = datosRx[58]; w.ui8[1] = datosRx[59]; w.ui8[2] = datosRx[60]; w.ui8[3] = datosRx[61];
+        float hr_angle = w.i32 / 10000.0f;
+        ui->angle_hr_data->display(QString::number(hr_angle, 'f', 4));
+
+        // Unpack raw IR values (IR1, IR3, IR5)
+        w.ui8[0] = datosRx[68]; w.ui8[1] = datosRx[69];
+        uint16_t rawIr1 = w.ui16[0];
+        ui->raw_ir1_lcd->display(rawIr1);
+        w.ui8[0] = datosRx[70]; w.ui8[1] = datosRx[71];
+        uint16_t rawIr3 = w.ui16[0];
+        ui->raw_ir3_lcd->display(rawIr3);
+        w.ui8[0] = datosRx[72]; w.ui8[1] = datosRx[73];
+        uint16_t rawIr5 = w.ui16[0];
+        ui->raw_ir5_lcd->display(rawIr5);
+
+        // Unpack calibrated IR values (IR1, IR3, IR5)
+        w.ui8[0] = datosRx[74]; w.ui8[1] = datosRx[75];
+        uint16_t calIr1 = w.ui16[0];
+        ui->cal_ir1_lcd->display(calIr1);
+        w.ui8[0] = datosRx[76]; w.ui8[1] = datosRx[77];
+        uint16_t calIr3 = w.ui16[0];
+        ui->cal_ir3_lcd->display(calIr3);
+        w.ui8[0] = datosRx[78]; w.ui8[1] = datosRx[79];
+        uint16_t calIr5 = w.ui16[0];
+        ui->cal_ir5_lcd->display(calIr5);
+
+        // --- Acumular muestra en buffer circular IR (último minuto) ---
+        IrSample sample;
+        sample.timestamp = QDateTime::currentDateTime();
+        sample.ir1 = rawIr1; // Guardar el valor sin procesar (raw)
+        sample.ir3 = rawIr3; // Guardar el valor sin procesar (raw)
+        sample.ir5 = rawIr5; // Guardar el valor sin procesar (raw)
+        m_irBuffer.append(sample);
+        if (m_irBuffer.size() > IR_BUFFER_SIZE)
+            m_irBuffer.removeFirst();
+
         if (!paramsSynced) {
             // 1. PID Balancín (indices 2 a 11)
             w.ui8[0] = datosRx[2];  w.ui8[1] = datosRx[3];  ui->setBalanceKp->setValue(w.i16[0]);
@@ -522,8 +558,10 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             w.ui8[0] = datosRx[20]; w.ui8[1] = datosRx[21]; ui->setOFFSETL->setValue(w.i16[0]);
             w.ui8[0] = datosRx[22]; w.ui8[1] = datosRx[23]; ui->setOFFSETR->setValue(w.i16[0]);
             w.ui8[0] = datosRx[24]; w.ui8[1] = datosRx[25]; ui->setCustomTurn->setValue(w.i16[0]);
-            w.ui8[0] = datosRx[26]; w.ui8[1] = datosRx[27]; ui->setAttackSetpoint->setValue(w.i16[0]);
-            w.ui8[0] = datosRx[28]; w.ui8[1] = datosRx[29]; ui->setCounterAngle->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[26]; w.ui8[1] = datosRx[27];
+            ui->setAttackSetpoint->blockSignals(true);
+            ui->setAttackSetpoint->setValue(w.i16[0]);
+            ui->setAttackSetpoint->blockSignals(false);
 
             // 4. Esquivador (indices 30 a 39)
             w.ui8[0] = datosRx[30]; w.ui8[1] = datosRx[31]; ui->setFrontDistance->setValue(w.ui16[0]);
@@ -538,6 +576,20 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             w.ui8[0] = datosRx[44]; w.ui8[1] = datosRx[45]; ui->setPWMRROT->setValue(w.ui16[0]);
             w.ui8[0] = datosRx[46]; w.ui8[1] = datosRx[47]; ui->setStaticOff->setValue(w.ui16[0]);
             w.ui8[0] = datosRx[48]; w.ui8[1] = datosRx[49]; ui->setMovingOff->setValue(w.ui16[0]);
+            w.ui8[0] = datosRx[50]; w.ui8[1] = datosRx[51]; ui->setLimitAngle->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[52]; w.ui8[1] = datosRx[53]; ui->setTurnDivisor->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[54]; w.ui8[1] = datosRx[55];
+            ui->setRecoveryLimit->blockSignals(true);
+            ui->setRecoveryLimit->setValue(w.i16[0]);
+            ui->setRecoveryLimit->blockSignals(false);
+
+            w.ui8[0] = datosRx[56]; w.ui8[1] = datosRx[57];
+            ui->setRecoveryAngle->blockSignals(true);
+            ui->setRecoveryAngle->setValue(w.i16[0]);
+            ui->setRecoveryAngle->blockSignals(false);
+            w.ui8[0] = datosRx[62]; w.ui8[1] = datosRx[63]; ui->setVelDampDiv->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[64]; w.ui8[1] = datosRx[65]; ui->setVelDampLim->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[66]; w.ui8[1] = datosRx[67]; ui->setTurnLimit->setValue(w.i16[0]);
 
             paramsSynced = true;
             addLogEntry("***PARÁMETROS SINCRONIZADOS DESDE STM32***", "RX");
@@ -562,7 +614,22 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         w.ui8[0] = datosRx[14]; w.ui8[1] = datosRx[15]; w.ui8[2] = datosRx[16]; w.ui8[3] = datosRx[17];
         int32_t current_output = w.i32;
 
-        // 5. Leer constantes actuales desde la Interfaz de Qt
+        // 5. Extraer Angulo Real del STM32 (Nuevo)
+        w.ui8[0] = datosRx[18]; w.ui8[1] = datosRx[19]; w.ui8[2] = datosRx[20]; w.ui8[3] = datosRx[21];
+        float stm_angle = w.i32 / 100.0f; // Escala x100 -> real
+        ui->angle_data->display(QString::number(stm_angle, 'f', 2));
+
+        // 5b. Extraer Turn Offset del STM32 (Nuevo)
+        w.ui8[0] = datosRx[22]; w.ui8[1] = datosRx[23]; w.ui8[2] = datosRx[24]; w.ui8[3] = datosRx[25];
+        int32_t current_turn_offset = w.i32;
+        ui->turn_offset_data->display(current_turn_offset);
+
+        // 5c. Extraer Delta-time Medido en milisegundos (Nuevo)
+        w.ui8[0] = datosRx[26]; w.ui8[1] = datosRx[27]; w.ui8[2] = datosRx[28]; w.ui8[3] = datosRx[29];
+        int32_t current_dt_ms = w.i32;
+        ui->dt_ms_data->display(current_dt_ms);
+
+        // 6. Leer constantes actuales desde la Interfaz de Qt
         // (Como paramsSynced se encarga de poblarlas, siempre tendremos el valor real aquí)
         int16_t kp = ui->setBalanceKp->value();
         int16_t ki = ui->setBalanceKi->value();
@@ -582,10 +649,19 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         // qDebug() << "P:" << term_P << "I:" << term_I << "D:" << term_D << "Out:" << term_Out;
         break;
     }
+    case EXPORTIRCSV:
+        if (datosRx[2] == ACK) {
+            // Leer número de exportación devuelto por el STM32 (big-endian)
+            m_irExportCount = ((int)datosRx[3] << 8) | datosRx[4];
+            exportIrCsvToFile();
+        }
+        break;
     case SETPWML:
     case SETPWMR:
     case SETPWMMINR:
     case SETPWMMINL:
+    case SETPOINTSAVEMIN:
+    case SETPOINTSAVEMAX:
     case SETBALANCEKP:
     case SETBALANCEKD:
     case SETBALANCEKI:
@@ -607,6 +683,11 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETPWMRROT:
     case SETSTATICOFF:
     case SETMOVINGOFF:
+    case SETTURNDIV:
+    case SETLIMITANG:
+    case SETVELDAMPDIV:
+    case SETVELDAMPLIM:
+    case SETTURNLIMIT:
         if(datosRx[2]==ACK){
             str="COMANDO ACEPTADO Y GUARDADO (ACK)!!!";
             addLogEntry(str, "RX");
@@ -1128,6 +1209,11 @@ void MainWindow::on_sendAttackSetpoint_clicked() {
     ui->textBrowserProcessed->append("***ATTACK SETPOINT ACTUALIZADO***");
 }
 
+void MainWindow::on_setAttackSetpoint_valueChanged(int arg1) {
+    (void)arg1;
+    on_sendAttackSetpoint_clicked();
+}
+
 void MainWindow::on_sendPWML_clicked() {
     uint8_t payload[10];
     uint8_t index = 0;
@@ -1188,17 +1274,18 @@ void MainWindow::on_sendCustomTurn_clicked() {
     ui->textBrowserProcessed->append("***CUSTOM TURN ACTUALIZADO***");
 }
 
-void MainWindow::on_sendCounterAngle_clicked() {
+void MainWindow::on_sendTurnDivisor_clicked() {
     uint8_t payload[10];
     uint8_t index = 0;
     _udat w;
-    payload[index++] = SETBKANG;
-    w.i32 = ui->setCounterAngle->value();
+    payload[index++] = SETTURNDIV;
+    w.i16[0] = ui->setTurnDivisor->value();
     payload[index++] = w.ui8[0];
     payload[index++] = w.ui8[1];
     sendCommand(payload, index);
-    ui->textBrowserProcessed->append("***COUNTER ANGLE ACTUALIZADO***");
+    ui->textBrowserProcessed->append("***TURN DIVISOR ACTUALIZADO***");
 }
+
 
 
 void MainWindow::on_P1toP3_clicked()
@@ -1419,4 +1506,120 @@ void MainWindow::on_sendMovingOff_clicked() {
     sendCommand(buf, 3);
 }
 
+void MainWindow::on_sendLimitAngle_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETLIMITANG;
+    myWord.i16[0] = ui->setLimitAngle->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+}
 
+void MainWindow::on_sendRecoveryLimit_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETPOINTSAVEMIN;
+    myWord.i16[0] = ui->setRecoveryLimit->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+    ui->textBrowserProcessed->append("***GATILLO RECUPERACION ACTUALIZADO***");
+}
+
+void MainWindow::on_sendRecoveryAngle_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETPOINTSAVEMAX;
+    myWord.i16[0] = ui->setRecoveryAngle->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+    ui->textBrowserProcessed->append("***ANGULO RECUPERACION ACTUALIZADO***");
+}
+
+void MainWindow::on_setRecoveryLimit_valueChanged(int arg1) {
+    (void)arg1;
+    on_sendRecoveryLimit_clicked();
+}
+
+void MainWindow::on_setRecoveryAngle_valueChanged(int arg1) {
+    (void)arg1;
+    on_sendRecoveryAngle_clicked();
+}
+
+void MainWindow::on_sendVelDampDiv_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETVELDAMPDIV;
+    myWord.i16[0] = ui->setVelDampDiv->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendVelDampLim_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETVELDAMPLIM;
+    myWord.i16[0] = ui->setVelDampLim->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+}
+
+void MainWindow::on_sendTurnLimit_clicked() {
+    uint8_t buf[3];
+    buf[0] = SETTURNLIMIT;
+    myWord.i16[0] = ui->setTurnLimit->value();
+    buf[1] = myWord.ui8[0];
+    buf[2] = myWord.ui8[1];
+    sendCommand(buf, 3);
+    ui->textBrowserProcessed->append("***TURN LIMIT ACTUALIZADO***");
+}
+
+// ---------------------------------------------------------------------------
+// Exportar CSV de Sensores IR (último minuto)
+// ---------------------------------------------------------------------------
+void MainWindow::exportIrCsvToFile() {
+    QString defaultName = "ir_sensors_" +
+        QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".csv";
+    QString fileName = QFileDialog::getSaveFileName(
+        this, "Exportar Sensores IR - CSV", defaultName,
+        "Archivos CSV (*.csv)");
+    if (fileName.isEmpty()) return;
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "No se pudo crear el archivo CSV.");
+        return;
+    }
+
+    QTextStream out(&file);
+    // Línea 1: número de guía de exportación
+    out << "ExportNum;" << m_irExportCount << "\n";
+    // Línea 2: encabezado de columnas
+    out << "Timestamp;IR1 (Der-Raw);IR3 (Cen-Raw);IR5 (Izq-Raw);Promedio\n";
+    // Datos: una fila por muestra
+    for (const IrSample &s : m_irBuffer) {
+        uint32_t avg = ((uint32_t)s.ir1 + s.ir3 + s.ir5) / 3;
+        out << s.timestamp.toString("hh:mm:ss.zzz") << ";"
+            << s.ir1 << ";"
+            << s.ir3 << ";"
+            << s.ir5 << ";"
+            << avg   << "\n";
+    }
+    file.close();
+
+    QMessageBox::information(this, "Exportación IR exitosa",
+        QString("Exportación N° %1\n%2 muestras guardadas en:\n%3")
+        .arg(m_irExportCount)
+        .arg(m_irBuffer.size())
+        .arg(fileName));
+}
+
+void MainWindow::on_pushButton_exportIrCsv_clicked() {
+    if (m_irBuffer.isEmpty()) {
+        QMessageBox::warning(this, "Sin datos",
+            "El buffer está vacío. Conectate al robot y esperá que lleguen datos de telemetría.");
+        return;
+    }
+    // Enviar comando EXPORTIRCSV al STM32 para obtener el número de exportación
+    uint8_t cmd[2] = { (uint8_t)EXPORTIRCSV, 0x00 };
+    sendCommand(cmd, 2);
+}

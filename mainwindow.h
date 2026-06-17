@@ -90,13 +90,14 @@ private slots:
     void on_sendPWMMINR_clicked();
     void on_sendSetpoint_clicked();
     void on_sendAttackSetpoint_clicked();
+    void on_setAttackSetpoint_valueChanged(int arg1);
 
     void on_sendPWML_clicked();
     void on_sendPWMR_clicked();
     void on_sendOFFSETL_clicked();
     void on_sendOFFSETR_clicked();
     void on_sendCustomTurn_clicked();
-    void on_sendCounterAngle_clicked();
+    void on_sendTurnDivisor_clicked();
 
     void on_sendFrontDistance_clicked();
     void on_sendSideDistance_clicked();
@@ -108,6 +109,14 @@ private slots:
     void on_sendPWMRROT_clicked();
     void on_sendStaticOff_clicked();
     void on_sendMovingOff_clicked();
+    void on_sendLimitAngle_clicked();
+    void on_sendRecoveryLimit_clicked();
+    void on_sendRecoveryAngle_clicked();
+    void on_setRecoveryLimit_valueChanged(int arg1);
+    void on_setRecoveryAngle_valueChanged(int arg1);
+    void on_sendVelDampDiv_clicked();
+    void on_sendVelDampLim_clicked();
+    void on_sendTurnLimit_clicked();
 
     void on_P1toP3_clicked();
 
@@ -122,6 +131,7 @@ private slots:
     void on_P2toP3_clicked();
 
     void on_pushButton_exportExcel_clicked();
+    void on_pushButton_exportIrCsv_clicked();
     void on_pushButton_exportTxt_clicked();
 
 private:
@@ -131,6 +141,19 @@ private:
         QString type; // "RX", "TX", "UNKNOWN", "CHK_ERROR"
     };
     QList<LogEntry> m_logHistory;
+
+    // --- Buffer circular de IR para exportación CSV ---
+    static const int IR_BUFFER_SIZE = 3000; // ~1 minuto a ~50Hz
+    struct IrSample {
+        QDateTime timestamp;
+        uint16_t ir1; // Sensor derecho (calibrado)
+        uint16_t ir3; // Sensor centro (calibrado)
+        uint16_t ir5; // Sensor izquierdo (calibrado)
+    };
+    QVector<IrSample> m_irBuffer;
+    int m_irExportCount = 0;  // Número de exportación devuelto por el STM32
+
+    void exportIrCsvToFile();
 
     // Estadísticas
     int m_countSent = 0;
@@ -233,6 +256,7 @@ private:
         SETOFFSETR=0xAF,
 
         SETCUSTOMTURN = 0xB0, //Valor de rotacion al seguir linea
+        SETTURNDIV = 0xC3, //Divisor del calculo de offset de giro
         SETSPEED = 0xB1, //angulo de ataque movimiento
         SETBKANG = 0xB2, //angulo contra para evitar el aumento de velocidad
 
@@ -248,6 +272,13 @@ private:
 
         SETSTATICOFF = 0xC1,
         SETMOVINGOFF = 0xC2,
+        SETLIMITANG = 0xC4,
+        SETPOINTSAVEMIN = 0xC5,
+        SETPOINTSAVEMAX = 0xC6,
+        SETVELDAMPDIV = 0xC7,
+        SETVELDAMPLIM = 0xC8,
+        SETTURNLIMIT = 0xC9,
+        EXPORTIRCSV  = 0xCA,
 
         UNKNOWCMD=0xFF,
         OTHERS
