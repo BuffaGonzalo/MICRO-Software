@@ -892,7 +892,7 @@
        </font>
       </property>
       <property name="text">
-       <string>SENSOR DERECHO (IR5)</string>
+       <string>SENSOR IZQUIERDO (IR5)</string>
       </property>
      </widget>
      <widget class="QLabel" name="header_ir3">
@@ -928,7 +928,7 @@
        </font>
       </property>
       <property name="text">
-       <string>SENSOR IZQUIERDO (IR1)</string>
+       <string>SENSOR DERECHO (IR1)</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_raw_title">
