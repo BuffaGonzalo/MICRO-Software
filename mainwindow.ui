@@ -474,407 +474,407 @@
         <height>350</height>
        </rect>
       </property>
-      <widget class="QGroupBox" name="groupBox_Curves">
+     </widget>
+     <widget class="QGroupBox" name="groupBox_Curves">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>650</y>
+        <width>1261</width>
+        <height>130</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="title">
+       <string>CURVAS DE TELEMETRÍA</string>
+      </property>
+      <widget class="QCheckBox" name="checkBox_P">
        <property name="geometry">
         <rect>
-         <x>40</x>
-         <y>650</y>
-         <width>1261</width>
-         <height>130</height>
+         <x>20</x>
+         <y>25</y>
+         <width>120</width>
+         <height>20</height>
         </rect>
        </property>
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
+       <property name="text">
+        <string>P Balance</string>
        </property>
-       <property name="title">
-        <string>CURVAS DE TELEMETRÍA</string>
+       <property name="checked">
+        <bool>true</bool>
        </property>
-       <widget class="QCheckBox" name="checkBox_P">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>25</y>
-          <width>120</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>P Balance</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_I">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>50</y>
-          <width>120</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>I Balance</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_D">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>75</y>
-          <width>120</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>D Balance</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Out">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>100</y>
-          <width>140</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Output Balance</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_P_line">
-        <property name="geometry">
-         <rect>
-          <x>180</x>
-          <y>25</y>
-          <width>140</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>P Seguimiento</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_D_line">
-        <property name="geometry">
-         <rect>
-          <x>180</x>
-          <y>50</y>
-          <width>140</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>D Seguimiento</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Out_line">
-        <property name="geometry">
-         <rect>
-          <x>180</x>
-          <y>75</y>
-          <width>150</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Giro Seguimiento</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Pitch">
-        <property name="geometry">
-         <rect>
-          <x>350</x>
-          <y>25</y>
-          <width>100</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Pitch</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Roll">
-        <property name="geometry">
-         <rect>
-          <x>350</x>
-          <y>50</y>
-          <width>100</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Roll</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Yaw">
-        <property name="geometry">
-         <rect>
-          <x>350</x>
-          <y>75</y>
-          <width>100</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Yaw</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Ax">
-        <property name="geometry">
-         <rect>
-          <x>480</x>
-          <y>25</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Ax</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Ay">
-        <property name="geometry">
-         <rect>
-          <x>480</x>
-          <y>50</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Ay</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Az">
-        <property name="geometry">
-         <rect>
-          <x>480</x>
-          <y>75</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Az</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Gx">
-        <property name="geometry">
-         <rect>
-          <x>550</x>
-          <y>25</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Gx</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Gy">
-        <property name="geometry">
-         <rect>
-          <x>550</x>
-          <y>50</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Gy</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Gz">
-        <property name="geometry">
-         <rect>
-          <x>550</x>
-          <y>75</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Gz</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Ir1">
-        <property name="geometry">
-         <rect>
-          <x>650</x>
-          <y>25</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>IR1</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Ir2">
-        <property name="geometry">
-         <rect>
-          <x>720</x>
-          <y>25</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>IR2</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Ir3">
-        <property name="geometry">
-         <rect>
-          <x>790</x>
-          <y>25</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>IR3</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Ir4">
-        <property name="geometry">
-         <rect>
-          <x>860</x>
-          <y>25</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>IR4</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Ir5">
-        <property name="geometry">
-         <rect>
-          <x>650</x>
-          <y>60</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>IR5</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Ir6">
-        <property name="geometry">
-         <rect>
-          <x>720</x>
-          <y>60</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>IR6</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Ir7">
-        <property name="geometry">
-         <rect>
-          <x>790</x>
-          <y>60</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>IR7</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="checkBox_Ir8">
-        <property name="geometry">
-         <rect>
-          <x>860</x>
-          <y>60</y>
-          <width>60</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>IR8</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_I">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>50</y>
+         <width>120</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>I Balance</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_D">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>75</y>
+         <width>120</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>D Balance</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Out">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>100</y>
+         <width>140</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Output Balance</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_P_line">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>25</y>
+         <width>140</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>P Seguimiento</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_D_line">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>50</y>
+         <width>140</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>D Seguimiento</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Out_line">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>75</y>
+         <width>150</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Giro Seguimiento</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Pitch">
+       <property name="geometry">
+        <rect>
+         <x>350</x>
+         <y>25</y>
+         <width>100</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Pitch</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Roll">
+       <property name="geometry">
+        <rect>
+         <x>350</x>
+         <y>50</y>
+         <width>100</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Roll</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Yaw">
+       <property name="geometry">
+        <rect>
+         <x>350</x>
+         <y>75</y>
+         <width>100</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Yaw</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Ax">
+       <property name="geometry">
+        <rect>
+         <x>480</x>
+         <y>25</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Ax</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Ay">
+       <property name="geometry">
+        <rect>
+         <x>480</x>
+         <y>50</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Ay</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Az">
+       <property name="geometry">
+        <rect>
+         <x>480</x>
+         <y>75</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Az</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Gx">
+       <property name="geometry">
+        <rect>
+         <x>550</x>
+         <y>25</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Gx</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Gy">
+       <property name="geometry">
+        <rect>
+         <x>550</x>
+         <y>50</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Gy</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Gz">
+       <property name="geometry">
+        <rect>
+         <x>550</x>
+         <y>75</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Gz</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Ir1">
+       <property name="geometry">
+        <rect>
+         <x>650</x>
+         <y>25</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>IR1</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Ir2">
+       <property name="geometry">
+        <rect>
+         <x>720</x>
+         <y>25</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>IR2</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Ir3">
+       <property name="geometry">
+        <rect>
+         <x>790</x>
+         <y>25</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>IR3</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Ir4">
+       <property name="geometry">
+        <rect>
+         <x>860</x>
+         <y>25</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>IR4</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Ir5">
+       <property name="geometry">
+        <rect>
+         <x>650</x>
+         <y>60</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>IR5</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Ir6">
+       <property name="geometry">
+        <rect>
+         <x>720</x>
+         <y>60</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>IR6</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Ir7">
+       <property name="geometry">
+        <rect>
+         <x>790</x>
+         <y>60</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>IR7</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox_Ir8">
+       <property name="geometry">
+        <rect>
+         <x>860</x>
+         <y>60</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>IR8</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
       </widget>
      </widget>
      <widget class="QLabel" name="header_ir5">
