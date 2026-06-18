@@ -505,7 +505,7 @@
         <string>P Balance</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_I">
@@ -521,7 +521,7 @@
         <string>I Balance</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_D">
@@ -537,7 +537,7 @@
         <string>D Balance</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Out">
@@ -553,7 +553,7 @@
         <string>Output Balance</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_P_line">
@@ -569,7 +569,7 @@
         <string>P Seguimiento</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_D_line">
@@ -585,7 +585,7 @@
         <string>D Seguimiento</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Out_line">
@@ -601,7 +601,7 @@
         <string>Giro Seguimiento</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Pitch">
@@ -617,7 +617,7 @@
         <string>Pitch</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Roll">
@@ -633,7 +633,7 @@
         <string>Roll</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Yaw">
@@ -649,7 +649,7 @@
         <string>Yaw</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Ax">
@@ -665,7 +665,7 @@
         <string>Ax</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Ay">
@@ -681,7 +681,7 @@
         <string>Ay</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Az">
@@ -697,7 +697,7 @@
         <string>Az</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Gx">
@@ -713,7 +713,7 @@
         <string>Gx</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Gy">
@@ -729,7 +729,7 @@
         <string>Gy</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Gz">
@@ -745,7 +745,7 @@
         <string>Gz</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Ir1">
@@ -761,7 +761,7 @@
         <string>IR1</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Ir2">
@@ -777,7 +777,7 @@
         <string>IR2</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Ir3">
@@ -793,7 +793,7 @@
         <string>IR3</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Ir4">
@@ -809,7 +809,7 @@
         <string>IR4</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Ir5">
@@ -825,7 +825,7 @@
         <string>IR5</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Ir6">
@@ -841,7 +841,7 @@
         <string>IR6</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Ir7">
@@ -857,7 +857,7 @@
         <string>IR7</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_Ir8">
@@ -873,7 +873,7 @@
         <string>IR8</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </widget>
