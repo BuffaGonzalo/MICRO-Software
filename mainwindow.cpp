@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->textBrowserUnProcessed->document()->setMaximumBlockCount(50);
 
     initPIDChart();
+
     // Conectar checkboxes para activar/desactivar curvas de la gráfica PID
     connect(ui->checkBox_P, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
     connect(ui->checkBox_I, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
@@ -47,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->checkBox_Ir6, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
     connect(ui->checkBox_Ir7, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
     connect(ui->checkBox_Ir8, &QCheckBox::toggled, this, &MainWindow::updatePIDChartRange);
+
     timer1 = new QTimer(this);
     timer2 = new QTimer(this);
 
@@ -432,8 +434,6 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         float roll = atan2(ay, sqrt(ax * ax + az * az)) * 180.0 / M_PI;
         float pitch = atan2(-ax, sqrt(ay * ay + az * az)) * 180.0 / M_PI;
 
-
->>>>>>> 55b47c2 (feat(line_follower): Añadir variables para poder modificar el)
         // (Opcional) Calcular Yaw integrando el giroscopio
         float gz_grados_seg = gz / 131.0f; // Asumiendo escala de +/- 250deg/s
         if (abs(gz_grados_seg) > 1.0f) {
@@ -445,6 +445,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         // ---- NUEVO: Enviar a la gráfica ----
         double t = runtimeTimer.elapsed() / 1000.0;
         updateMPUChart(t, ax, ay, az, gx, gy, gz, pitch, roll, yawAcumulado);
+
         // 3. Enviar los ángulos a Qt Quick 3D
         if (ui->AutoWidget && ui->AutoWidget->rootObject()) {
             ui->AutoWidget->rootObject()->setProperty("carPitch", roll);
@@ -536,6 +537,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         // ---- NUEVO: Enviar a la gráfica ----
         double t = runtimeTimer.elapsed() / 1000.0;
         updateIRChart(t, ir1, ir2, ir3, ir4, ir5, ir6, ir7, ir8);
+
         break;
     }
     case GETINTERNALDATA: {
@@ -1478,6 +1480,7 @@ void MainWindow::initPIDChart()
     pid_ir6Series->attachAxis(pid_axisX);   pid_ir6Series->attachAxis(pid_axisY);
     pid_ir7Series->attachAxis(pid_axisX);   pid_ir7Series->attachAxis(pid_axisY);
     pid_ir8Series->attachAxis(pid_axisX);   pid_ir8Series->attachAxis(pid_axisY);
+
     ui->PIDchart->setChart(chartPID_mw);
     ui->PIDchart->setRenderHint(QPainter::Antialiasing);
 }
