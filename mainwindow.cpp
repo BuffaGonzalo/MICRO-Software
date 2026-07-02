@@ -309,6 +309,34 @@ void MainWindow::dataReceived(){
 
 }
 
+static const uint16_t PC_LUT_Y_SCALE[16] = {0, 67, 133, 200, 267, 333, 400, 467, 533, 600, 667, 733, 800, 867, 933, 1000};
+
+static const uint16_t PC_LUT_IR0[16] = {514, 546, 553, 569, 576, 578, 583, 590, 594, 608, 618, 659, 1589, 2721, 3890, 3968};
+static const uint16_t PC_LUT_IR2[16] = {1283, 1648, 1679, 1687, 1692, 1705, 1712, 1718, 1721, 1725, 1732, 1740, 1749, 1754, 1762, 3968};
+static const uint16_t PC_LUT_IR4[16] = {2120, 2134, 2139, 2144, 2148, 2152, 2155, 2158, 2162, 2165, 2169, 2182, 2229, 2255, 2266, 3973};
+static const uint16_t PC_LUT_IR6[16] = {2166, 2183, 2187, 2193, 2196, 2200, 2203, 2209, 2215, 2237, 2253, 2264, 2276, 2442, 2600, 3984};
+static const uint16_t PC_LUT_IR7[16] = {1068, 1093, 1101, 1107, 1111, 1117, 1123, 1133, 1142, 1151, 1159, 1187, 1291, 1433, 1610, 3940};
+
+static uint16_t PC_LUT_Interpolate(const uint16_t *x, const uint16_t *lut_y, uint16_t raw) {
+    if(raw <= x[0])
+        return lut_y[0];
+
+    if(raw >= x[15])
+        return lut_y[15];
+
+    for(int i = 0; i < 15; i++) {
+        if(raw >= x[i] && raw <= x[i + 1]) {
+            uint32_t diff_x = x[i + 1] - x[i];
+            if (diff_x == 0) return lut_y[i];
+            uint32_t diff_y = lut_y[i + 1] - lut_y[i];
+            uint32_t offset_x = raw - x[i];
+            uint32_t y = lut_y[i] + (((offset_x * diff_y) + (diff_x / 2)) / diff_x);
+            return (uint16_t)y;
+        }
+    }
+    return lut_y[15];
+}
+
 void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     m_countReceived++; // Comando completo y válido recibido
 
@@ -537,6 +565,37 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         // ---- NUEVO: Enviar a la gráfica ----
         double t = runtimeTimer.elapsed() / 1000.0;
         updateIRChart(t, ir1, ir2, ir3, ir4, ir5, ir6, ir7, ir8);
+
+        // --- Acumular muestra en buffer circular de IR superiores (último minuto) ---
+        UpperIrSample upperSample;
+        upperSample.timestamp = QDateTime::currentDateTime();
+        upperSample.ir1 = ir1;
+        upperSample.ir3 = ir3;
+        upperSample.ir5 = ir5;
+        upperSample.ir7 = ir7;
+        upperSample.ir8 = ir8;
+        m_upperIrBuffer.append(upperSample);
+        if (m_upperIrBuffer.size() > IR_BUFFER_SIZE)
+            m_upperIrBuffer.removeFirst();
+
+        // ---- NUEVO: Calcular y mostrar normalización de sensores de distancia superiores ----
+        uint16_t norm_ir0 = PC_LUT_Interpolate(PC_LUT_IR0, PC_LUT_Y_SCALE, ir1);
+        uint16_t norm_ir2 = PC_LUT_Interpolate(PC_LUT_IR2, PC_LUT_Y_SCALE, ir3);
+        uint16_t norm_ir4 = PC_LUT_Interpolate(PC_LUT_IR4, PC_LUT_Y_SCALE, ir5);
+        uint16_t norm_ir6 = PC_LUT_Interpolate(PC_LUT_IR6, PC_LUT_Y_SCALE, ir7);
+        uint16_t norm_ir7 = PC_LUT_Interpolate(PC_LUT_IR7, PC_LUT_Y_SCALE, ir8);
+
+        ui->raw_ir0_lcd->display(ir1);
+        ui->raw_ir2_lcd->display(ir3);
+        ui->raw_ir4_lcd->display(ir5);
+        ui->raw_ir6_lcd->display(ir7);
+        ui->raw_ir7_lcd->display(ir8);
+
+        ui->norm_ir0_lcd->display(norm_ir0);
+        ui->norm_ir2_lcd->display(norm_ir2);
+        ui->norm_ir4_lcd->display(norm_ir4);
+        ui->norm_ir6_lcd->display(norm_ir6);
+        ui->norm_ir7_lcd->display(norm_ir7);
 
         break;
     }
@@ -1371,6 +1430,16 @@ void MainWindow::on_P2toP3_clicked()
     ui->stackedWidget->setCurrentIndex(2);
 }
 
+void MainWindow::on_P1toP4_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(3);
+}
+
+void MainWindow::on_P4toP1_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(0);
+}
+
 // -----------------------------------------------------------------------
 // Chart PID embebido en MainWindow (widget PIDchart promovido a QChartView)
 // -----------------------------------------------------------------------
@@ -1835,44 +1904,80 @@ void MainWindow::on_sendTurnLimit_clicked() {
 // Exportar CSV de Sensores IR (último minuto)
 // ---------------------------------------------------------------------------
 void MainWindow::exportIrCsvToFile() {
-    QString defaultName = "ir_sensors_" +
-        QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".csv";
-    QString fileName = QFileDialog::getSaveFileName(
-        this, "Exportar Sensores IR - CSV", defaultName,
-        "Archivos CSV (*.csv)");
-    if (fileName.isEmpty()) return;
+    bool lowerOk = false;
+    QString fileNameLower;
+    if (!m_irBuffer.isEmpty()) {
+        QString defaultNameLower = "ir_sensors_lower_" +
+            QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".csv";
+        fileNameLower = QFileDialog::getSaveFileName(
+            this, "Exportar Sensores IR Inferiores - CSV", defaultNameLower,
+            "Archivos CSV (*.csv)");
 
-    QFile file(fileName);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", "No se pudo crear el archivo CSV.");
-        return;
+        if (!fileNameLower.isEmpty()) {
+            QFile file(fileNameLower);
+            if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                QTextStream out(&file);
+                out << "ExportNum;" << m_irExportCount << "\n";
+                out << "Timestamp;IR1 (Der-Raw);IR3 (Cen-Raw);IR5 (Izq-Raw);Promedio\n";
+                for (const IrSample &s : m_irBuffer) {
+                    uint32_t avg = ((uint32_t)s.ir1 + s.ir3 + s.ir5) / 3;
+                    out << s.timestamp.toString("hh:mm:ss.zzz") << ";"
+                        << s.ir1 << ";"
+                        << s.ir3 << ";"
+                        << s.ir5 << ";"
+                        << avg   << "\n";
+                }
+                file.close();
+                lowerOk = true;
+            } else {
+                QMessageBox::critical(this, "Error", "No se pudo crear el archivo CSV de sensores inferiores.");
+            }
+        }
     }
 
-    QTextStream out(&file);
-    // Línea 1: número de guía de exportación
-    out << "ExportNum;" << m_irExportCount << "\n";
-    // Línea 2: encabezado de columnas
-    out << "Timestamp;IR1 (Der-Raw);IR3 (Cen-Raw);IR5 (Izq-Raw);Promedio\n";
-    // Datos: una fila por muestra
-    for (const IrSample &s : m_irBuffer) {
-        uint32_t avg = ((uint32_t)s.ir1 + s.ir3 + s.ir5) / 3;
-        out << s.timestamp.toString("hh:mm:ss.zzz") << ";"
-            << s.ir1 << ";"
-            << s.ir3 << ";"
-            << s.ir5 << ";"
-            << avg   << "\n";
-    }
-    file.close();
+    bool upperOk = false;
+    QString fileNameUpper;
+    if (!m_upperIrBuffer.isEmpty()) {
+        QString defaultNameUpper = "ir_sensors_upper_" +
+            QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".csv";
+        fileNameUpper = QFileDialog::getSaveFileName(
+            this, "Exportar Sensores IR Superiores (Esquivar Objeto) - CSV", defaultNameUpper,
+            "Archivos CSV (*.csv)");
 
-    QMessageBox::information(this, "Exportación IR exitosa",
-        QString("Exportación N° %1\n%2 muestras guardadas en:\n%3")
-        .arg(m_irExportCount)
-        .arg(m_irBuffer.size())
-        .arg(fileName));
+        if (!fileNameUpper.isEmpty()) {
+            QFile file(fileNameUpper);
+            if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                QTextStream out(&file);
+                out << "ExportNum;" << m_irExportCount << "\n";
+                out << "Timestamp;IR1;IR3;IR5;IR7;IR8;Promedio\n";
+                for (const UpperIrSample &s : m_upperIrBuffer) {
+                    uint32_t avg = ((uint32_t)s.ir1 + s.ir3 + s.ir5 + s.ir7 + s.ir8) / 5;
+                    out << s.timestamp.toString("hh:mm:ss.zzz") << ";"
+                        << s.ir1 << ";"
+                        << s.ir3 << ";"
+                        << s.ir5 << ";"
+                        << s.ir7 << ";"
+                        << s.ir8 << ";"
+                        << avg   << "\n";
+                }
+                file.close();
+                upperOk = true;
+            } else {
+                QMessageBox::critical(this, "Error", "No se pudo crear el archivo CSV de sensores superiores.");
+            }
+        }
+    }
+
+    if (lowerOk || upperOk) {
+        QString msg = QString("Exportación N° %1 exitosa.\n").arg(m_irExportCount);
+        if (lowerOk) msg += QString("- %1 muestras inferiores guardadas en:\n  %2\n").arg(m_irBuffer.size()).arg(fileNameLower);
+        if (upperOk) msg += QString("- %1 muestras superiores guardadas en:\n  %2\n").arg(m_upperIrBuffer.size()).arg(fileNameUpper);
+        QMessageBox::information(this, "Exportación IR exitosa", msg);
+    }
 }
 
 void MainWindow::on_pushButton_exportIrCsv_clicked() {
-    if (m_irBuffer.isEmpty()) {
+    if (m_irBuffer.isEmpty() && m_upperIrBuffer.isEmpty()) {
         QMessageBox::warning(this, "Sin datos",
             "El buffer está vacío. Conectate al robot y esperá que lleguen datos de telemetría.");
         return;

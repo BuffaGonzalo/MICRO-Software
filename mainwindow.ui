@@ -49,7 +49,7 @@
      </size>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="MAIN">
      <widget class="Line" name="line_3">
@@ -361,6 +361,19 @@
        <string>GRAFICAS</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="P1toP4">
+      <property name="geometry">
+       <rect>
+        <x>1240</x>
+        <y>170</y>
+        <width>161</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>NORMALIZACION</string>
+      </property>
+     </widget>
      <widget class="QPushButton" name="pushButton_exportExcel">
       <property name="geometry">
        <rect>
@@ -479,7 +492,7 @@
       <property name="geometry">
        <rect>
         <x>40</x>
-        <y>650</y>
+        <y>440</y>
         <width>1261</width>
         <height>130</height>
        </rect>
@@ -876,158 +889,6 @@
         <bool>false</bool>
        </property>
       </widget>
-     </widget>
-     <widget class="QLabel" name="header_ir5">
-      <property name="geometry">
-       <rect>
-        <x>240</x>
-        <y>450</y>
-        <width>250</width>
-        <height>30</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>SENSOR IZQUIERDO (IR5)</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="header_ir3">
-      <property name="geometry">
-       <rect>
-        <x>540</x>
-        <y>450</y>
-        <width>250</width>
-        <height>30</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>SENSOR CENTRO (IR3)</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="header_ir1">
-      <property name="geometry">
-       <rect>
-        <x>840</x>
-        <y>450</y>
-        <width>250</width>
-        <height>30</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>SENSOR DERECHO (IR1)</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_raw_title">
-      <property name="geometry">
-       <rect>
-        <x>40</x>
-        <y>490</y>
-        <width>180</width>
-        <height>60</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>VALORES CRUDOS (RAW):</string>
-      </property>
-     </widget>
-     <widget class="QLCDNumber" name="raw_ir5_lcd">
-      <property name="geometry">
-       <rect>
-        <x>240</x>
-        <y>490</y>
-        <width>250</width>
-        <height>60</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLCDNumber" name="raw_ir3_lcd">
-      <property name="geometry">
-       <rect>
-        <x>540</x>
-        <y>490</y>
-        <width>250</width>
-        <height>60</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLCDNumber" name="raw_ir1_lcd">
-      <property name="geometry">
-       <rect>
-        <x>840</x>
-        <y>490</y>
-        <width>250</width>
-        <height>60</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_cal_title">
-      <property name="geometry">
-       <rect>
-        <x>40</x>
-        <y>570</y>
-        <width>180</width>
-        <height>60</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>CALIBRADOS (PID):</string>
-      </property>
-     </widget>
-     <widget class="QLCDNumber" name="cal_ir5_lcd">
-      <property name="geometry">
-       <rect>
-        <x>240</x>
-        <y>570</y>
-        <width>250</width>
-        <height>60</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLCDNumber" name="cal_ir3_lcd">
-      <property name="geometry">
-       <rect>
-        <x>540</x>
-        <y>570</y>
-        <width>250</width>
-        <height>60</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLCDNumber" name="cal_ir1_lcd">
-      <property name="geometry">
-       <rect>
-        <x>840</x>
-        <y>570</y>
-        <width>250</width>
-        <height>60</height>
-       </rect>
-      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="TELE">
@@ -2473,6 +2334,604 @@
         </layout>
        </item>
       </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="NORMALIZACION">
+     <widget class="QLabel" name="label_norm_page_title">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>40</y>
+        <width>800</width>
+        <height>40</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>16</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>NORMALIZACIÓN DE SENSORES SUITE</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="P4toP1">
+      <property name="geometry">
+       <rect>
+        <x>1240</x>
+        <y>30</y>
+        <width>161</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>MAIN</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_lower_sensors_section">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>100</y>
+        <width>500</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSORES INFERIORES (SEGUIMIENTO DE LÍNEA)</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="header_ir5">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>130</y>
+        <width>200</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSOR IZQUIERDO (IR5)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="header_ir3">
+      <property name="geometry">
+       <rect>
+        <x>500</x>
+        <y>130</y>
+        <width>200</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSOR CENTRO (IR3)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="header_ir1">
+      <property name="geometry">
+       <rect>
+        <x>750</x>
+        <y>130</y>
+        <width>200</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSOR DERECHO (IR1)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_raw_title">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>170</y>
+        <width>180</width>
+        <height>50</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>VALORES CRUDOS (RAW):</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="raw_ir5_lcd">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>170</y>
+        <width>200</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="raw_ir3_lcd">
+      <property name="geometry">
+       <rect>
+        <x>500</x>
+        <y>170</y>
+        <width>200</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="raw_ir1_lcd">
+      <property name="geometry">
+       <rect>
+        <x>750</x>
+        <y>170</y>
+        <width>200</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_cal_title">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>250</y>
+        <width>180</width>
+        <height>50</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>CALIBRADOS (PID):</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="cal_ir5_lcd">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>250</y>
+        <width>200</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="cal_ir3_lcd">
+      <property name="geometry">
+       <rect>
+        <x>500</x>
+        <y>250</y>
+        <width>200</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="cal_ir1_lcd">
+      <property name="geometry">
+       <rect>
+        <x>750</x>
+        <y>250</y>
+        <width>200</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_upper_sensors_section">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>330</y>
+        <width>600</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSORES SUPERIORES (ESQUIVAR OBSTÁCULOS / DISTANCIA)</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir0_title">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>370</y>
+        <width>180</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSOR IR0 (Front-Right)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir0_raw_hdr">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>400</y>
+        <width>180</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Pre-Normalizado (Raw)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="raw_ir0_lcd">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>420</y>
+        <width>180</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir0_norm_hdr">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>480</y>
+        <width>180</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Post-Normalizado (0-1000)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="norm_ir0_lcd">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>500</y>
+        <width>180</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir2_title">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>370</y>
+        <width>180</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSOR IR2 (Side-Left)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir2_raw_hdr">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>400</y>
+        <width>180</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Pre-Normalizado (Raw)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="raw_ir2_lcd">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>420</y>
+        <width>180</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir2_norm_hdr">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>480</y>
+        <width>180</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Post-Normalizado (0-1000)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="norm_ir2_lcd">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>500</y>
+        <width>180</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir4_title">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>370</y>
+        <width>180</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSOR IR4 (Front-Left)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir4_raw_hdr">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>400</y>
+        <width>180</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Pre-Normalizado (Raw)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="raw_ir4_lcd">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>420</y>
+        <width>180</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir4_norm_hdr">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>480</y>
+        <width>180</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Post-Normalizado (0-1000)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="norm_ir4_lcd">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>500</y>
+        <width>180</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir6_title">
+      <property name="geometry">
+       <rect>
+        <x>450</x>
+        <y>370</y>
+        <width>180</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSOR IR6 (Front)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir6_raw_hdr">
+      <property name="geometry">
+       <rect>
+        <x>450</x>
+        <y>400</y>
+        <width>180</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Pre-Normalizado (Raw)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="raw_ir6_lcd">
+      <property name="geometry">
+       <rect>
+        <x>450</x>
+        <y>420</y>
+        <width>180</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir6_norm_hdr">
+      <property name="geometry">
+       <rect>
+        <x>450</x>
+        <y>480</y>
+        <width>180</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Post-Normalizado (0-1000)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="norm_ir6_lcd">
+      <property name="geometry">
+       <rect>
+        <x>450</x>
+        <y>500</y>
+        <width>180</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir7_title">
+      <property name="geometry">
+       <rect>
+        <x>830</x>
+        <y>370</y>
+        <width>180</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SENSOR IR7 (Side-Right)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir7_raw_hdr">
+      <property name="geometry">
+       <rect>
+        <x>830</x>
+        <y>400</y>
+        <width>180</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Pre-Normalizado (Raw)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="raw_ir7_lcd">
+      <property name="geometry">
+       <rect>
+        <x>830</x>
+        <y>420</y>
+        <width>180</width>
+        <height>50</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ir7_norm_hdr">
+      <property name="geometry">
+       <rect>
+        <x>830</x>
+        <y>480</y>
+        <width>180</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Post-Normalizado (0-1000)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="norm_ir7_lcd">
+      <property name="geometry">
+       <rect>
+        <x>830</x>
+        <y>500</y>
+        <width>180</width>
+        <height>50</height>
+       </rect>
+      </property>
      </widget>
     </widget>
    </widget>

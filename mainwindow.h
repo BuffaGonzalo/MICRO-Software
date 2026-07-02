@@ -128,6 +128,9 @@ private slots:
 
     void on_P2toP3_clicked();
 
+    void on_P1toP4_clicked();
+    void on_P4toP1_clicked();
+
     void on_pushButton_exportExcel_clicked();
     void on_pushButton_exportIrCsv_clicked();
     void on_pushButton_exportTxt_clicked();
@@ -149,6 +152,17 @@ private:
         uint16_t ir5; // Sensor izquierdo (calibrado)
     };
     QVector<IrSample> m_irBuffer;
+
+    struct UpperIrSample {
+        QDateTime timestamp;
+        uint16_t ir1; // Raw Superior 1 (adcDataTx[0])
+        uint16_t ir3; // Raw Superior 2 (adcDataTx[2])
+        uint16_t ir5; // Raw Superior 3 (adcDataTx[4])
+        uint16_t ir7; // Raw Superior 4 (adcDataTx[6])
+        uint16_t ir8; // Raw Superior 5 (adcDataTx[7])
+    };
+    QVector<UpperIrSample> m_upperIrBuffer;
+
     int m_irExportCount = 0;  // Número de exportación devuelto por el STM32
 
     void exportIrCsvToFile();
