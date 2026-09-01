@@ -648,6 +648,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             ui->setAttackSetpoint->blockSignals(true);
             ui->setAttackSetpoint->setValue(w.i16[0]);
             ui->setAttackSetpoint->blockSignals(false);
+            w.ui8[0] = datosRx[28]; w.ui8[1] = datosRx[29]; ui->setWallKp->setValue(w.i16[0]);
 
             // 4. Esquivador (indices 30 a 39)
             w.ui8[0] = datosRx[30]; w.ui8[1] = datosRx[31]; ui->setFrontDistance->setValue(w.ui16[0]);
@@ -669,6 +670,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             w.ui8[0] = datosRx[62]; w.ui8[1] = datosRx[63]; ui->setVelDampDiv->setValue(w.i16[0]);
             w.ui8[0] = datosRx[64]; w.ui8[1] = datosRx[65]; ui->setVelDampLim->setValue(w.i16[0]);
             w.ui8[0] = datosRx[66]; w.ui8[1] = datosRx[67]; ui->setTurnLimit->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[80]; w.ui8[1] = datosRx[81]; ui->setWallKd->setValue(w.i16[0]);
 
             paramsSynced = true;
             addLogEntry("***PARÁMETROS SINCRONIZADOS DESDE STM32***", "RX");
