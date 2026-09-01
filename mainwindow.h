@@ -7,6 +7,8 @@
 
 #include <QtSerialPort/QSerialPort>
 #include <QtNetwork/QUdpSocket>
+#include <QtNetwork/QTcpServer>
+#include <QtNetwork/QTcpSocket>
 #include <QLabel>
 #include <QInputDialog>
 #include <QTimer>
@@ -46,6 +48,9 @@ private slots:
     void timeOut();
 
     void OnUdpRxData();
+    void OnTcpNewConnection();
+    void OnTcpRxData();
+    void OnTcpDisconnected();
 
     void on_pushButton_connectSerial_clicked();
 
@@ -115,6 +120,8 @@ private slots:
     void on_sendVelDampDiv_clicked();
     void on_sendVelDampLim_clicked();
     void on_sendTurnLimit_clicked();
+    void on_sendWallKp_clicked();
+    void on_sendWallKd_clicked();
 
     void on_P1toP3_clicked();
 
@@ -244,6 +251,11 @@ private:
     QHostAddress clientAddress;
     int puertoremoto;
 
+    //variables comunicacion tcp
+    QTcpServer *QTcpServer1;
+    QTcpSocket *QTcpSocketClient = nullptr;
+    void sendTcp(uint8_t *tx, uint8_t length);
+
     //otras
     bool firExe; //bool utilizado para dibujar el fondo del radar
     bool servoDir; //bool utilizado para modificar el sentido de giro del servo
@@ -268,7 +280,7 @@ private:
         PAYLOAD,
     }_eProtocolo;
 
-    _eProtocolo estadoProtocolo,estadoProtocoloUdp;
+    _eProtocolo estadoProtocolo,estadoProtocoloUdp,estadoProtocoloTcp;
 
     typedef enum{
         UDP=0,
@@ -324,6 +336,8 @@ private:
         SETVELDAMPDIV = 0xC7,
         SETVELDAMPLIM = 0xC8,
         SETTURNLIMIT = 0xC9,
+        SETWALLKP = 0xCB,
+        SETWALLKD = 0xCC,
         EXPORTIRCSV  = 0xCA,
 
         UNKNOWCMD=0xFF,
@@ -338,7 +352,7 @@ private:
         uint8_t index;
     }_sDatos ;
 
-    _sDatos rxData, rxDataUdp;
+    _sDatos rxData, rxDataUdp, rxDataTcp;
 
     typedef union {
         double  d32;

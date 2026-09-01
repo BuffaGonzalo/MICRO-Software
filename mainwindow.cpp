@@ -58,6 +58,8 @@ MainWindow::MainWindow(QWidget *parent)
     //comunicacion
     QSerialPort1 = new QSerialPort(this);
     QUdpSocket1 = new QUdpSocket(this);
+    QTcpServer1 = new QTcpServer(this);
+    QTcpSocketClient = nullptr;
 
     //debug de comandos
     myGraphics = new graphics(this);
@@ -66,13 +68,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     //connects del puerto serial
     connect(QSerialPort1,&QSerialPort::readyRead,this,&MainWindow::dataReceived);
-
     //connects de los timers con las funciones
     connect(timer1,&QTimer::timeout,this,&MainWindow::timeOut);
     connect(timer2,&QTimer::timeout,this,&MainWindow::getData);
 
-    //connects de udp
+    //connects de udp/tcp
     connect(QUdpSocket1,&QUdpSocket::readyRead,this,&MainWindow::OnUdpRxData);
+    connect(QTcpServer1,&QTcpServer::newConnection,this,&MainWindow::OnTcpNewConnection);
 
     //connect(ui->actionScanPorts, &QAction::triggered, settingPorts,&SettingsDialog::show);
     connect(ui->actionGRAPHICS, &QAction::triggered, myGraphics, &graphics::show);
@@ -83,6 +85,7 @@ MainWindow::MainWindow(QWidget *parent)
     estadoProtocolo=START;
     rxData.timeOut=0;
 
+    timer2->start(75);
 
     statusMode = new QLabel(this);
     ui->statusBar->addWidget(statusMode);
@@ -311,13 +314,9 @@ void MainWindow::dataReceived(){
 
 static const uint16_t PC_LUT_Y_SCALE[16] = {0, 67, 133, 200, 267, 333, 400, 467, 533, 600, 667, 733, 800, 867, 933, 1000};
 
-static const uint16_t PC_LUT_IR0[16] = {514, 546, 553, 569, 576, 578, 583, 590, 594, 608, 618, 659, 1589, 2721, 3890, 3968};
-static const uint16_t PC_LUT_IR2[16] = {1283, 1648, 1679, 1687, 1692, 1705, 1712, 1718, 1721, 1725, 1732, 1740, 1749, 1754, 1762, 3968};
-static const uint16_t PC_LUT_IR4[16] = {2120, 2134, 2139, 2144, 2148, 2152, 2155, 2158, 2162, 2165, 2169, 2182, 2229, 2255, 2266, 3973};
-static const uint16_t PC_LUT_IR6[16] = {2166, 2183, 2187, 2193, 2196, 2200, 2203, 2209, 2215, 2237, 2253, 2264, 2276, 2442, 2600, 3984};
-static const uint16_t PC_LUT_IR7[16] = {1068, 1093, 1101, 1107, 1111, 1117, 1123, 1133, 1142, 1151, 1159, 1187, 1291, 1433, 1610, 3940};
+// (LUTs de PC para sensores superiores eliminadas para usar valores crudos directamente)
 
-static uint16_t PC_LUT_Interpolate(const uint16_t *x, const uint16_t *lut_y, uint16_t raw) {
+[[maybe_unused]] static uint16_t PC_LUT_Interpolate(const uint16_t *x, const uint16_t *lut_y, uint16_t raw) {
     if(raw <= x[0])
         return lut_y[0];
 
@@ -578,24 +577,11 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         if (m_upperIrBuffer.size() > IR_BUFFER_SIZE)
             m_upperIrBuffer.removeFirst();
 
-        // ---- NUEVO: Calcular y mostrar normalización de sensores de distancia superiores ----
-        uint16_t norm_ir0 = PC_LUT_Interpolate(PC_LUT_IR0, PC_LUT_Y_SCALE, ir1);
-        uint16_t norm_ir2 = PC_LUT_Interpolate(PC_LUT_IR2, PC_LUT_Y_SCALE, ir3);
-        uint16_t norm_ir4 = PC_LUT_Interpolate(PC_LUT_IR4, PC_LUT_Y_SCALE, ir5);
-        uint16_t norm_ir6 = PC_LUT_Interpolate(PC_LUT_IR6, PC_LUT_Y_SCALE, ir7);
-        uint16_t norm_ir7 = PC_LUT_Interpolate(PC_LUT_IR7, PC_LUT_Y_SCALE, ir8);
-
         ui->raw_ir0_lcd->display(ir1);
         ui->raw_ir2_lcd->display(ir3);
         ui->raw_ir4_lcd->display(ir5);
         ui->raw_ir6_lcd->display(ir7);
         ui->raw_ir7_lcd->display(ir8);
-
-        ui->norm_ir0_lcd->display(norm_ir0);
-        ui->norm_ir2_lcd->display(norm_ir2);
-        ui->norm_ir4_lcd->display(norm_ir4);
-        ui->norm_ir6_lcd->display(norm_ir6);
-        ui->norm_ir7_lcd->display(norm_ir7);
 
         break;
     }
@@ -794,6 +780,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETVELDAMPDIV:
     case SETVELDAMPLIM:
     case SETTURNLIMIT:
+    case SETWALLKP:
+    case SETWALLKD:
         if(datosRx[2]==ACK){
             str="COMANDO ACEPTADO Y GUARDADO (ACK)!!!";
             addLogEntry(str, "RX");
@@ -898,8 +886,7 @@ void MainWindow::sendUdp(uint8_t *buf, uint8_t length){
     puerto=ui->lineEdit_device_port->text().toInt();
     puertoremoto=puerto;
 
-    if(clientAddress.isNull())
-        clientAddress.setAddress(ui->lineEdit_device_ip->text());
+    clientAddress.setAddress(ui->lineEdit_device_ip->text());
     if(puertoremoto==0)
         puertoremoto=puerto;
     if(QUdpSocket1->isOpen()){
@@ -915,14 +902,54 @@ void MainWindow::sendUdp(uint8_t *buf, uint8_t length){
     }
     str=str + clientAddress.toString() + "  " +  QString().number(puertoremoto,10);
 
-    addLogEntry("PC--UDP-->MBED ( " + str + " )", "TX");
-    ui->textBrowserUnProcessed->append("PC--UDP-->MBED ( " + str + " )");
+    addLogEntry("PC--UDP/TCP-->MBED ( " + str + " )", "TX");
+    ui->textBrowserUnProcessed->append("PC--UDP/TCP-->MBED ( " + str + " )");
+}
+
+void MainWindow::sendTcp(uint8_t *txData, uint8_t length) {
+    if (!QTcpSocketClient || !QTcpSocketClient->isOpen()) return;
+
+    uint8_t tx[100];
+    uint8_t indice = 0;
+    uint8_t chk = 0;
+    QString str = "";
+
+    tx[0] = 'U';
+    tx[1] = 'N';
+    tx[2] = 'E';
+    tx[3] = 'R';
+    tx[4] = length + 1;
+    tx[5] = ':';
+
+    memcpy(&tx[6], txData, length);
+
+    chk = 0;
+    for (indice=0; indice<(length+6); indice++) {
+        chk ^= tx[indice];
+    }
+
+    tx[indice] = chk;
+
+    QTcpSocketClient->write(reinterpret_cast<const char *>(tx), (length + 7));
+    QTcpSocketClient->flush();
+
+    str = "--> 0x";
+    for (int i = 0; i < length + 7; i++) {
+        str = str + QString("%1").arg(tx[i], 2, 16, QChar('0')).toUpper();
+    }
+
+    addLogEntry("PC--TCP-->MBED ( " + str + " )", "TX");
+    ui->textBrowserUnProcessed->append("PC--TCP-->MBED ( " + str + " )");
 }
 
 void MainWindow::sendCommand(uint8_t *buf, uint8_t length) {
     bool sent = false;
 
-    if (QSerialPort1->isOpen()) {
+    if (QTcpSocketClient && QTcpSocketClient->isOpen()) {
+        sendTcp(buf, length);
+        sent = true;
+        m_countSent++;
+    } else if (QSerialPort1->isOpen()) {
         sendSerial(buf, length);
         sent = true;
         m_countSent++;
@@ -976,7 +1003,8 @@ void MainWindow::OnUdpRxData(){
         ui->textBrowserUnProcessed->append(" adr " + RemoteAddress.toString());
 
         // Actualizar la IP y el puerto detectado del robot
-        ui->lineEdit_device_ip->setText(RemoteAddress.toString().right((RemoteAddress.toString().length())-7));
+        QHostAddress cleanAddr(RemoteAddress.toIPv4Address());
+        ui->lineEdit_device_ip->setText(cleanAddr.toString());
         ui->lineEdit_device_port->setText(QString().number(RemotePort, 10));
 
         // --- RESET de la MeF al inicio de cada datagrama ---
@@ -1068,9 +1096,130 @@ void MainWindow::OnUdpRxData(){
     }
 }
 
+void MainWindow::OnTcpNewConnection() {
+    if(QTcpSocketClient) {
+        QTcpSocketClient->disconnect();
+        QTcpSocketClient->close();
+        QTcpSocketClient->deleteLater();
+        QTcpSocketClient = nullptr;
+    }
+    QTcpSocketClient = QTcpServer1->nextPendingConnection();
+    if(QTcpSocketClient) {
+        connect(QTcpSocketClient, &QTcpSocket::readyRead, this, &MainWindow::OnTcpRxData);
+        connect(QTcpSocketClient, &QTcpSocket::disconnected, this, &MainWindow::OnTcpDisconnected);
+
+        QHostAddress cleanAddr(QTcpSocketClient->peerAddress().toIPv4Address());
+        ui->lineEdit_device_ip->setText(cleanAddr.toString());
+
+        addLogEntry("CLIENT CONNECTED VIA TCP (" + cleanAddr.toString() + ")", "RX");
+        ui->textBrowserUnProcessed->append("CLIENT CONNECTED VIA TCP (" + cleanAddr.toString() + ")");
+    }
+}
+
+void MainWindow::OnTcpDisconnected() {
+    addLogEntry("CLIENT DISCONNECTED FROM TCP", "RX");
+    ui->textBrowserUnProcessed->append("CLIENT DISCONNECTED FROM TCP");
+    if(QTcpSocketClient) {
+        QTcpSocketClient->disconnect();
+        QTcpSocketClient->deleteLater();
+        QTcpSocketClient = nullptr;
+    }
+}
+
+void MainWindow::OnTcpRxData() {
+    if(!QTcpSocketClient) return;
+
+    QByteArray incomingData = QTcpSocketClient->readAll();
+    int count = incomingData.size();
+    if(count <= 0) return;
+
+    const unsigned char *incomingBuffer = reinterpret_cast<const unsigned char *>(incomingData.constData());
+
+    QString str = "";
+    for(int i = 0; i < count; i++){
+        if(isalnum(incomingBuffer[i]))
+            str = str + QString("%1").arg(char(incomingBuffer[i]));
+        else
+            str = str + "{" + QString("%1").arg(incomingBuffer[i], 2, 16, QChar('0')) + "}";
+    }
+    addLogEntry("MBED-->TCP-->PC (" + str + ")", "RX");
+    ui->textBrowserUnProcessed->append("MBED-->TCP-->PC (" + str + ")");
+
+    for(int i = 0; i < count; i++){
+        switch (estadoProtocoloTcp) {
+        case START:
+            if (incomingBuffer[i] == 'U'){
+                estadoProtocoloTcp = HEADER_1;
+                rxDataTcp.cheksum = 0;
+            }
+            break;
+        case HEADER_1:
+            if (incomingBuffer[i] == 'N')
+                estadoProtocoloTcp = HEADER_2;
+            else {
+                i--;
+                estadoProtocoloTcp = START;
+            }
+            break;
+        case HEADER_2:
+            if (incomingBuffer[i] == 'E')
+                estadoProtocoloTcp = HEADER_3;
+            else {
+                i--;
+                estadoProtocoloTcp = START;
+            }
+            break;
+        case HEADER_3:
+            if (incomingBuffer[i] == 'R')
+                estadoProtocoloTcp = NBYTES;
+            else {
+                i--;
+                estadoProtocoloTcp = START;
+            }
+            break;
+        case NBYTES:
+            rxDataTcp.nBytes = incomingBuffer[i];
+            estadoProtocoloTcp = TOKEN;
+            break;
+        case TOKEN:
+            if (incomingBuffer[i] == ':'){
+                estadoProtocoloTcp = PAYLOAD;
+                rxDataTcp.cheksum = 'U' ^ 'N' ^ 'E' ^ 'R' ^ rxDataTcp.nBytes ^ ':';
+                rxDataTcp.payLoad[0] = rxDataTcp.nBytes;
+                rxDataTcp.index = 1;
+            }
+            else {
+                i--;
+                estadoProtocoloTcp = START;
+            }
+            break;
+        case PAYLOAD:
+            if (rxDataTcp.nBytes > 1){
+                rxDataTcp.payLoad[rxDataTcp.index++] = incomingBuffer[i];
+                rxDataTcp.cheksum ^= incomingBuffer[i];
+            }
+            rxDataTcp.nBytes--;
+            if(rxDataTcp.nBytes == 0){
+                estadoProtocoloTcp = START;
+                if(rxDataTcp.cheksum == incomingBuffer[i]){
+                    decodeData(&rxDataTcp.payLoad[0], UDP);
+                } else {
+                    addLogEntry(" CHK TCP DISTINTO!!!!! ", "CHK_ERROR");
+                    ui->textBrowserProcessed->append(" CHK TCP DISTINTO!!!!! ");
+                    isWaitingReply = false;
+                }
+            }
+            break;
+        default:
+            estadoProtocoloTcp = START;
+            break;
+        }
+    }
+}
+
 void MainWindow::getData(){
     // --- 1. GUARDIA DE SEGURIDAD (Frena el spam) ---
-    if(!QSerialPort1->isOpen() && !QUdpSocket1->isOpen()) {
+    if(!QSerialPort1->isOpen() && !QUdpSocket1->isOpen() && (!QTcpSocketClient || !QTcpSocketClient->isOpen())) {
         statusMode->setText("CURRENT STATE --> DESCONECTADO");
         return;
     }
@@ -1078,21 +1227,20 @@ void MainWindow::getData(){
     // --- SISTEMA DE ADAPTACIÓN A REDES LENTAS (PING-PONG) ---
     if (isWaitingReply) {
         timeoutPatience++;
-        // Si pasaron ~240ms (8 ciclos de 30ms) sin respuesta,
-        // asumimos que el paquete se perdió y forzamos un reintento.
         if (timeoutPatience >= 8) {
             isWaitingReply = false;
         } else {
-            return; // Seguimos esperando. ¡NO enviamos nada a la ESP-01!
+            return;
         }
     }
 
-    // Levantamos el semáforo: acabamos de preguntar, ahora esperamos.
     isWaitingReply = true;
     timeoutPatience = 0;
 
     // --- 2. ACTUALIZAR ESTADO VISUAL ---
-    if(QSerialPort1->isOpen())
+    if(QTcpSocketClient && QTcpSocketClient->isOpen())
+        statusMode->setText("CURRENT STATE --> CONECTADO TCP");
+    else if(QSerialPort1->isOpen())
         statusMode->setText("CURRENT STATE --> CONECTADO SERIE");
     else if (QUdpSocket1->isOpen())
         statusMode->setText("CURRENT STATE --> CONECTADO UDP");
@@ -1172,8 +1320,19 @@ void MainWindow::on_pushButton_connectUdp_clicked()
     int Port;
     bool ok;
 
-    if(QUdpSocket1->isOpen()){
-        QUdpSocket1->close();
+    if(QUdpSocket1->isOpen() || (QTcpServer1 && QTcpServer1->isListening())){
+        if(QUdpSocket1->isOpen()) {
+            QUdpSocket1->close();
+        }
+        if(QTcpServer1 && QTcpServer1->isListening()) {
+            QTcpServer1->close();
+        }
+        if(QTcpSocketClient) {
+            QTcpSocketClient->disconnect();
+            QTcpSocketClient->close();
+            QTcpSocketClient->deleteLater();
+            QTcpSocketClient = nullptr;
+        }
         ui->pushButton_connectUdp->setText("CONNECT");
         resetInterface();
         return;
@@ -1189,6 +1348,9 @@ void MainWindow::on_pushButton_connectUdp_clicked()
         QUdpSocket1->abort();
         QUdpSocket1->bind(Port);
         QUdpSocket1->open(QUdpSocket::ReadWrite);
+
+        if(QTcpServer1->isListening()) QTcpServer1->close();
+        QTcpServer1->listen(QHostAddress::Any, Port);
     }catch(...){
         QMessageBox::information(this, tr("SERVER PORT"),tr("Can't OPEN Port."));
         return;
@@ -1197,10 +1359,9 @@ void MainWindow::on_pushButton_connectUdp_clicked()
     ui->pushButton_connectUdp->setText("DISCONNECT");
     paramsSynced = false;
     uint8_t b = GETINTERNALDATA;
-    sendUdp(&b, 1);
+    sendCommand(&b, 1);
     if(QUdpSocket1->isOpen()){
-        if(clientAddress.isNull())
-            clientAddress.setAddress(ui->lineEdit_device_ip->text());
+        clientAddress.setAddress(ui->lineEdit_device_ip->text());
         if(puertoremoto==0)
             puertoremoto=ui->lineEdit_device_port->text().toInt();
         QUdpSocket1->writeDatagram("r", 1, clientAddress, puertoremoto);
@@ -1265,6 +1426,30 @@ void MainWindow::on_sendLineKd_clicked() {
     payload[index++] = w.ui8[1];
     sendCommand(payload, index);
     ui->textBrowserProcessed->append("***KD LÍNEA ACTUALIZADO***");
+}
+
+void MainWindow::on_sendWallKp_clicked() {
+    uint8_t payload[10];
+    uint8_t index = 0;
+    _udat w;
+    payload[index++] = SETWALLKP;
+    w.i32 = ui->setWallKp->value();
+    payload[index++] = w.ui8[0];
+    payload[index++] = w.ui8[1];
+    sendCommand(payload, index);
+    ui->textBrowserProcessed->append("***KP PARED ACTUALIZADO***");
+}
+
+void MainWindow::on_sendWallKd_clicked() {
+    uint8_t payload[10];
+    uint8_t index = 0;
+    _udat w;
+    payload[index++] = SETWALLKD;
+    w.i32 = ui->setWallKd->value();
+    payload[index++] = w.ui8[0];
+    payload[index++] = w.ui8[1];
+    sendCommand(payload, index);
+    ui->textBrowserProcessed->append("***KD ANTICIPO PARED ACTUALIZADO***");
 }
 
 void MainWindow::on_sendPWMMINL_clicked() {
