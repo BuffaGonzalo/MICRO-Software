@@ -457,26 +457,31 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         ui->textBrowserProcessed->append(strOut);
         ui->gz_data->display(str);
 
-        // 2. Calcular ángulos
-        float roll = atan2(ay, sqrt(ax * ax + az * az)) * 180.0 / M_PI;
-        float pitch = atan2(-ax, sqrt(ay * ay + az * az)) * 180.0 / M_PI;
-
-        // (Opcional) Calcular Yaw integrando el giroscopio
-        float gz_grados_seg = gz / 131.0f; // Asumiendo escala de +/- 250deg/s
-        if (abs(gz_grados_seg) > 1.0f) {
-            yawAcumulado += gz_grados_seg * 0.5f; // asumiendo 100ms de muestreo de tu timer1
-        }
-        // Añade esta línea para imprimir los ángulos finales en la consola de Qt Creator
-        qDebug() << "Angulos Calculados -> Pitch:" << pitch << " | Roll:" << roll << " | Yaw:" << yawAcumulado;
-
-        // ---- NUEVO: Enviar a la gráfica ----
+        // 1. Delta-time real entre paquetes MPU
+        static double lastMpuTimestamp = -1.0;
         double t = runtimeTimer.elapsed() / 1000.0;
+        double dt = (lastMpuTimestamp >= 0.0) ? (t - lastMpuTimestamp) : 0.0;
+        lastMpuTimestamp = t;
+
+        // 2. Calcular ángulos
+        float pitch = atan2(ay, sqrt(ax * ax + az * az)) * 180.0 / M_PI;
+        float roll = atan2(-ax, sqrt(ay * ay + az * az)) * 180.0 / M_PI;
+
+        // 3. Integración precisa de Yaw con el dt real medido
+        float gz_grados_seg = gz / 131.0f; // Asumiendo escala de +/- 250deg/s (131 LSB/(°/s))
+        if (std::abs(gz_grados_seg) > 1.2f && dt > 0.0 && dt < 0.5) {
+            yawAcumulado += gz_grados_seg * static_cast<float>(dt);
+        }
+        // Imprimir los ángulos finales en la consola de Qt Creator
+        qDebug() << "Angulos Calculados -> Pitch:" << pitch << " | Roll:" << roll << " | Yaw:" << yawAcumulado << " | dt:" << dt;
+
+        // ---- Enviar a la gráfica ----
         updateMPUChart(t, ax, ay, az, gx, gy, gz, pitch, roll, yawAcumulado);
 
-        // 3. Enviar los ángulos a Qt Quick 3D
+        // 4. Enviar los ángulos a Qt Quick 3D
         if (ui->AutoWidget && ui->AutoWidget->rootObject()) {
-            ui->AutoWidget->rootObject()->setProperty("carPitch", roll);
-            ui->AutoWidget->rootObject()->setProperty("carRoll", pitch);
+            ui->AutoWidget->rootObject()->setProperty("carPitch", pitch);
+            ui->AutoWidget->rootObject()->setProperty("carRoll", roll);
             ui->AutoWidget->rootObject()->setProperty("carYaw", yawAcumulado);
         }
         break;
@@ -1427,7 +1432,7 @@ void MainWindow::on_sendLineKd_clicked() {
     payload[index++] = w.ui8[0];
     payload[index++] = w.ui8[1];
     sendCommand(payload, index);
-    ui->textBrowserProcessed->append("***KD LÍNEA ACTUALIZADO***");
+    ui->textBrowserProcessed->append("***KQ LÍNEA (CUADRÁTICO) ACTUALIZADO***");
 }
 
 void MainWindow::on_sendWallKp_clicked() {
