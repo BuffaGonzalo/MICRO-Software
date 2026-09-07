@@ -7,6 +7,7 @@
 #include <QTextStream>
 #include <QFileDialog>
 #include <QDateTime>
+#include <QtWidgets/QGraphicsLayout>
 
 static bool isWaitingReply = false;
 static int timeoutPatience = 0;
@@ -16,6 +17,17 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    
+    myDebugDialog = new QDialog(this);
+    myDebugDialog->setWindowTitle("DEBUG");
+    myDebugDialog->setWindowFlags(Qt::Window);
+    myDebugDialog->setStyleSheet(this->styleSheet());
+    ui->stackedWidget->removeWidget(ui->DEBUG_PAGE);
+    QVBoxLayout *debugLayout = new QVBoxLayout(myDebugDialog);
+    debugLayout->setContentsMargins(0, 0, 0, 0);
+    debugLayout->addWidget(ui->DEBUG_PAGE);
+    ui->DEBUG_PAGE->show();
+    myDebugDialog->adjustSize();
 
     // Limitar los logs a los últimos 50 comandos
     ui->textBrowserProcessed->document()->setMaximumBlockCount(50);
@@ -62,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
     QTcpSocketClient = nullptr;
 
     //debug de comandos
-    myGraphics = new graphics(this);
+
 
     ui->comboBox_PORT->installEventFilter(this);
 
@@ -77,7 +89,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(QTcpServer1,&QTcpServer::newConnection,this,&MainWindow::OnTcpNewConnection);
 
     //connect(ui->actionScanPorts, &QAction::triggered, settingPorts,&SettingsDialog::show);
-    connect(ui->actionGRAPHICS, &QAction::triggered, myGraphics, &graphics::show);
+
 
 
 
@@ -546,7 +558,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         ui->ir6_data->display(str);
         sumLineSensors += qMax(0, 2400 - w.i16[0]);
         str = QString("%1").arg(sumLineSensors, 5, 10, QChar('0'));
-        ui->sumSensors_data->display(str);
+
 
         w.ui8[0] = datosRx[14];
         w.ui8[1] = datosRx[15];
@@ -582,11 +594,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         if (m_upperIrBuffer.size() > IR_BUFFER_SIZE)
             m_upperIrBuffer.removeFirst();
 
-        ui->raw_ir0_lcd->display(ir1);
-        ui->raw_ir2_lcd->display(ir3);
-        ui->raw_ir4_lcd->display(ir5);
-        ui->raw_ir6_lcd->display(ir7);
-        ui->raw_ir7_lcd->display(ir8);
+
 
         break;
     }
@@ -598,26 +606,26 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         // Unpack raw IR values (IR1, IR3, IR5) with correct mapping: index 1 is Left (IR5), index 5 is Right (IR1)
         w.ui8[0] = datosRx[68]; w.ui8[1] = datosRx[69];
         uint16_t rawIr5 = w.ui16[0];
-        ui->raw_ir5_lcd->display(rawIr5);
+
         w.ui8[0] = datosRx[70]; w.ui8[1] = datosRx[71];
         uint16_t rawIr3 = w.ui16[0];
-        ui->raw_ir3_lcd->display(rawIr3);
+
         w.ui8[0] = datosRx[72]; w.ui8[1] = datosRx[73];
         uint16_t rawIr1 = w.ui16[0];
-        ui->raw_ir1_lcd->display(rawIr1);
+
 
         // Unpack calibrated IR values (IR1, IR3, IR5) with correct mapping
         w.ui8[0] = datosRx[74]; w.ui8[1] = datosRx[75];
         uint16_t calIr5 = w.ui16[0];
-        ui->cal_ir5_lcd->display(calIr5);
+
         m_calIr5 = calIr5;
         w.ui8[0] = datosRx[76]; w.ui8[1] = datosRx[77];
         uint16_t calIr3 = w.ui16[0];
-        ui->cal_ir3_lcd->display(calIr3);
+
         m_calIr3 = calIr3;
         w.ui8[0] = datosRx[78]; w.ui8[1] = datosRx[79];
         uint16_t calIr1 = w.ui16[0];
-        ui->cal_ir1_lcd->display(calIr1);
+
         m_calIr1 = calIr1;
 
         // --- Acumular muestra en buffer circular IR (último minuto) ---
@@ -1622,15 +1630,17 @@ void MainWindow::on_P2toP3_clicked()
     ui->stackedWidget->setCurrentIndex(2);
 }
 
-void MainWindow::on_P1toP4_clicked()
+void MainWindow::on_actionOpenDebug_triggered()
 {
-    ui->stackedWidget->setCurrentIndex(3);
+    ui->DEBUG_PAGE->show();
+    if (!myDebugDialog->isVisible()) {
+        myDebugDialog->adjustSize();
+    }
+    myDebugDialog->show();
+    myDebugDialog->raise();
+    myDebugDialog->activateWindow();
 }
 
-void MainWindow::on_P4toP1_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(0);
-}
 
 // -----------------------------------------------------------------------
 // Chart PID embebido en MainWindow (widget PIDchart promovido a QChartView)

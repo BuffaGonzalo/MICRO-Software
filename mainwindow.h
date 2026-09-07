@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QResizeEvent>
+#include <QDialog>
+#include <QVBoxLayout>
 
 #include <QtSerialPort/QSerialPort>
 #include <QtNetwork/QUdpSocket>
@@ -25,7 +27,6 @@
 #include <QtCharts/QChart>
 #include <QtCharts/QValueAxis>
 
-#include "graphics.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -134,9 +135,8 @@ private slots:
     void on_P3toP2_clicked();
 
     void on_P2toP3_clicked();
+    void on_actionOpenDebug_triggered();
 
-    void on_P1toP4_clicked();
-    void on_P4toP1_clicked();
 
     void on_pushButton_exportExcel_clicked();
     void on_pushButton_exportIrCsv_clicked();
@@ -186,14 +186,13 @@ private:
     QSerialPort *QSerialPort1;
     QLabel *statusMode;
 
-    //Debug *myDebug;
+    QDialog *myDebugDialog;
 
     //timers
     QTimer  *timer1;
     QTimer  *timer2;
 
 
-    graphics *myGraphics;
 
     // --- Gráfica PID embebida en MainWindow ---
     QChart       *chartPID_mw;

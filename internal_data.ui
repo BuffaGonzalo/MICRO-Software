@@ -1,8 +1,61 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <ui version="4.0">
  <class>internal_data</class>
  <widget class="QDialog" name="internal_data">
-  <property name="geometry">
+  <property name="styleSheet"><string notr="true">
+QMainWindow, QDialog, QWidget#centralwidget, QWidget#MAIN, QWidget#GRAF, QWidget#TELE, QStackedWidget {
+    background-color: #1e1e2d;
+    color: #e2e2e2;
+}
+
+QPushButton {
+    background-color: #27293d;
+    color: #00f2c3;
+    border: 1px solid #e14eca;
+    border-radius: 6px;
+    padding: 6px;
+    font-weight: bold;
+}
+QPushButton:hover {
+    background-color: #e14eca;
+    color: white;
+}
+
+QLineEdit, QSpinBox, QComboBox, QTextBrowser {
+    background-color: #1d1e2b;
+    color: #00f2c3;
+    border: 1px solid #27293d;
+    border-radius: 4px;
+    padding: 3px;
+}
+
+QLabel {
+    color: #e2e2e2;
+    font-weight: bold;
+}
+
+QGroupBox {
+    border: 1px solid #27293d;
+    margin-top: 10px;
+    color: #e14eca;
+    font-weight: bold;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 3px;
+}
+
+QLCDNumber {
+    color: #00f2c3;
+    background-color: #1d1e2b;
+    border: 1px solid #27293d;
+}
+
+QCheckBox {
+    color: #e2e2e2;
+}
+</string></property><property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -30,7 +83,7 @@
    </property>
   </widget>
  </widget>
- <resources/>
+ <resources />
  <connections>
   <connection>
    <sender>buttonBox</sender>
