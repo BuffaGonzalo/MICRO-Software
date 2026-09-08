@@ -2321,6 +2321,132 @@ QCheckBox {
          </item>
         </layout>
        </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_frontKp">
+         <item>
+          <widget class="QLabel" name="label_frontKp">
+           <property name="font">
+            <font>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>KP FRONTAL (CENTRAL)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_frontKp">
+           <item>
+            <widget class="QSpinBox" name="setFrontKp">
+             <property name="minimum">
+              <number>-1000</number>
+             </property>
+             <property name="maximum">
+              <number>10000</number>
+             </property>
+             <property name="value">
+              <number>3</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sendFrontKp">
+             <property name="text">
+              <string>ENVIAR</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_frontKd">
+         <item>
+          <widget class="QLabel" name="label_frontKd">
+           <property name="font">
+            <font>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>KD ANTICIPO FRONTAL</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_frontKd">
+           <item>
+            <widget class="QSpinBox" name="setFrontKd">
+             <property name="minimum">
+              <number>-1000</number>
+             </property>
+             <property name="maximum">
+              <number>10000</number>
+             </property>
+             <property name="value">
+              <number>6</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sendFrontKd">
+             <property name="text">
+              <string>ENVIAR</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_dodgeDir">
+         <item>
+          <widget class="QLabel" name="label_dodgeDir">
+           <property name="font">
+            <font>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>MODO ESQUIVADO</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_dodgeDir">
+           <item>
+            <widget class="QComboBox" name="comboDodgeDir">
+             <item>
+              <property name="text">
+               <string>Derecha</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Izquierda</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Alternado</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sendDodgeDir">
+             <property name="text">
+              <string>ENVIAR</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
     </widget>

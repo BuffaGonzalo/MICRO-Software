@@ -684,6 +684,9 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             w.ui8[0] = datosRx[64]; w.ui8[1] = datosRx[65]; ui->setVelDampLim->setValue(w.i16[0]);
             w.ui8[0] = datosRx[66]; w.ui8[1] = datosRx[67]; ui->setTurnLimit->setValue(w.i16[0]);
             w.ui8[0] = datosRx[80]; w.ui8[1] = datosRx[81]; ui->setWallKd->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[82]; w.ui8[1] = datosRx[83]; ui->setFrontKp->setValue(w.i16[0]);
+            w.ui8[0] = datosRx[84]; w.ui8[1] = datosRx[85]; ui->setFrontKd->setValue(w.i16[0]);
+            ui->comboDodgeDir->setCurrentIndex(datosRx[86]);
 
             paramsSynced = true;
             addLogEntry("***PARÁMETROS SINCRONIZADOS DESDE STM32***", "RX");
@@ -797,6 +800,9 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETTURNLIMIT:
     case SETWALLKP:
     case SETWALLKD:
+    case SETFRONTKP:
+    case SETFRONTKD:
+    case SETDODGEMODE:
         if(datosRx[2]==ACK){
             str="COMANDO ACEPTADO Y GUARDADO (ACK)!!!";
             addLogEntry(str, "RX");
@@ -1465,6 +1471,43 @@ void MainWindow::on_sendWallKd_clicked() {
     payload[index++] = w.ui8[1];
     sendCommand(payload, index);
     ui->textBrowserProcessed->append("***KD ANTICIPO PARED ACTUALIZADO***");
+}
+
+void MainWindow::on_sendFrontKp_clicked() {
+    uint8_t payload[10];
+    uint8_t index = 0;
+    _udat w;
+    payload[index++] = SETFRONTKP;
+    w.i32 = ui->setFrontKp->value();
+    payload[index++] = w.ui8[0];
+    payload[index++] = w.ui8[1];
+    sendCommand(payload, index);
+    ui->textBrowserProcessed->append("***KP FRONTAL (CENTRAL) ACTUALIZADO***");
+}
+
+void MainWindow::on_sendFrontKd_clicked() {
+    uint8_t payload[10];
+    uint8_t index = 0;
+    _udat w;
+    payload[index++] = SETFRONTKD;
+    w.i32 = ui->setFrontKd->value();
+    payload[index++] = w.ui8[0];
+    payload[index++] = w.ui8[1];
+    sendCommand(payload, index);
+    ui->textBrowserProcessed->append("***KD ANTICIPO FRONTAL ACTUALIZADO***");
+}
+
+void MainWindow::on_sendDodgeDir_clicked() {
+    uint8_t payload[10];
+    uint8_t index = 0;
+    _udat w;
+    payload[index++] = SETDODGEMODE;
+    w.i32 = ui->comboDodgeDir->currentIndex();
+    payload[index++] = w.ui8[0];
+    payload[index++] = w.ui8[1];
+    sendCommand(payload, index);
+    QString modeName = ui->comboDodgeDir->currentText();
+    ui->textBrowserProcessed->append("***MODO ESQUIVADO ACTUALIZADO: " + modeName + "***");
 }
 
 void MainWindow::on_sendPWMMINL_clicked() {

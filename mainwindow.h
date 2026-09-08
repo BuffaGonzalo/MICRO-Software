@@ -123,6 +123,9 @@ private slots:
     void on_sendTurnLimit_clicked();
     void on_sendWallKp_clicked();
     void on_sendWallKd_clicked();
+    void on_sendFrontKp_clicked();
+    void on_sendFrontKd_clicked();
+    void on_sendDodgeDir_clicked();
 
     void on_P1toP3_clicked();
 
@@ -337,6 +340,9 @@ private:
         SETTURNLIMIT = 0xC9,
         SETWALLKP = 0xCB,
         SETWALLKD = 0xCC,
+        SETFRONTKP = 0xCD,
+        SETFRONTKD = 0xCE,
+        SETDODGEMODE = 0xCF,
         EXPORTIRCSV  = 0xCA,
 
         UNKNOWCMD=0xFF,
