@@ -126,6 +126,7 @@ private slots:
     void on_sendFrontKp_clicked();
     void on_sendFrontKd_clicked();
     void on_sendDodgeDir_clicked();
+    void on_pushButton_setSoftAp_clicked();
 
     void on_P1toP3_clicked();
 
@@ -343,6 +344,7 @@ private:
         SETFRONTKP = 0xCD,
         SETFRONTKD = 0xCE,
         SETDODGEMODE = 0xCF,
+        SETSOFTAP = 0xD1,
         EXPORTIRCSV  = 0xCA,
 
         UNKNOWCMD=0xFF,

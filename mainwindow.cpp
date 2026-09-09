@@ -113,6 +113,15 @@ MainWindow::MainWindow(QWidget *parent)
         spinBox->setMinimum(-10000);
         spinBox->setMaximum(10000);
     }
+
+    // Iniciar servidor TCP y socket UDP para recepción automática en puerto local
+    int defaultPort = ui->lineEdit_local_port->text().toInt();
+    if(defaultPort > 0) {
+        QTcpServer1->listen(QHostAddress::Any, defaultPort);
+        QUdpSocket1->bind(defaultPort);
+        QUdpSocket1->open(QUdpSocket::ReadWrite);
+        ui->pushButton_connectUdp->setText("DISCONNECT");
+    }
 }
 
 MainWindow::~MainWindow()
@@ -803,6 +812,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETFRONTKP:
     case SETFRONTKD:
     case SETDODGEMODE:
+    case SETSOFTAP:
         if(datosRx[2]==ACK){
             str="COMANDO ACEPTADO Y GUARDADO (ACK)!!!";
             addLogEntry(str, "RX");
@@ -1134,6 +1144,11 @@ void MainWindow::OnTcpNewConnection() {
 
         addLogEntry("CLIENT CONNECTED VIA TCP (" + cleanAddr.toString() + ")", "RX");
         ui->textBrowserUnProcessed->append("CLIENT CONNECTED VIA TCP (" + cleanAddr.toString() + ")");
+
+        ui->pushButton_connectUdp->setText("DISCONNECT");
+        paramsSynced = false;
+        uint8_t b = GETINTERNALDATA;
+        sendCommand(&b, 1);
     }
 }
 
@@ -1508,6 +1523,15 @@ void MainWindow::on_sendDodgeDir_clicked() {
     sendCommand(payload, index);
     QString modeName = ui->comboDodgeDir->currentText();
     ui->textBrowserProcessed->append("***MODO ESQUIVADO ACTUALIZADO: " + modeName + "***");
+}
+
+void MainWindow::on_pushButton_setSoftAp_clicked() {
+    uint8_t payload[4];
+    uint8_t index = 0;
+    payload[index++] = SETSOFTAP;
+    sendCommand(payload, index);
+    addLogEntry("***COMANDO ENVIADO: CAMBIO A MODO SOFTAP***", "TX");
+    ui->textBrowserProcessed->append("***SOLICITANDO CAMBIO A MODO SOFTAP EN EL ROBOT...***");
 }
 
 void MainWindow::on_sendPWMMINL_clicked() {
