@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QDateTime>
 #include <QtWidgets/QGraphicsLayout>
+#include <QListWidget>
 
 static bool isWaitingReply = false;
 static int timeoutPatience = 0;
@@ -19,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     
     myDebugDialog = new QDialog(this);
-    myDebugDialog->setWindowTitle("DEBUG");
+    myDebugDialog->setWindowTitle("WIFI");
     myDebugDialog->setWindowFlags(Qt::Window);
     myDebugDialog->setStyleSheet(this->styleSheet());
     ui->stackedWidget->removeWidget(ui->DEBUG_PAGE);
@@ -64,6 +65,31 @@ MainWindow::MainWindow(QWidget *parent)
     timer1 = new QTimer(this);
     timer2 = new QTimer(this);
 
+        // Inicializar barras de progreso de sensores
+    ui->bar_ir1->setValue(100); ui->bar_ir1->setFormat("Libre (100%)");
+    ui->bar_ir3->setValue(100); ui->bar_ir3->setFormat("Libre (100%)");
+    ui->bar_ir5->setValue(100); ui->bar_ir5->setFormat("Libre (100%)");
+    ui->bar_ir7->setValue(100); ui->bar_ir7->setFormat("Libre (100%)");
+    ui->bar_ir8->setValue(100); ui->bar_ir8->setFormat("Libre (100%)");
+    ui->bar_ir2->setValue(0);   ui->bar_ir2->setFormat("0 / 4095");
+    ui->bar_ir4->setValue(0);   ui->bar_ir4->setFormat("0 / 4095");
+    ui->bar_ir6->setValue(0);   ui->bar_ir6->setFormat("0 / 4095");
+
+    
+    // Navegación de pantallas superior (Header Tabs)
+    connect(ui->btn_nav_infrarrojos, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentIndex(0);
+    });
+    connect(ui->btn_nav_visualizacion, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentIndex(1);
+    });
+    connect(ui->btn_nav_tuning, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentIndex(2);
+    });
+
+    connect(ui->stackedWidget, &QStackedWidget::currentChanged, this, &MainWindow::updateNavSelection);
+    updateNavSelection(ui->stackedWidget->currentIndex());
+
     ui->AutoWidget->setSource(QUrl(QStringLiteral("qrc:/Scene3D.qml")));
     ui->AutoWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
 
@@ -99,8 +125,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     timer2->start(75);
 
-    statusMode = new QLabel(this);
+    statusMode = ui->label_statusMode;
     ui->statusBar->addWidget(statusMode);
+    statusMode->setText("ESTADO --> DESCONECTADO");
+    statusMode->setStyleSheet("color: #fd5d93; font-weight: bold; font-size: 11px; padding-left: 5px;");
 
     runtimeTimer.start();
 
@@ -114,13 +142,61 @@ MainWindow::MainWindow(QWidget *parent)
         spinBox->setMaximum(10000);
     }
 
-    // Iniciar servidor TCP y socket UDP para recepción automática en puerto local
-    int defaultPort = ui->lineEdit_local_port->text().toInt();
-    if(defaultPort > 0) {
-        QTcpServer1->listen(QHostAddress::Any, defaultPort);
-        QUdpSocket1->bind(defaultPort);
-        QUdpSocket1->open(QUdpSocket::ReadWrite);
-        ui->pushButton_connectUdp->setText("DISCONNECT");
+    // Iniciar desconectado por defecto (requerimiento de usuario)
+    ui->pushButton_connectUdp->setText("CONNECT");
+
+    // Inicializar lista de comandos individuales
+    if (ui->comboBox_CMD) {
+        ui->comboBox_CMD->clear();
+        ui->comboBox_CMD->addItem("GETALIVE (0xA0)", GETALIVE);
+        ui->comboBox_CMD->addItem("GETFIRMWARE (0xA1)", GETFIRMWARE);
+        ui->comboBox_CMD->addItem("GETMPU (0xA2)", GETMPU);
+        ui->comboBox_CMD->addItem("GETADC (0xA3)", GETADC);
+        ui->comboBox_CMD->addItem("GETINTERNALDATA (0xF0)", GETINTERNALDATA);
+        ui->comboBox_CMD->addItem("GETPIDBALANCE (0xF1)", GETPIDBALANCE);
+        ui->comboBox_CMD->addItem("EXPORTIRCSV (0xD3)", EXPORTIRCSV);
+        ui->comboBox_CMD->addItem("SETPWML (0xA4)", SETPWML);
+        ui->comboBox_CMD->addItem("SETPWMR (0xA5)", SETPWMR);
+        ui->comboBox_CMD->addItem("SETPWMMINL (0xA7)", SETPWMMINL);
+        ui->comboBox_CMD->addItem("SETPWMMINR (0xA6)", SETPWMMINR);
+        ui->comboBox_CMD->addItem("SETBALANCEKP (0xA8)", SETBALANCEKP);
+        ui->comboBox_CMD->addItem("SETBALANCEKD (0xA9)", SETBALANCEKD);
+        ui->comboBox_CMD->addItem("SETBALANCEKI (0xAA)", SETBALANCEKI);
+        ui->comboBox_CMD->addItem("SETSETPOINT (0xAB)", SETSETPOINT);
+        ui->comboBox_CMD->addItem("SETSPEED (0xB1)", SETSPEED);
+        ui->comboBox_CMD->addItem("SETBKANG (0xB2)", SETBKANG);
+        ui->comboBox_CMD->addItem("SETSTATICOFF (0xC1)", SETSTATICOFF);
+        ui->comboBox_CMD->addItem("SETMOVINGOFF (0xC2)", SETMOVINGOFF);
+        ui->comboBox_CMD->addItem("SETLIMITANG (0xC4)", SETLIMITANG);
+        ui->comboBox_CMD->addItem("SET_KP_EXT (0xC3)", SET_KP_EXT);
+        ui->comboBox_CMD->addItem("SET_KI_EXT (0xC5)", SET_KI_EXT);
+        ui->comboBox_CMD->addItem("SET_ALFA_LPF (0xC6)", SET_ALFA_LPF);
+        ui->comboBox_CMD->addItem("SETVELDAMPDIV (0xC7)", SETVELDAMPDIV);
+        ui->comboBox_CMD->addItem("SETVELDAMPLIM (0xC8)", SETVELDAMPLIM);
+        ui->comboBox_CMD->addItem("SETTURNLIMIT (0xC9)", SETTURNLIMIT);
+        ui->comboBox_CMD->addItem("SETLINEKP (0xAC)", SETLINEKP);
+        ui->comboBox_CMD->addItem("SETLINEKD (0xAD)", SETLINEKD);
+        ui->comboBox_CMD->addItem("SETOFFSETL (0xAE)", SETOFFSETL);
+        ui->comboBox_CMD->addItem("SETOFFSETR (0xAF)", SETOFFSETR);
+        ui->comboBox_CMD->addItem("SETCUSTOMTURN (0xB0)", SETCUSTOMTURN);
+        ui->comboBox_CMD->addItem("SETFRONTDIST (0xB3)", SETFRONTDIST);
+        ui->comboBox_CMD->addItem("SETSIDEDIST (0xB4)", SETSIDEDIST);
+        ui->comboBox_CMD->addItem("SETLOSTDIST (0xB5)", SETLOSTDIST);
+        ui->comboBox_CMD->addItem("SETSTOPCYCLES (0xB6)", SETSTOPCYCLES);
+        ui->comboBox_CMD->addItem("SETCORNERDIST (0xB7)", SETCORNERDIST);
+        ui->comboBox_CMD->addItem("SETALIGNDIST (0xB8)", SETALIGNDIST);
+        ui->comboBox_CMD->addItem("SETPWMLROT (0xB9)", SETPWMLROT);
+        ui->comboBox_CMD->addItem("SETPWMRROT (0xC0)", SETPWMRROT);
+        ui->comboBox_CMD->addItem("SETWALLKP (0xCB)", SETWALLKP);
+        ui->comboBox_CMD->addItem("SETWALLKD (0xCC)", SETWALLKD);
+        ui->comboBox_CMD->addItem("SETFRONTKP (0xCD)", SETFRONTKP);
+        ui->comboBox_CMD->addItem("SETFRONTKD (0xCE)", SETFRONTKD);
+        ui->comboBox_CMD->addItem("SETDODGEMODE (0xCF)", SETDODGEMODE);
+        ui->comboBox_CMD->addItem("SETROBOTMODE (0xD2)", SETROBOTMODE);
+
+        connect(ui->comboBox_CMD, QOverload<int>::of(&QComboBox::currentIndexChanged),
+                this, &MainWindow::on_comboBox_CMD_currentIndexChanged);
+        on_comboBox_CMD_currentIndexChanged(0);
     }
 }
 
@@ -514,57 +590,78 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         w.ui8[1] = datosRx[3];
         uint16_t ir1 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
-        strOut = "IR1: " + str;
+        strOut = "IR0 (Der 90°): " + str;
         addLogEntry(strOut, "RX");
         ui->textBrowserProcessed->append(strOut);
         ui->ir1_data->display(str);
+        double dist1 = adcToDistanceCm(ir1);
+        ui->ir1_cm_data->display(QString::number(dist1, 'f', 1));
+        int pct1 = (dist1 >= 80.0) ? 100 : qBound(0, (int)((dist1 / 80.0) * 100.0), 100);
+        ui->bar_ir1->setValue(pct1);
+        ui->bar_ir1->setFormat((dist1 >= 80.0) ? QString("Libre (100%)") : QString("%1 cm (%2%)").arg(dist1, 0, 'f', 1).arg(pct1));
 
         w.ui8[0] = datosRx[4];
         w.ui8[1] = datosRx[5];
         uint16_t ir2 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
-        strOut = "IR2: " + str;
+        strOut = "IR1 (Línea Izq): " + str;
         addLogEntry(strOut, "RX");
         ui->textBrowserProcessed->append(strOut);
         ui->ir2_data->display(str);
+        ui->bar_ir2->setValue(ir2);
+        ui->bar_ir2->setFormat(QString("%1 / 4095").arg(ir2));
         sumLineSensors += qMax(0, 2400 - w.i16[0]);
 
         w.ui8[0] = datosRx[6];
         w.ui8[1] = datosRx[7];
         uint16_t ir3 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
-        strOut = "IR3: " + str;
+        strOut = "IR2 (Izq 90°): " + str;
         addLogEntry(strOut, "RX");
         ui->textBrowserProcessed->append(strOut);
         ui->ir3_data->display(str);
+        double dist3 = adcToDistanceCm(ir3);
+        ui->ir3_cm_data->display(QString::number(dist3, 'f', 1));
+        int pct3 = (dist3 >= 80.0) ? 100 : qBound(0, (int)((dist3 / 80.0) * 100.0), 100);
+        ui->bar_ir3->setValue(pct3);
+        ui->bar_ir3->setFormat((dist3 >= 80.0) ? QString("Libre (100%)") : QString("%1 cm (%2%)").arg(dist3, 0, 'f', 1).arg(pct3));
 
         w.ui8[0] = datosRx[8];
         w.ui8[1] = datosRx[9];
         uint16_t ir4 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
-        strOut = "IR4: " + str;
+        strOut = "IR3 (Línea Cen): " + str;
         addLogEntry(strOut, "RX");
         ui->textBrowserProcessed->append(strOut);
         ui->ir4_data->display(str);
+        ui->bar_ir4->setValue(ir4);
+        ui->bar_ir4->setFormat(QString("%1 / 4095").arg(ir4));
         sumLineSensors += qMax(0, 2400 - w.i16[0]);
 
         w.ui8[0] = datosRx[10];
         w.ui8[1] = datosRx[11];
         uint16_t ir5 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
-        strOut = "IR5: " + str;
+        strOut = "IR4 (Izq 45°): " + str;
         addLogEntry(strOut, "RX");
         ui->textBrowserProcessed->append(strOut);
         ui->ir5_data->display(str);
+        double dist5 = adcToDistanceCm(ir5);
+        ui->ir5_cm_data->display(QString::number(dist5, 'f', 1));
+        int pct5 = (dist5 >= 80.0) ? 100 : qBound(0, (int)((dist5 / 80.0) * 100.0), 100);
+        ui->bar_ir5->setValue(pct5);
+        ui->bar_ir5->setFormat((dist5 >= 80.0) ? QString("Libre (100%)") : QString("%1 cm (%2%)").arg(dist5, 0, 'f', 1).arg(pct5));
 
         w.ui8[0] = datosRx[12];
         w.ui8[1] = datosRx[13];
         uint16_t ir6 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
-        strOut = "IR6: " + str;
+        strOut = "IR5 (Línea Der): " + str;
         addLogEntry(strOut, "RX");
         ui->textBrowserProcessed->append(strOut);
         ui->ir6_data->display(str);
+        ui->bar_ir6->setValue(ir6);
+        ui->bar_ir6->setFormat(QString("%1 / 4095").arg(ir6));
         sumLineSensors += qMax(0, 2400 - w.i16[0]);
         str = QString("%1").arg(sumLineSensors, 5, 10, QChar('0'));
 
@@ -573,19 +670,29 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         w.ui8[1] = datosRx[15];
         uint16_t ir7 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
-        strOut = "IR7: " + str;
+        strOut = "IR6 (Frontal): " + str;
         addLogEntry(strOut, "RX");
         ui->textBrowserProcessed->append(strOut);
         ui->ir7_data->display(str);
+        double dist7 = adcToDistanceCm(ir7);
+        ui->ir7_cm_data->display(QString::number(dist7, 'f', 1));
+        int pct7 = (dist7 >= 80.0) ? 100 : qBound(0, (int)((dist7 / 80.0) * 100.0), 100);
+        ui->bar_ir7->setValue(pct7);
+        ui->bar_ir7->setFormat((dist7 >= 80.0) ? QString("Libre (100%)") : QString("%1 cm (%2%)").arg(dist7, 0, 'f', 1).arg(pct7));
 
         w.ui8[0] = datosRx[16];
         w.ui8[1] = datosRx[17];
         uint16_t ir8 = w.ui16[0];
         str = QString("%1").arg(w.ui16[0], 5, 10, QChar('0'));
-        strOut = "IR8: " + str;
+        strOut = "IR7 (Der 45°): " + str;
         addLogEntry(strOut, "RX");
         ui->textBrowserProcessed->append(strOut);
         ui->ir8_data->display(str);
+        double dist8 = adcToDistanceCm(ir8);
+        ui->ir8_cm_data->display(QString::number(dist8, 'f', 1));
+        int pct8 = (dist8 >= 80.0) ? 100 : qBound(0, (int)((dist8 / 80.0) * 100.0), 100);
+        ui->bar_ir8->setValue(pct8);
+        ui->bar_ir8->setFormat((dist8 >= 80.0) ? QString("Libre (100%)") : QString("%1 cm (%2%)").arg(dist8, 0, 'f', 1).arg(pct8));
 
         // ---- NUEVO: Enviar a la gráfica ----
         double t = runtimeTimer.elapsed() / 1000.0;
@@ -612,30 +719,33 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         float hr_angle = w.i32 / 10000.0f;
         ui->angle_hr_data->display(QString::number(hr_angle, 'f', 4));
 
-        // Unpack raw IR values (IR1, IR3, IR5) with correct mapping: index 1 is Left (IR5), index 5 is Right (IR1)
+        // Unpack raw IR values (IR1=Izq, IR3=Cen, IR5=Der)
         w.ui8[0] = datosRx[68]; w.ui8[1] = datosRx[69];
-        uint16_t rawIr5 = w.ui16[0];
+        uint16_t rawIr1 = w.ui16[0]; // Izquierda (IR1)
 
         w.ui8[0] = datosRx[70]; w.ui8[1] = datosRx[71];
-        uint16_t rawIr3 = w.ui16[0];
+        uint16_t rawIr3 = w.ui16[0]; // Centro (IR3)
 
         w.ui8[0] = datosRx[72]; w.ui8[1] = datosRx[73];
-        uint16_t rawIr1 = w.ui16[0];
+        uint16_t rawIr5 = w.ui16[0]; // Derecha (IR5)
 
 
-        // Unpack calibrated IR values (IR1, IR3, IR5) with correct mapping
+        // Unpack calibrated IR values (IR1=Izq, IR3=Cen, IR5=Der)
         w.ui8[0] = datosRx[74]; w.ui8[1] = datosRx[75];
-        uint16_t calIr5 = w.ui16[0];
-
-        m_calIr5 = calIr5;
-        w.ui8[0] = datosRx[76]; w.ui8[1] = datosRx[77];
-        uint16_t calIr3 = w.ui16[0];
-
-        m_calIr3 = calIr3;
-        w.ui8[0] = datosRx[78]; w.ui8[1] = datosRx[79];
-        uint16_t calIr1 = w.ui16[0];
-
+        uint16_t calIr1 = w.ui16[0]; // Izquierda (IR1)
         m_calIr1 = calIr1;
+
+        w.ui8[0] = datosRx[76]; w.ui8[1] = datosRx[77];
+        uint16_t calIr3 = w.ui16[0]; // Centro (IR3)
+        m_calIr3 = calIr3;
+
+        w.ui8[0] = datosRx[78]; w.ui8[1] = datosRx[79];
+        uint16_t calIr5 = w.ui16[0]; // Derecha (IR5)
+        m_calIr5 = calIr5;
+
+        // --- Modo del robot en tiempo real ---
+        uint8_t currentRobotMode = datosRx[87];
+        updateRobotModeUI(currentRobotMode);
 
         // --- Acumular muestra en buffer circular IR (último minuto) ---
         IrSample sample;
@@ -750,7 +860,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         // Calcular los Términos de Seguimiento de Línea
         int32_t sum = m_calIr1 + m_calIr3 + m_calIr5;
         if (sum == 0) sum = 1;
-        int32_t error_linea = ((-(1000 * (int32_t)m_calIr5) + (1000 * (int32_t)m_calIr1)) / sum) / 10;
+        int32_t error_linea = ((-(1000 * (int32_t)m_calIr1) + (1000 * (int32_t)m_calIr5)) / sum) / 10;
         int32_t abs_error = (error_linea > 0) ? error_linea : -error_linea;
 
         int16_t kp_line = ui->setLineKp->value();
@@ -819,6 +929,24 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             ui->textBrowserProcessed->append(str);
         }
         break;
+
+    case SETROBOTMODE: {
+        if (datosRx[2] == ACK) {
+            uint8_t currentMode = datosRx[3];
+            updateRobotModeUI(currentMode);
+            QString modeStr;
+            switch(currentMode) {
+            case 1: modeStr = "BALANCE"; break;
+            case 2: modeStr = "SEGUIR LINEA"; break;
+            case 3: modeStr = "ESQUIVAR"; break;
+            default: modeStr = QString::number(currentMode); break;
+            }
+            str = QString("***MODO DEL ROBOT CONFIRMADO (ACK): %1***").arg(modeStr);
+            addLogEntry(str, "RX");
+            ui->textBrowserProcessed->append(str);
+        }
+        break;
+    }
 
     default:
         str = str + "Comando DESCONOCIDO!!!!";
@@ -1019,6 +1147,7 @@ void MainWindow::OnUdpRxData(){
 
         incomingBuffer = new unsigned char[count];
         QUdpSocket1->readDatagram(reinterpret_cast<char *>(incomingBuffer), count, &RemoteAddress, &RemotePort);
+        m_lastRxTime = QDateTime::currentMSecsSinceEpoch();
 
         // Debug visual de los datos crudos en la interfaz
         QString str = "";
@@ -1146,6 +1275,9 @@ void MainWindow::OnTcpNewConnection() {
         ui->textBrowserUnProcessed->append("CLIENT CONNECTED VIA TCP (" + cleanAddr.toString() + ")");
 
         ui->pushButton_connectUdp->setText("DISCONNECT");
+        statusMode->setText("ESTADO --> CONECTADO STATION TCP");
+        statusMode->setStyleSheet("color: #00f2c3; font-weight: bold; font-size: 11px; padding-left: 5px;");
+        m_lastRxTime = QDateTime::currentMSecsSinceEpoch();
         paramsSynced = false;
         uint8_t b = GETINTERNALDATA;
         sendCommand(&b, 1);
@@ -1155,6 +1287,13 @@ void MainWindow::OnTcpNewConnection() {
 void MainWindow::OnTcpDisconnected() {
     addLogEntry("CLIENT DISCONNECTED FROM TCP", "RX");
     ui->textBrowserUnProcessed->append("CLIENT DISCONNECTED FROM TCP");
+    if(QUdpSocket1->isOpen()) {
+        statusMode->setText("ESTADO --> CONECTANDO...");
+        statusMode->setStyleSheet("color: #ffd600; font-weight: bold; font-size: 11px; padding-left: 5px;");
+    } else {
+        statusMode->setText("ESTADO --> DESCONECTADO");
+        statusMode->setStyleSheet("color: #fd5d93; font-weight: bold; font-size: 11px; padding-left: 5px;");
+    }
     if(QTcpSocketClient) {
         QTcpSocketClient->disconnect();
         QTcpSocketClient->deleteLater();
@@ -1168,6 +1307,7 @@ void MainWindow::OnTcpRxData() {
     QByteArray incomingData = QTcpSocketClient->readAll();
     int count = incomingData.size();
     if(count <= 0) return;
+    m_lastRxTime = QDateTime::currentMSecsSinceEpoch();
 
     const unsigned char *incomingBuffer = reinterpret_cast<const unsigned char *>(incomingData.constData());
 
@@ -1255,12 +1395,17 @@ void MainWindow::OnTcpRxData() {
 
 void MainWindow::getData(){
     // --- 1. GUARDIA DE SEGURIDAD (Frena el spam) ---
-    if(!QSerialPort1->isOpen() && !QUdpSocket1->isOpen() && (!QTcpSocketClient || !QTcpSocketClient->isOpen())) {
-        statusMode->setText("CURRENT STATE --> DESCONECTADO");
+    bool isTcpActive = (QTcpSocketClient && QTcpSocketClient->isOpen() && QTcpSocketClient->state() == QAbstractSocket::ConnectedState);
+    bool isSerialActive = (QSerialPort1 && QSerialPort1->isOpen());
+    bool isUdpActive = (QUdpSocket1 && QUdpSocket1->isOpen());
+
+    if(!isSerialActive && !isUdpActive && !isTcpActive) {
+        statusMode->setText("ESTADO --> DESCONECTADO");
+        statusMode->setStyleSheet("color: #fd5d93; font-weight: bold; font-size: 11px; padding-left: 5px;");
         return;
     }
 
-    // --- SISTEMA DE ADAPTACIÓN A REDES LENTAS (PING-PONG) ---
+    // --- SISTEMA DE ADAPTACION A REDES LENTAS (PING-PONG) ---
     if (isWaitingReply) {
         timeoutPatience++;
         if (timeoutPatience >= 8) {
@@ -1274,12 +1419,35 @@ void MainWindow::getData(){
     timeoutPatience = 0;
 
     // --- 2. ACTUALIZAR ESTADO VISUAL ---
-    if(QTcpSocketClient && QTcpSocketClient->isOpen())
-        statusMode->setText("CURRENT STATE --> CONECTADO TCP");
-    else if(QSerialPort1->isOpen())
-        statusMode->setText("CURRENT STATE --> CONECTADO SERIE");
-    else if (QUdpSocket1->isOpen())
-        statusMode->setText("CURRENT STATE --> CONECTADO UDP");
+    qint64 now = QDateTime::currentMSecsSinceEpoch();
+    if(isTcpActive) {
+        statusMode->setText("ESTADO --> CONECTADO STATION TCP");
+        statusMode->setStyleSheet("color: #00f2c3; font-weight: bold; font-size: 11px; padding-left: 5px;");
+    } else if(isSerialActive) {
+        statusMode->setText("ESTADO --> CONECTADO SERIE");
+        statusMode->setStyleSheet("color: #1d8cf8; font-weight: bold; font-size: 11px; padding-left: 5px;");
+    } else if (isUdpActive) {
+        if (m_lastRxTime > 0 && (now - m_lastRxTime) < 3000) {
+            statusMode->setText("ESTADO --> CONECTADO STATION UDP");
+            statusMode->setStyleSheet("color: #00f2c3; font-weight: bold; font-size: 11px; padding-left: 5px;");
+        } else {
+            statusMode->setText("ESTADO --> CONECTANDO...");
+            statusMode->setStyleSheet("color: #ffd600; font-weight: bold; font-size: 11px; padding-left: 5px;");
+        }
+    }
+
+    // Bloqueo de telemetría para permitir testeo limpio de comandos individuales
+    if (m_isCommBlocked) {
+        if (isTcpActive) {
+            statusMode->setText("ESTADO --> CONECTADO STATION TCP [ENVÍO BLOQUEADO]");
+        } else if (isSerialActive) {
+            statusMode->setText("ESTADO --> CONECTADO SERIE [ENVÍO BLOQUEADO]");
+        } else if (isUdpActive) {
+            statusMode->setText("ESTADO --> CONECTADO STATION UDP [ENVÍO BLOQUEADO]");
+        }
+        isWaitingReply = false;
+        return;
+    }
 
     // --- 3. MÁQUINA DE ESTADOS ---
     static uint8_t commMef = 1;
@@ -1370,6 +1538,9 @@ void MainWindow::on_pushButton_connectUdp_clicked()
             QTcpSocketClient = nullptr;
         }
         ui->pushButton_connectUdp->setText("CONNECT");
+        statusMode->setText("ESTADO --> DESCONECTADO");
+        statusMode->setStyleSheet("color: #fd5d93; font-weight: bold; font-size: 11px; padding-left: 5px;");
+        m_lastRxTime = 0;
         resetInterface();
         return;
     }
@@ -1393,6 +1564,8 @@ void MainWindow::on_pushButton_connectUdp_clicked()
     }
 
     ui->pushButton_connectUdp->setText("DISCONNECT");
+    statusMode->setText("ESTADO --> CONECTANDO...");
+    statusMode->setStyleSheet("color: #ffd600; font-weight: bold; font-size: 11px; padding-left: 5px;");
     paramsSynced = false;
     uint8_t b = GETINTERNALDATA;
     sendCommand(&b, 1);
@@ -1661,44 +1834,79 @@ void MainWindow::on_sendKpCascada_clicked() {
 
 
 
-void MainWindow::on_P1toP3_clicked()
+
+
+void MainWindow::on_actionConn_triggered()
 {
-    ui->stackedWidget->setCurrentIndex(2);
+    ui->tabWidget_wifi->setCurrentWidget(ui->tab_CONN);
+    ui->DEBUG_PAGE->show();
+    if (!myDebugDialog->isVisible()) {
+        myDebugDialog->adjustSize();
+    }
+    myDebugDialog->show();
+    myDebugDialog->raise();
+    myDebugDialog->activateWindow();
 }
 
 
-void MainWindow::on_P1toP2_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(1);
+void MainWindow::updateNavSelection(int index) {
+    ui->btn_nav_infrarrojos->setChecked(index == 0);
+    ui->btn_nav_visualizacion->setChecked(index == 1);
+    ui->btn_nav_tuning->setChecked(index == 2);
 }
 
+void MainWindow::sendRobotMode(uint8_t modeId) {
+    uint8_t payload[4];
+    uint8_t index = 0;
+    payload[index++] = SETROBOTMODE;
+    payload[index++] = modeId;
+    sendCommand(payload, index);
 
+    QString modeName;
+    switch(modeId) {
+    case 1: modeName = "BALANCE"; break;
+    case 2: modeName = "SEGUIR LINEA"; break;
+    case 3: modeName = "ESQUIVAR"; break;
+    default: modeName = QString("MODO %1").arg(modeId); break;
+    }
 
-void MainWindow::on_P2toP1_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(0);
+    addLogEntry("***COMANDO MODO ENVIADO: " + modeName + "***", "TX");
+    ui->textBrowserProcessed->append("***ENVIANDO MODO AL ROBOT: " + modeName + "...***");
+
+    if (modeId >= 1 && modeId <= 3) {
+        updateRobotModeUI(modeId);
+    }
 }
 
+void MainWindow::updateRobotModeUI(uint8_t mode) {
+    ui->btn_mode_balance->blockSignals(true);
+    ui->btn_mode_line->blockSignals(true);
+    ui->btn_mode_dodge->blockSignals(true);
 
-void MainWindow::on_P3toP1_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(0);
+    ui->btn_mode_balance->setChecked(mode == 1);
+    ui->btn_mode_line->setChecked(mode == 2);
+    ui->btn_mode_dodge->setChecked(mode == 3);
+
+    ui->btn_mode_balance->blockSignals(false);
+    ui->btn_mode_line->blockSignals(false);
+    ui->btn_mode_dodge->blockSignals(false);
 }
 
-
-void MainWindow::on_P3toP2_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(1);
+void MainWindow::on_btn_mode_balance_clicked() {
+    sendRobotMode(1);
 }
 
+void MainWindow::on_btn_mode_line_clicked() {
+    sendRobotMode(2);
+}
 
-void MainWindow::on_P2toP3_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(2);
+void MainWindow::on_btn_mode_dodge_clicked() {
+    sendRobotMode(3);
 }
 
 void MainWindow::on_actionOpenDebug_triggered()
 {
+    ui->tabWidget_wifi->setCurrentWidget(ui->tab_LOGS);
     ui->DEBUG_PAGE->show();
     if (!myDebugDialog->isVisible()) {
         myDebugDialog->adjustSize();
@@ -1714,16 +1922,18 @@ void MainWindow::on_actionOpenDebug_triggered()
 // -----------------------------------------------------------------------
 void MainWindow::initPIDChart()
 {
-    pid_pSeries   = new QLineSeries(); pid_pSeries->setName("P Balance");
-    pid_iSeries   = new QLineSeries(); pid_iSeries->setName("I Balance");
-    pid_dSeries   = new QLineSeries(); pid_dSeries->setName("D Balance");
+    // Series para Balanceo
+    pid_pSeries   = new QLineSeries(); pid_pSeries->setName("P Balance (Kp)");
+    pid_iSeries   = new QLineSeries(); pid_iSeries->setName("I Balance (Ki)");
+    pid_dSeries   = new QLineSeries(); pid_dSeries->setName("D Balance (Kd)");
     pid_outSeries = new QLineSeries(); pid_outSeries->setName("Output Balance");
 
-    pid_pLineSeries   = new QLineSeries(); pid_pLineSeries->setName("P Seguimiento");
-    pid_dLineSeries   = new QLineSeries(); pid_dLineSeries->setName("D Seguimiento");
-    pid_outLineSeries = new QLineSeries(); pid_outLineSeries->setName("Giro Seguimiento");
+    // Series para Seguimiento de Linea
+    pid_pLineSeries   = new QLineSeries(); pid_pLineSeries->setName("P Linea (Kp)");
+    pid_dLineSeries   = new QLineSeries(); pid_dLineSeries->setName("D Linea (Kq)");
+    pid_outLineSeries = new QLineSeries(); pid_outLineSeries->setName("Giro Offset");
 
-    // MPU series
+    // Series MPU y Angulos
     pid_axSeries = new QLineSeries(); pid_axSeries->setName("Ax");
     pid_aySeries = new QLineSeries(); pid_aySeries->setName("Ay");
     pid_azSeries = new QLineSeries(); pid_azSeries->setName("Az");
@@ -1731,127 +1941,201 @@ void MainWindow::initPIDChart()
     pid_gySeries = new QLineSeries(); pid_gySeries->setName("Gy");
     pid_gzSeries = new QLineSeries(); pid_gzSeries->setName("Gz");
 
-    // Angles series
     pid_pitchSeries = new QLineSeries(); pid_pitchSeries->setName("Pitch");
     pid_rollSeries  = new QLineSeries(); pid_rollSeries->setName("Roll");
     pid_yawSeries   = new QLineSeries(); pid_yawSeries->setName("Yaw");
 
-    // IR series
-    pid_ir1Series = new QLineSeries(); pid_ir1Series->setName("IR1");
-    pid_ir2Series = new QLineSeries(); pid_ir2Series->setName("IR2");
-    pid_ir3Series = new QLineSeries(); pid_ir3Series->setName("IR3");
-    pid_ir4Series = new QLineSeries(); pid_ir4Series->setName("IR4");
-    pid_ir5Series = new QLineSeries(); pid_ir5Series->setName("IR5");
-    pid_ir6Series = new QLineSeries(); pid_ir6Series->setName("IR6");
-    pid_ir7Series = new QLineSeries(); pid_ir7Series->setName("IR7");
-    pid_ir8Series = new QLineSeries(); pid_ir8Series->setName("IR8");
+    // Series Sensores IR
+    pid_ir1Series = new QLineSeries(); pid_ir1Series->setName("IR0 (Der 90°)");
+    pid_ir2Series = new QLineSeries(); pid_ir2Series->setName("IR1 (Línea Izq)");
+    pid_ir3Series = new QLineSeries(); pid_ir3Series->setName("IR2 (Izq 90°)");
+    pid_ir4Series = new QLineSeries(); pid_ir4Series->setName("IR3 (Línea Cen)");
+    pid_ir5Series = new QLineSeries(); pid_ir5Series->setName("IR4 (Izq 45°)");
+    pid_ir6Series = new QLineSeries(); pid_ir6Series->setName("IR5 (Línea Der)");
+    pid_ir7Series = new QLineSeries(); pid_ir7Series->setName("IR6 (Frontal)");
+    pid_ir8Series = new QLineSeries(); pid_ir8Series->setName("IR7 (Der 45°)");
 
-    chartPID_mw = new QChart();
-    chartPID_mw->addSeries(pid_pSeries);
-    chartPID_mw->addSeries(pid_iSeries);
-    chartPID_mw->addSeries(pid_dSeries);
-    chartPID_mw->addSeries(pid_outSeries);
-    chartPID_mw->addSeries(pid_pLineSeries);
-    chartPID_mw->addSeries(pid_dLineSeries);
-    chartPID_mw->addSeries(pid_outLineSeries);
+    // Colores y grosores para diferenciar curvas claramente
+    QPen penPitch(QColor("#00f2c3")); penPitch.setWidth(2); pid_pitchSeries->setPen(penPitch);
+    QPen penRoll(QColor("#ffd600"));  penRoll.setWidth(2);  pid_rollSeries->setPen(penRoll);
+    QPen penYaw(QColor("#bd00ff"));   penYaw.setWidth(2);   pid_yawSeries->setPen(penYaw);
 
-    chartPID_mw->addSeries(pid_axSeries);
-    chartPID_mw->addSeries(pid_aySeries);
-    chartPID_mw->addSeries(pid_azSeries);
-    chartPID_mw->addSeries(pid_gxSeries);
-    chartPID_mw->addSeries(pid_gySeries);
-    chartPID_mw->addSeries(pid_gzSeries);
+    QPen penP(QColor("#fd5d93"));     penP.setWidth(2);     pid_pSeries->setPen(penP);
+    QPen penI(QColor("#00f2c3"));     penI.setWidth(2);     pid_iSeries->setPen(penI);
+    QPen penD(QColor("#1d8cf8"));     penD.setWidth(2);     pid_dSeries->setPen(penD);
+    QPen penOut(QColor("#ff8d72"));   penOut.setWidth(2);   pid_outSeries->setPen(penOut);
 
-    chartPID_mw->addSeries(pid_pitchSeries);
-    chartPID_mw->addSeries(pid_rollSeries);
-    chartPID_mw->addSeries(pid_yawSeries);
+    QPen penPLine(QColor("#00f2c3")); penPLine.setWidth(2); pid_pLineSeries->setPen(penPLine);
+    QPen penDLine(QColor("#e14eca")); penDLine.setWidth(2); pid_dLineSeries->setPen(penDLine);
+    QPen penOutLine(QColor("#ff8d72")); penOutLine.setWidth(2); pid_outLineSeries->setPen(penOutLine);
 
-    chartPID_mw->addSeries(pid_ir1Series);
-    chartPID_mw->addSeries(pid_ir2Series);
-    chartPID_mw->addSeries(pid_ir3Series);
-    chartPID_mw->addSeries(pid_ir4Series);
-    chartPID_mw->addSeries(pid_ir5Series);
-    chartPID_mw->addSeries(pid_ir6Series);
-    chartPID_mw->addSeries(pid_ir7Series);
-    chartPID_mw->addSeries(pid_ir8Series);
+    auto setupChartCommon = [](QChart *chart, const QString &title) {
+        chart->setTheme(QChart::ChartThemeDark);
+        chart->setTitle(title);
+        chart->setTitleBrush(QBrush(QColor("#e2e2e2")));
+        QFont titleFont = chart->titleFont();
+        titleFont.setBold(true);
+        titleFont.setPointSize(10);
+        chart->setTitleFont(titleFont);
+        chart->setBackgroundBrush(QBrush(QColor("#151522")));
+        chart->setPlotAreaBackgroundBrush(QBrush(QColor("#10101a")));
+        chart->setPlotAreaBackgroundVisible(true);
+        chart->layout()->setContentsMargins(0, 0, 0, 0);
+        chart->setBackgroundRoundness(0);
+        chart->legend()->setLabelColor(QColor("#e2e2e2"));
+        chart->legend()->setBackgroundVisible(false);
+        chart->legend()->setVisible(true);
+        chart->legend()->setAlignment(Qt::AlignTop);
+    };
 
-    chartPID_mw->setTitle("Curvas de telemetría");
-    chartPID_mw->layout()->setContentsMargins(0, 0, 0, 0);
-    chartPID_mw->setBackgroundRoundness(0);
+    auto setupAxisCommon = [](QValueAxis *axis, const QString &title, double minVal, double maxVal) {
+        axis->setRange(minVal, maxVal);
+        axis->setTitleText(title);
+        axis->setLabelsColor(QColor("#a0a5b5"));
+        axis->setTitleBrush(QBrush(QColor("#00f2c3")));
+        axis->setGridLineColor(QColor("#27293d"));
+        axis->setLinePenColor(QColor("#3d405b"));
+    };
 
-    pid_axisX = new QValueAxis();
-    pid_axisX->setRange(0, 10);
-    pid_axisX->setTitleText("Tiempo (s)");
+    // 1. Gráfica de Orientación
+    chartOrientation_mw = new QChart();
+    setupChartCommon(chartOrientation_mw, "Orientacion (Pitch, Roll, Yaw)");
+    chartOrientation_mw->addSeries(pid_pitchSeries);
+    chartOrientation_mw->addSeries(pid_rollSeries);
+    chartOrientation_mw->addSeries(pid_yawSeries);
+    chartOrientation_mw->addSeries(pid_axSeries);
+    chartOrientation_mw->addSeries(pid_aySeries);
+    chartOrientation_mw->addSeries(pid_azSeries);
+    chartOrientation_mw->addSeries(pid_gxSeries);
+    chartOrientation_mw->addSeries(pid_gySeries);
+    chartOrientation_mw->addSeries(pid_gzSeries);
 
-    pid_axisY = new QValueAxis();
-    pid_axisY->setRange(pid_yMin, pid_yMax);
-    pid_axisY->setTitleText("Valor");
+    orient_axisX = new QValueAxis();
+    setupAxisCommon(orient_axisX, "Tiempo (s)", 0, 10);
+    orient_axisY = new QValueAxis();
+    setupAxisCommon(orient_axisY, "Angulo (deg)", -45, 45);
 
-    chartPID_mw->addAxis(pid_axisX, Qt::AlignBottom);
-    chartPID_mw->addAxis(pid_axisY, Qt::AlignLeft);
+    chartOrientation_mw->addAxis(orient_axisX, Qt::AlignBottom);
+    chartOrientation_mw->addAxis(orient_axisY, Qt::AlignLeft);
+    pid_pitchSeries->attachAxis(orient_axisX); pid_pitchSeries->attachAxis(orient_axisY);
+    pid_rollSeries->attachAxis(orient_axisX);  pid_rollSeries->attachAxis(orient_axisY);
+    pid_yawSeries->attachAxis(orient_axisX);   pid_yawSeries->attachAxis(orient_axisY);
+    pid_axSeries->attachAxis(orient_axisX);    pid_axSeries->attachAxis(orient_axisY);
+    pid_aySeries->attachAxis(orient_axisX);    pid_aySeries->attachAxis(orient_axisY);
+    pid_azSeries->attachAxis(orient_axisX);    pid_azSeries->attachAxis(orient_axisY);
+    pid_gxSeries->attachAxis(orient_axisX);    pid_gxSeries->attachAxis(orient_axisY);
+    pid_gySeries->attachAxis(orient_axisX);    pid_gySeries->attachAxis(orient_axisY);
+    pid_gzSeries->attachAxis(orient_axisX);    pid_gzSeries->attachAxis(orient_axisY);
 
-    pid_pSeries->attachAxis(pid_axisX);   pid_pSeries->attachAxis(pid_axisY);
-    pid_iSeries->attachAxis(pid_axisX);   pid_iSeries->attachAxis(pid_axisY);
-    pid_dSeries->attachAxis(pid_axisX);   pid_dSeries->attachAxis(pid_axisY);
-    pid_outSeries->attachAxis(pid_axisX); pid_outSeries->attachAxis(pid_axisY);
+    if (ui->chartView_orientation) {
+        ui->chartView_orientation->setChart(chartOrientation_mw);
+        ui->chartView_orientation->setRenderHint(QPainter::Antialiasing);
+    }
 
-    pid_pLineSeries->attachAxis(pid_axisX);   pid_pLineSeries->attachAxis(pid_axisY);
-    pid_dLineSeries->attachAxis(pid_axisX);   pid_dLineSeries->attachAxis(pid_axisY);
-    pid_outLineSeries->attachAxis(pid_axisX); pid_outLineSeries->attachAxis(pid_axisY);
+    // 2. Gráfica de Balanceo
+    chartBalance_mw = new QChart();
+    setupChartCommon(chartBalance_mw, "Sistema de Balanceo (Kp, Ki, Kd)");
+    chartBalance_mw->addSeries(pid_pSeries);
+    chartBalance_mw->addSeries(pid_iSeries);
+    chartBalance_mw->addSeries(pid_dSeries);
+    chartBalance_mw->addSeries(pid_outSeries);
 
-    pid_axSeries->attachAxis(pid_axisX);   pid_axSeries->attachAxis(pid_axisY);
-    pid_aySeries->attachAxis(pid_axisX);   pid_aySeries->attachAxis(pid_axisY);
-    pid_azSeries->attachAxis(pid_axisX);   pid_azSeries->attachAxis(pid_axisY);
-    pid_gxSeries->attachAxis(pid_axisX);   pid_gxSeries->attachAxis(pid_axisY);
-    pid_gySeries->attachAxis(pid_axisX);   pid_gySeries->attachAxis(pid_axisY);
-    pid_gzSeries->attachAxis(pid_axisX);   pid_gzSeries->attachAxis(pid_axisY);
+    bal_axisX = new QValueAxis();
+    setupAxisCommon(bal_axisX, "Tiempo (s)", 0, 10);
+    bal_axisY = new QValueAxis();
+    setupAxisCommon(bal_axisY, "Amplitud", -200, 200);
 
-    pid_pitchSeries->attachAxis(pid_axisX);   pid_pitchSeries->attachAxis(pid_axisY);
-    pid_rollSeries->attachAxis(pid_axisX);    pid_rollSeries->attachAxis(pid_axisY);
-    pid_yawSeries->attachAxis(pid_axisX);     pid_yawSeries->attachAxis(pid_axisY);
+    chartBalance_mw->addAxis(bal_axisX, Qt::AlignBottom);
+    chartBalance_mw->addAxis(bal_axisY, Qt::AlignLeft);
+    pid_pSeries->attachAxis(bal_axisX);   pid_pSeries->attachAxis(bal_axisY);
+    pid_iSeries->attachAxis(bal_axisX);   pid_iSeries->attachAxis(bal_axisY);
+    pid_dSeries->attachAxis(bal_axisX);   pid_dSeries->attachAxis(bal_axisY);
+    pid_outSeries->attachAxis(bal_axisX); pid_outSeries->attachAxis(bal_axisY);
 
-    pid_ir1Series->attachAxis(pid_axisX);   pid_ir1Series->attachAxis(pid_axisY);
-    pid_ir2Series->attachAxis(pid_axisX);   pid_ir2Series->attachAxis(pid_axisY);
-    pid_ir3Series->attachAxis(pid_axisX);   pid_ir3Series->attachAxis(pid_axisY);
-    pid_ir4Series->attachAxis(pid_axisX);   pid_ir4Series->attachAxis(pid_axisY);
-    pid_ir5Series->attachAxis(pid_axisX);   pid_ir5Series->attachAxis(pid_axisY);
-    pid_ir6Series->attachAxis(pid_axisX);   pid_ir6Series->attachAxis(pid_axisY);
-    pid_ir7Series->attachAxis(pid_axisX);   pid_ir7Series->attachAxis(pid_axisY);
-    pid_ir8Series->attachAxis(pid_axisX);   pid_ir8Series->attachAxis(pid_axisY);
+    chartPID_mw = chartBalance_mw;
+    pid_axisX = bal_axisX;
+    pid_axisY = bal_axisY;
 
-    ui->PIDchart->setChart(chartPID_mw);
-    ui->PIDchart->setRenderHint(QPainter::Antialiasing);
+    if (ui->chartView_balance) {
+        ui->chartView_balance->setChart(chartBalance_mw);
+        ui->chartView_balance->setRenderHint(QPainter::Antialiasing);
+    }
+
+    // 3. Gráfica de Seguimiento de Línea
+    chartLine_mw = new QChart();
+    setupChartCommon(chartLine_mw, "Seguimiento de Linea (Kp, Kq)");
+    chartLine_mw->addSeries(pid_pLineSeries);
+    chartLine_mw->addSeries(pid_dLineSeries);
+    chartLine_mw->addSeries(pid_outLineSeries);
+    chartLine_mw->addSeries(pid_ir1Series);
+    chartLine_mw->addSeries(pid_ir2Series);
+    chartLine_mw->addSeries(pid_ir3Series);
+    chartLine_mw->addSeries(pid_ir4Series);
+    chartLine_mw->addSeries(pid_ir5Series);
+    chartLine_mw->addSeries(pid_ir6Series);
+    chartLine_mw->addSeries(pid_ir7Series);
+    chartLine_mw->addSeries(pid_ir8Series);
+
+    line_axisX = new QValueAxis();
+    setupAxisCommon(line_axisX, "Tiempo (s)", 0, 10);
+    line_axisY = new QValueAxis();
+    setupAxisCommon(line_axisY, "Giro / Error", -100, 100);
+
+    chartLine_mw->addAxis(line_axisX, Qt::AlignBottom);
+    chartLine_mw->addAxis(line_axisY, Qt::AlignLeft);
+    pid_pLineSeries->attachAxis(line_axisX);   pid_pLineSeries->attachAxis(line_axisY);
+    pid_dLineSeries->attachAxis(line_axisX);   pid_dLineSeries->attachAxis(line_axisY);
+    pid_outLineSeries->attachAxis(line_axisX); pid_outLineSeries->attachAxis(line_axisY);
+    pid_ir1Series->attachAxis(line_axisX);     pid_ir1Series->attachAxis(line_axisY);
+    pid_ir2Series->attachAxis(line_axisX);     pid_ir2Series->attachAxis(line_axisY);
+    pid_ir3Series->attachAxis(line_axisX);     pid_ir3Series->attachAxis(line_axisY);
+    pid_ir4Series->attachAxis(line_axisX);     pid_ir4Series->attachAxis(line_axisY);
+    pid_ir5Series->attachAxis(line_axisX);     pid_ir5Series->attachAxis(line_axisY);
+    pid_ir6Series->attachAxis(line_axisX);     pid_ir6Series->attachAxis(line_axisY);
+    pid_ir7Series->attachAxis(line_axisX);     pid_ir7Series->attachAxis(line_axisY);
+    pid_ir8Series->attachAxis(line_axisX);     pid_ir8Series->attachAxis(line_axisY);
+
+    if (ui->chartView_line) {
+        ui->chartView_line->setChart(chartLine_mw);
+        ui->chartView_line->setRenderHint(QPainter::Antialiasing);
+    }
+
+    updatePIDChartRange();
 }
 
 void MainWindow::updatePIDChart(double time, double p, double i, double d, double out, double pLine, double dLine, double outLine)
 {
+    // Balance
     pid_pSeries->append(time, p);
     pid_iSeries->append(time, i);
     pid_dSeries->append(time, d);
     pid_outSeries->append(time, out);
 
+    // Line
     pid_pLineSeries->append(time, pLine);
     pid_dLineSeries->append(time, dLine);
     pid_outLineSeries->append(time, outLine);
 
-    // Limitar la cantidad de puntos para no saturar memoria
-    int maxPoints = 1000;
+    // Limitar la cantidad de puntos
+    const int maxPoints = 1000;
     while (pid_pSeries->count() > maxPoints) pid_pSeries->remove(0);
     while (pid_iSeries->count() > maxPoints) pid_iSeries->remove(0);
     while (pid_dSeries->count() > maxPoints) pid_dSeries->remove(0);
     while (pid_outSeries->count() > maxPoints) pid_outSeries->remove(0);
+
     while (pid_pLineSeries->count() > maxPoints) pid_pLineSeries->remove(0);
     while (pid_dLineSeries->count() > maxPoints) pid_dLineSeries->remove(0);
     while (pid_outLineSeries->count() > maxPoints) pid_outLineSeries->remove(0);
 
-    // Scroll del eje X (ventana de 10 segundos)
+    // Scroll del eje X para balance y linea
     if (time > 10.0) {
-        pid_axisX->setRange(time - 10.0, time);
+        bal_axisX->setRange(time - 10.0, time);
+        line_axisX->setRange(time - 10.0, time);
     } else {
-        pid_axisX->setRange(0, 10.0);
+        bal_axisX->setRange(0, 10.0);
+        line_axisX->setRange(0, 10.0);
     }
 
-    // Actualizar visibilidad y rango dinámico adaptativo
     updatePIDChartRange();
 }
 
@@ -1867,8 +2151,7 @@ void MainWindow::updateMPUChart(double time, double ax, double ay, double az, do
     pid_rollSeries->append(time, roll);
     pid_yawSeries->append(time, yaw);
 
-    // Limitar puntos
-    int maxPoints = 1000;
+    const int maxPoints = 1000;
     while (pid_axSeries->count() > maxPoints) pid_axSeries->remove(0);
     while (pid_aySeries->count() > maxPoints) pid_aySeries->remove(0);
     while (pid_azSeries->count() > maxPoints) pid_azSeries->remove(0);
@@ -1879,11 +2162,11 @@ void MainWindow::updateMPUChart(double time, double ax, double ay, double az, do
     while (pid_rollSeries->count() > maxPoints) pid_rollSeries->remove(0);
     while (pid_yawSeries->count() > maxPoints) pid_yawSeries->remove(0);
 
-    // Scroll del eje X
+    // Scroll del eje X para orientacion
     if (time > 10.0) {
-        pid_axisX->setRange(time - 10.0, time);
+        orient_axisX->setRange(time - 10.0, time);
     } else {
-        pid_axisX->setRange(0, 10.0);
+        orient_axisX->setRange(0, 10.0);
     }
 
     updatePIDChartRange();
@@ -1900,8 +2183,7 @@ void MainWindow::updateIRChart(double time, double ir1, double ir2, double ir3, 
     pid_ir7Series->append(time, ir7);
     pid_ir8Series->append(time, ir8);
 
-    // Limitar puntos
-    int maxPoints = 1000;
+    const int maxPoints = 1000;
     while (pid_ir1Series->count() > maxPoints) pid_ir1Series->remove(0);
     while (pid_ir2Series->count() > maxPoints) pid_ir2Series->remove(0);
     while (pid_ir3Series->count() > maxPoints) pid_ir3Series->remove(0);
@@ -1911,11 +2193,10 @@ void MainWindow::updateIRChart(double time, double ir1, double ir2, double ir3, 
     while (pid_ir7Series->count() > maxPoints) pid_ir7Series->remove(0);
     while (pid_ir8Series->count() > maxPoints) pid_ir8Series->remove(0);
 
-    // Scroll del eje X
     if (time > 10.0) {
-        pid_axisX->setRange(time - 10.0, time);
+        line_axisX->setRange(time - 10.0, time);
     } else {
-        pid_axisX->setRange(0, 10.0);
+        line_axisX->setRange(0, 10.0);
     }
 
     updatePIDChartRange();
@@ -1923,54 +2204,32 @@ void MainWindow::updateIRChart(double time, double ir1, double ir2, double ir3, 
 
 void MainWindow::updatePIDChartRange()
 {
-    double time = pid_axisX->max();
-    double yMin = std::numeric_limits<double>::max();
-    double yMax = std::numeric_limits<double>::lowest();
-    bool hasPoints = false;
+    auto autoRangeChart = [](QChart *chart, QValueAxis *axisX, QValueAxis *axisY, const QList<QPair<QLineSeries*, bool>> &seriesList, double defaultSpan) {
+        if (!chart || !axisX || !axisY) return;
 
-    struct SeriesInfo {
-        QLineSeries* series;
-        bool visible;
-    };
-    QList<SeriesInfo> seriesList = {
-        {pid_pSeries, ui->checkBox_P->isChecked()},
-        {pid_iSeries, ui->checkBox_I->isChecked()},
-        {pid_dSeries, ui->checkBox_D->isChecked()},
-        {pid_outSeries, ui->checkBox_Out->isChecked()},
-        {pid_pLineSeries, ui->checkBox_P_line->isChecked()},
-        {pid_dLineSeries, ui->checkBox_D_line->isChecked()},
-        {pid_outLineSeries, ui->checkBox_Out_line->isChecked()},
+        double time = axisX->max();
+        double xMin = qMax(0.0, time - 10.0);
+        double xMax = time;
+        double yMin = std::numeric_limits<double>::max();
+        double yMax = std::numeric_limits<double>::lowest();
+        bool hasPoints = false;
+        bool anyVisible = false;
 
-        {pid_axSeries, ui->checkBox_Ax->isChecked()},
-        {pid_aySeries, ui->checkBox_Ay->isChecked()},
-        {pid_azSeries, ui->checkBox_Az->isChecked()},
-        {pid_gxSeries, ui->checkBox_Gx->isChecked()},
-        {pid_gySeries, ui->checkBox_Gy->isChecked()},
-        {pid_gzSeries, ui->checkBox_Gz->isChecked()},
+        for (const auto &item : seriesList) {
+            QLineSeries *s = item.first;
+            bool visible = item.second;
+            if (!s) continue;
+            s->setVisible(visible);
 
-        {pid_pitchSeries, ui->checkBox_Pitch->isChecked()},
-        {pid_rollSeries, ui->checkBox_Roll->isChecked()},
-        {pid_yawSeries, ui->checkBox_Yaw->isChecked()},
+            const auto markers = chart->legend()->markers(s);
+            for (QLegendMarker *marker : markers) {
+                marker->setVisible(visible);
+            }
 
-        {pid_ir1Series, ui->checkBox_Ir1->isChecked()},
-        {pid_ir2Series, ui->checkBox_Ir2->isChecked()},
-        {pid_ir3Series, ui->checkBox_Ir3->isChecked()},
-        {pid_ir4Series, ui->checkBox_Ir4->isChecked()},
-        {pid_ir5Series, ui->checkBox_Ir5->isChecked()},
-        {pid_ir6Series, ui->checkBox_Ir6->isChecked()},
-        {pid_ir7Series, ui->checkBox_Ir7->isChecked()},
-        {pid_ir8Series, ui->checkBox_Ir8->isChecked()}
-    };
-
-    double xMin = qMax(0.0, time - 10.0);
-    double xMax = time;
-
-    for (const auto& info : seriesList) {
-        if (info.series) {
-            info.series->setVisible(info.visible);
-            if (info.visible) {
-                const QList<QPointF> points = info.series->points();
-                for (const QPointF& pt : points) {
+            if (visible) {
+                anyVisible = true;
+                const QList<QPointF> points = s->points();
+                for (const QPointF &pt : points) {
                     if (pt.x() >= xMin && pt.x() <= xMax) {
                         if (pt.y() < yMin) yMin = pt.y();
                         if (pt.y() > yMax) yMax = pt.y();
@@ -1979,20 +2238,55 @@ void MainWindow::updatePIDChartRange()
                 }
             }
         }
-    }
 
-    if (hasPoints) {
-        double margin = (yMax - yMin) * 0.1;
-        if (margin < 1.0) margin = 5.0;
-        pid_axisY->setRange(yMin - margin, yMax + margin);
-        pid_yMin = yMin;
-        pid_yMax = yMax;
-    } else {
-        pid_axisY->setRange(-10.0, 10.0);
-        pid_yMin = -10.0;
-        pid_yMax = 10.0;
-    }
+        chart->legend()->setVisible(anyVisible);
+
+        if (hasPoints) {
+            double margin = (yMax - yMin) * 0.15;
+            if (margin < 1.0) margin = 2.0;
+            axisY->setRange(yMin - margin, yMax + margin);
+        } else {
+            axisY->setRange(-defaultSpan, defaultSpan);
+        }
+    };
+
+    // 1. Orientacion (Pitch, Roll, Yaw, MPU)
+    autoRangeChart(chartOrientation_mw, orient_axisX, orient_axisY, {
+        {pid_pitchSeries, ui->checkBox_Pitch->isChecked()},
+        {pid_rollSeries,  ui->checkBox_Roll->isChecked()},
+        {pid_yawSeries,   ui->checkBox_Yaw->isChecked()},
+        {pid_axSeries,    ui->checkBox_Ax->isChecked()},
+        {pid_aySeries,    ui->checkBox_Ay->isChecked()},
+        {pid_azSeries,    ui->checkBox_Az->isChecked()},
+        {pid_gxSeries,    ui->checkBox_Gx->isChecked()},
+        {pid_gySeries,    ui->checkBox_Gy->isChecked()},
+        {pid_gzSeries,    ui->checkBox_Gz->isChecked()}
+    }, 30.0);
+
+    // 2. Balanceo (P, I, D, Out)
+    autoRangeChart(chartBalance_mw, bal_axisX, bal_axisY, {
+        {pid_pSeries,   ui->checkBox_P->isChecked()},
+        {pid_iSeries,   ui->checkBox_I->isChecked()},
+        {pid_dSeries,   ui->checkBox_D->isChecked()},
+        {pid_outSeries, ui->checkBox_Out->isChecked()}
+    }, 100.0);
+
+    // 3. Seguimiento de Linea (P_line, D_line, Out_line, IRs)
+    autoRangeChart(chartLine_mw, line_axisX, line_axisY, {
+        {pid_pLineSeries,   ui->checkBox_P_line->isChecked()},
+        {pid_dLineSeries,   ui->checkBox_D_line->isChecked()},
+        {pid_outLineSeries, ui->checkBox_Out_line->isChecked()},
+        {pid_ir1Series,     ui->checkBox_Ir1->isChecked()},
+        {pid_ir2Series,     ui->checkBox_Ir2->isChecked()},
+        {pid_ir3Series,     ui->checkBox_Ir3->isChecked()},
+        {pid_ir4Series,     ui->checkBox_Ir4->isChecked()},
+        {pid_ir5Series,     ui->checkBox_Ir5->isChecked()},
+        {pid_ir6Series,     ui->checkBox_Ir6->isChecked()},
+        {pid_ir7Series,     ui->checkBox_Ir7->isChecked()},
+        {pid_ir8Series,     ui->checkBox_Ir8->isChecked()}
+    }, 50.0);
 }
+
 
 void MainWindow::resetInterface() {
     paramsSynced = false;
@@ -2172,6 +2466,26 @@ void MainWindow::on_sendTurnLimit_clicked() {
 // ---------------------------------------------------------------------------
 // Exportar CSV de Sensores IR (último minuto)
 // ---------------------------------------------------------------------------
+
+double MainWindow::adcToDistanceCm(uint16_t adc) {
+    if (adc >= 4085 || adc < 50) {
+        return 99.9; // Fuera de rango o sin obstaculo proximo
+    }
+    if (adc >= 3800) {
+        // Calibracion lineal experimental (3906 -> 0 cm, ~0.1865 cm/punto)
+        double dist = (adc - 3906.0) * 0.1865;
+        if (dist < 2.0) dist = 2.0;
+        if (dist > 80.0) dist = 99.9;
+        return dist;
+    } else {
+        // Curva analógica inversa de sensor optico (para lecturas directas 200..3800)
+        double dist = 8000.0 / (double)adc;
+        if (dist < 2.0) dist = 2.0;
+        if (dist > 80.0) dist = 99.9;
+        return dist;
+    }
+}
+
 void MainWindow::exportIrCsvToFile() {
     bool lowerOk = false;
     QString fileNameLower;
@@ -2187,7 +2501,7 @@ void MainWindow::exportIrCsvToFile() {
             if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
                 QTextStream out(&file);
                 out << "ExportNum;" << m_irExportCount << "\n";
-                out << "Timestamp;IR1 (Der-Raw);IR3 (Cen-Raw);IR5 (Izq-Raw);Promedio\n";
+                out << "Timestamp;IR1 (Línea Izq);IR3 (Línea Cen);IR5 (Línea Der);Promedio\n";
                 for (const IrSample &s : m_irBuffer) {
                     uint32_t avg = ((uint32_t)s.ir1 + s.ir3 + s.ir5) / 3;
                     out << s.timestamp.toString("hh:mm:ss.zzz") << ";"
@@ -2218,7 +2532,7 @@ void MainWindow::exportIrCsvToFile() {
             if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
                 QTextStream out(&file);
                 out << "ExportNum;" << m_irExportCount << "\n";
-                out << "Timestamp;IR1;IR3;IR5;IR7;IR8;Promedio\n";
+                out << "Timestamp;IR0 (Der 90°);IR2 (Izq 90°);IR4 (Izq 45°);IR6 (Frontal);IR7 (Der 45°);Promedio\n";
                 for (const UpperIrSample &s : m_upperIrBuffer) {
                     uint32_t avg = ((uint32_t)s.ir1 + s.ir3 + s.ir5 + s.ir7 + s.ir8) / 5;
                     out << s.timestamp.toString("hh:mm:ss.zzz") << ";"
@@ -2254,4 +2568,128 @@ void MainWindow::on_pushButton_exportIrCsv_clicked() {
     // Enviar comando EXPORTIRCSV al STM32 para obtener el número de exportación
     uint8_t cmd[2] = { (uint8_t)EXPORTIRCSV, 0x00 };
     sendCommand(cmd, 2);
+}
+
+void MainWindow::toggleBlockAutoData(bool blocked) {
+    m_isCommBlocked = blocked;
+
+    if (ui->pushButton_blockAutoData) {
+        ui->pushButton_blockAutoData->blockSignals(true);
+        ui->pushButton_blockAutoData->setChecked(blocked);
+        ui->pushButton_blockAutoData->setText(blocked ? "🚫 ENVÍO BLOQUEADO (Click para reanudar)" : "⏸ BLOQUEAR ENVÍO AUTOMÁTICO");
+        ui->pushButton_blockAutoData->blockSignals(false);
+    }
+    if (ui->pushButton_blockAutoData_comm) {
+        ui->pushButton_blockAutoData_comm->blockSignals(true);
+        ui->pushButton_blockAutoData_comm->setChecked(blocked);
+        ui->pushButton_blockAutoData_comm->setText(blocked ? "🚫 ENVÍO BLOQUEADO (Click para reanudar)" : "⏸ BLOQUEAR ENVÍO AUTOMÁTICO (TEST MANUAL)");
+        ui->pushButton_blockAutoData_comm->blockSignals(false);
+    }
+
+    if (ui->label_comm_traffic_status) {
+        if (blocked) {
+            ui->label_comm_traffic_status->setText("Telemetría periódica: PAUSADA (Canal libre)");
+            ui->label_comm_traffic_status->setStyleSheet("color: #ff4d6d; font-weight: bold; font-size: 8pt;");
+        } else {
+            ui->label_comm_traffic_status->setText("Telemetría periódica: ACTIVA (~28 pkts/s)");
+            ui->label_comm_traffic_status->setStyleSheet("color: #00f2c3; font-weight: bold; font-size: 8pt;");
+        }
+    }
+
+    if (blocked) {
+        ui->textBrowserProcessed->append("*** TELEMETRÍA AUTOMÁTICA DETENIDA - CANAL DISPONIBLE PARA TEST INDIVIDUAL ***");
+    } else {
+        ui->textBrowserProcessed->append("*** TELEMETRÍA AUTOMÁTICA REANUDADA ***");
+    }
+}
+
+void MainWindow::on_pushButton_blockAutoData_clicked(bool checked) {
+    toggleBlockAutoData(checked);
+}
+
+void MainWindow::on_pushButton_blockAutoData_comm_clicked(bool checked) {
+    toggleBlockAutoData(checked);
+}
+
+void MainWindow::on_comboBox_CMD_currentIndexChanged(int index) {
+    Q_UNUSED(index);
+    if (!ui->comboBox_CMD) return;
+
+    if (ui->spinBox_cmdParam) {
+        ui->spinBox_cmdParam->setEnabled(true);
+    }
+}
+
+void MainWindow::on_pushButton_sendCommand_clicked() {
+    if (!ui->comboBox_CMD) return;
+
+    uint8_t cmdId = ui->comboBox_CMD->currentData().toUInt();
+    uint8_t payload[16];
+    uint8_t length = 0;
+    _udat w;
+
+    payload[length++] = cmdId;
+
+    bool isGetCommand = (cmdId == GETALIVE || cmdId == GETFIRMWARE || cmdId == GETMPU ||
+                         cmdId == GETADC || cmdId == GETINTERNALDATA || cmdId == GETPIDBALANCE ||
+                         cmdId == EXPORTIRCSV);
+
+    int paramVal = ui->spinBox_cmdParam ? ui->spinBox_cmdParam->value() : 0;
+
+    if (cmdId == SETROBOTMODE) {
+        payload[length++] = (uint8_t)paramVal;
+    } else if (!isGetCommand || paramVal != 0) {
+        w.i16[0] = (short)paramVal;
+        payload[length++] = w.ui8[0];
+        payload[length++] = w.ui8[1];
+    }
+
+    sendCommand(payload, length);
+
+    QString cmdName = ui->comboBox_CMD->currentText();
+    QString medium = "DESCONECTADO";
+    if (QTcpSocketClient && QTcpSocketClient->isOpen()) medium = "STATION TCP";
+    else if (QSerialPort1 && QSerialPort1->isOpen()) medium = "SERIAL";
+    else if (QUdpSocket1 && QUdpSocket1->isOpen()) medium = "STATION UDP";
+
+    QString logMsg = QString("*** COMANDO ENVIADO POR %1: %2 ***").arg(medium, cmdName);
+    if (!isGetCommand || paramVal != 0) {
+        logMsg += QString(" [Valor: %1]").arg(paramVal);
+    }
+    ui->textBrowserProcessed->append(logMsg);
+    if (ui->label_cmd_result) {
+        ui->label_cmd_result->setText(QString("Enviado [%1]: %2%3")
+            .arg(medium, cmdName)
+            .arg((!isGetCommand || paramVal != 0) ? QString(" (Valor: %1)").arg(paramVal) : ""));
+    }
+
+    // Historial de comandos enviados:
+    // El último comando en color ROJO (#ff4d6d) y negrita,
+    // comandos viejos en gris (#7f8599) y normal.
+    if (ui->listWidget_cmdHistory) {
+        for (int i = 0; i < ui->listWidget_cmdHistory->count(); ++i) {
+            QListWidgetItem *oldItem = ui->listWidget_cmdHistory->item(i);
+            if (oldItem) {
+                oldItem->setForeground(QBrush(QColor("#7f8599")));
+                QFont f = oldItem->font();
+                f.setBold(false);
+                oldItem->setFont(f);
+            }
+        }
+
+        QString itemText = QString("[%1] [%2] %3%4")
+            .arg(QTime::currentTime().toString("hh:mm:ss"))
+            .arg(medium)
+            .arg(cmdName)
+            .arg((!isGetCommand || paramVal != 0) ? QString(" (Valor: %1)").arg(paramVal) : "");
+
+        QListWidgetItem *newItem = new QListWidgetItem(itemText);
+        newItem->setForeground(QBrush(QColor("#ff4d6d"))); // ROJO para el último comando enviado
+        QFont boldFont = newItem->font();
+        boldFont.setBold(true);
+        newItem->setFont(boldFont);
+
+        ui->listWidget_cmdHistory->addItem(newItem);
+        ui->listWidget_cmdHistory->scrollToBottom();
+    }
 }

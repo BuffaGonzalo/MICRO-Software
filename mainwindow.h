@@ -26,6 +26,7 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QChart>
 #include <QtCharts/QValueAxis>
+#include <QtCharts/QLegendMarker>
 
 
 QT_BEGIN_NAMESPACE
@@ -128,18 +129,19 @@ private slots:
     void on_sendDodgeDir_clicked();
     void on_pushButton_setSoftAp_clicked();
 
-    void on_P1toP3_clicked();
-
-    void on_P1toP2_clicked();
-
-    void on_P2toP1_clicked();
-
-    void on_P3toP1_clicked();
-
-    void on_P3toP2_clicked();
-
-    void on_P2toP3_clicked();
+    void on_pushButton_blockAutoData_clicked(bool checked);
+    void on_pushButton_blockAutoData_comm_clicked(bool checked);
+    void on_pushButton_sendCommand_clicked();
+    void on_comboBox_CMD_currentIndexChanged(int index);
+    void toggleBlockAutoData(bool blocked);
+    void on_actionConn_triggered();
     void on_actionOpenDebug_triggered();
+    void on_btn_mode_balance_clicked();
+    void on_btn_mode_line_clicked();
+    void on_btn_mode_dodge_clicked();
+    void sendRobotMode(uint8_t modeId);
+    void updateRobotModeUI(uint8_t mode);
+    void updateNavSelection(int index);
 
 
     void on_pushButton_exportExcel_clicked();
@@ -177,6 +179,7 @@ private:
     int m_irExportCount = 0;  // Número de exportación devuelto por el STM32
 
     void exportIrCsvToFile();
+    double adcToDistanceCm(uint16_t adc);
 
     // Estadísticas
     int m_countSent = 0;
@@ -189,6 +192,7 @@ private:
     Ui::MainWindow *ui;
     QSerialPort *QSerialPort1;
     QLabel *statusMode;
+    qint64 m_lastRxTime = 0;
 
     QDialog *myDebugDialog;
 
@@ -199,7 +203,18 @@ private:
 
 
     // --- Gráfica PID embebida en MainWindow ---
+        // --- Gráficas de Telemetría (3 Gráficas en Visualización) ---
+    QChart       *chartOrientation_mw;
+    QChart       *chartBalance_mw;
+    QChart       *chartLine_mw;
     QChart       *chartPID_mw;
+
+    QValueAxis   *orient_axisX;
+    QValueAxis   *orient_axisY;
+    QValueAxis   *bal_axisX;
+    QValueAxis   *bal_axisY;
+    QValueAxis   *line_axisX;
+    QValueAxis   *line_axisY;
     QLineSeries  *pid_pSeries;
     QLineSeries  *pid_iSeries;
     QLineSeries  *pid_dSeries;
@@ -232,9 +247,6 @@ private:
     QLineSeries  *pid_ir8Series;
     QValueAxis   *pid_axisX;
     QValueAxis   *pid_axisY;
-    double        pid_yMin = -10.0;
-    double        pid_yMax =  10.0;
-
     // Valores calibrados guardados para cálculo del PID del seguidor
     uint16_t      m_calIr1 = 0;
     uint16_t      m_calIr3 = 0;
@@ -345,6 +357,7 @@ private:
         SETFRONTKD = 0xCE,
         SETDODGEMODE = 0xCF,
         SETSOFTAP = 0xD1,
+        SETROBOTMODE = 0xD2,
         EXPORTIRCSV  = 0xCA,
 
         UNKNOWCMD=0xFF,
@@ -379,6 +392,7 @@ private:
 
     QQuickWidget *view3D;
     float yawAcumulado = 0.0f; // Para acumular la rotación del giroscopio
+    bool m_isCommBlocked = false; // Bloqueo de telemetria para testeo manual
 
 };
 #endif // MAINWINDOW_H

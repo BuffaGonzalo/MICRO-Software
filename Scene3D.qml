@@ -105,8 +105,8 @@ View3D {
         eulerRotation.x: -90
 
         materials: PrincipledMaterial {
-            baseColor: "#FFFFFF" // Un color gris tipo asfalto
-            roughness: 0.9       // Opaco, para que no parezca un espejo
+            baseColor: "#9ca3af" // Gris claro mate suave acorde a la interfaz
+            roughness: 0.85      // Opaco, para que no parezca un espejo
             metalness: 0.0
         }
     }
