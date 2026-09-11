@@ -43,12 +43,104 @@ QPushButton:hover {
     color: white;
 }
 
-QLineEdit, QSpinBox, QComboBox, QTextBrowser {
+QLineEdit, QTextBrowser, QComboBox {
     background-color: #1d1e2b;
     color: #00f2c3;
     border: 1px solid #27293d;
     border-radius: 4px;
     padding: 3px;
+}
+
+QSpinBox, QDoubleSpinBox {
+    background-color: #1d1e2b;
+    color: #00f2c3;
+    border: 1px solid #27293d;
+    border-radius: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 4px;
+    padding-right: 22px;
+}
+
+QSpinBox:focus, QDoubleSpinBox:focus {
+    border: 1px solid #00f2c3;
+}
+
+QSpinBox::up-button, QDoubleSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 18px;
+    background-color: #27293d;
+    border-left: 1px solid #1d1e2b;
+    border-bottom: 1px solid #1d1e2b;
+    border-top-right-radius: 4px;
+}
+
+QSpinBox::up-button:hover, QDoubleSpinBox::up-button:hover {
+    background-color: #e14eca;
+}
+
+QSpinBox::up-button:pressed, QDoubleSpinBox::up-button:pressed {
+    background-color: #00f2c3;
+}
+
+QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {
+    image: url(:/resources/icons/arrow_up.png);
+    width: 9px;
+    height: 9px;
+    subcontrol-origin: margin;
+    subcontrol-position: center;
+}
+
+QSpinBox::up-arrow:hover, QDoubleSpinBox::up-arrow:hover {
+    image: url(:/resources/icons/arrow_up_hover.png);
+}
+
+QSpinBox::up-arrow:pressed, QDoubleSpinBox::up-arrow:pressed {
+    image: url(:/resources/icons/arrow_up_pressed.png);
+}
+
+QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off,
+QDoubleSpinBox::up-arrow:disabled, QDoubleSpinBox::up-arrow:off {
+    image: url(:/resources/icons/arrow_up_disabled.png);
+}
+
+QSpinBox::down-button, QDoubleSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 18px;
+    background-color: #27293d;
+    border-left: 1px solid #1d1e2b;
+    border-bottom-right-radius: 4px;
+}
+
+QSpinBox::down-button:hover, QDoubleSpinBox::down-button:hover {
+    background-color: #e14eca;
+}
+
+QSpinBox::down-button:pressed, QDoubleSpinBox::down-button:pressed {
+    background-color: #00f2c3;
+}
+
+QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
+    image: url(:/resources/icons/arrow_down.png);
+    width: 9px;
+    height: 9px;
+    subcontrol-origin: margin;
+    subcontrol-position: center;
+}
+
+QSpinBox::down-arrow:hover, QDoubleSpinBox::down-arrow:hover {
+    image: url(:/resources/icons/arrow_down_hover.png);
+}
+
+QSpinBox::down-arrow:pressed, QDoubleSpinBox::down-arrow:pressed {
+    image: url(:/resources/icons/arrow_down_pressed.png);
+}
+
+QSpinBox::down-arrow:disabled, QSpinBox::down-arrow:off,
+QDoubleSpinBox::down-arrow:disabled, QDoubleSpinBox::down-arrow:off {
+    image: url(:/resources/icons/arrow_down_disabled.png);
 }
 
 QLabel {
@@ -78,7 +170,7 @@ QCheckBox {
     color: #e2e2e2;
 }
 /* Boxes para Telemetria y Sensores/Modo Esquivado en Main, 3D, Graficas y Comandos */
-QFrame#box_linea, QFrame#box_balance, QFrame#box_motores, QFrame#box_esquivar, QFrame#box_sensors, QFrame#box_dodgeDir, QFrame#box_3d_container, QFrame#box_chart_orientation, QFrame#box_chart_balance, QFrame#box_chart_line, QFrame#box_manual_commands {
+QFrame#box_linea, QFrame#box_balance, QFrame#box_motores, QFrame#box_motores_rot, QFrame#box_esquivar, QFrame#box_sensors, QFrame#box_dodgeDir, QFrame#box_3d_container, QFrame#box_chart_orientation, QFrame#box_chart_balance, QFrame#box_chart_line, QFrame#box_manual_commands {
     background-color: #151522;
     border-top: 1px solid #2d2f44;
     border-left: 1px solid #2d2f44;
@@ -117,7 +209,7 @@ QFrame#item_front_kp, QFrame#item_front_kd {
 }
 
 /* Titulos destacados de las secciones */
-QLabel#label_sensors_10, QLabel#label_sensors_9, QLabel#label_sensors_3, QLabel#label_sensors_4,
+QLabel#label_sensors_10, QLabel#label_sensors_9, QLabel#label_sensors_3, QLabel#label_sensors_motores_rot, QLabel#label_sensors_4,
 QLabel#label_dodgeDir {
     color: #00f2c3;
     font-size: 11pt;
@@ -371,34 +463,42 @@ QFrame#header_navigation_bar {
     background-color: #13141f;
     border: 1px solid #25283b;
     border-radius: 8px;
-    padding: 2px;
+    padding: 0px;
 }
 
 /* Botones de Pestanas de Navegacion */
 QPushButton#btn_nav_infrarrojos, QPushButton#btn_nav_visualizacion,
-QPushButton#btn_nav_tuning {
-    background-color: #1a1c2b;
-    color: #8c93a8;
-    border: 1px solid #272a40;
+QPushButton#btn_nav_tuning, QPushButton#btn_nav_goto {
+    background-color: #27293d;
+    color: #00f2c3;
+    border: 1px solid #e14eca;
     border-radius: 6px;
-    padding: 5px 14px;
-    font-size: 8pt;
+    padding: 0px 14px;
+    font-size: 8.5pt;
     font-weight: bold;
-    min-height: 22px;
+    min-height: 30px;
+    max-height: 30px;
 }
 
 QPushButton#btn_nav_infrarrojos:hover, QPushButton#btn_nav_visualizacion:hover,
-QPushButton#btn_nav_tuning:hover:hover {
-    background-color: #24273d;
-    color: #ffffff;
-    border-color: #3b3f5c;
+QPushButton#btn_nav_tuning:hover, QPushButton#btn_nav_goto:hover {
+    background-color: #3d2047;
+    color: #00f2c3;
+    border: 1.5px solid #e14eca;
 }
 
 QPushButton#btn_nav_infrarrojos:checked, QPushButton#btn_nav_visualizacion:checked,
-QPushButton#btn_nav_tuning:checked:checked {
-    background-color: #1b263b;
+QPushButton#btn_nav_tuning:checked, QPushButton#btn_nav_goto:checked {
+    background-color: #4a154b;
     color: #00f2c3;
-    border: 1.5px solid #00f2c3;
+    border: 2px solid #e14eca;
+}
+
+QPushButton#btn_nav_infrarrojos:checked:hover, QPushButton#btn_nav_visualizacion:checked:hover,
+QPushButton#btn_nav_tuning:checked:hover, QPushButton#btn_nav_goto:checked:hover {
+    background-color: #551956;
+    color: #00f2c3;
+    border: 2px solid #e14eca;
 }
 
   /* Botones de Modo del Robot (Derecha) */
@@ -408,19 +508,26 @@ QPushButton#btn_nav_tuning:checked:checked {
       color: #00bcd4;
       border: 1px solid #00bcd4;
       border-radius: 6px;
-      padding: 5px 12px;
-      font-size: 8pt;
+      padding: 0px 12px;
+      font-size: 8.5pt;
       font-weight: bold;
-      min-height: 22px;
+      min-height: 30px;
+      max-height: 30px;
   }
   QPushButton#btn_mode_balance:hover {
-      background-color: #00bcd4;
-      color: #0d121c;
+      background-color: #183344;
+      color: #00bcd4;
+      border: 1.5px solid #00bcd4;
   }
   QPushButton#btn_mode_balance:checked {
-      background-color: #00bcd4;
-      color: #0d121c;
-      border: 1.5px solid #ffffff;
+      background-color: #0f384a;
+      color: #00bcd4;
+      border: 2px solid #00bcd4;
+  }
+  QPushButton#btn_mode_balance:checked:hover {
+      background-color: #13465c;
+      color: #00bcd4;
+      border: 2px solid #00bcd4;
   }
   
   QPushButton#btn_mode_line {
@@ -428,19 +535,26 @@ QPushButton#btn_nav_tuning:checked:checked {
       color: #00e676;
       border: 1px solid #00e676;
       border-radius: 6px;
-      padding: 5px 14px;
-      font-size: 8pt;
+      padding: 0px 12px;
+      font-size: 8.5pt;
       font-weight: bold;
-      min-height: 22px;
+      min-height: 30px;
+      max-height: 30px;
   }
   QPushButton#btn_mode_line:hover {
-      background-color: #00e676;
-      color: #081a10;
+      background-color: #123822;
+      color: #00e676;
+      border: 1.5px solid #00e676;
   }
   QPushButton#btn_mode_line:checked {
-      background-color: #00e676;
-      color: #081a10;
-      border: 1.5px solid #ffffff;
+      background-color: #0d381e;
+      color: #00e676;
+      border: 2px solid #00e676;
+  }
+  QPushButton#btn_mode_line:checked:hover {
+      background-color: #114726;
+      color: #00e676;
+      border: 2px solid #00e676;
   }
 
   QPushButton#btn_mode_dodge {
@@ -448,19 +562,76 @@ QPushButton#btn_nav_tuning:checked:checked {
       color: #ff9100;
       border: 1px solid #ff9100;
       border-radius: 6px;
-      padding: 5px 12px;
-      font-size: 8pt;
+      padding: 0px 12px;
+      font-size: 8.5pt;
       font-weight: bold;
-      min-height: 22px;
+      min-height: 30px;
+      max-height: 30px;
   }
   QPushButton#btn_mode_dodge:hover {
-      background-color: #ff9100;
-      color: #1a0f00;
+      background-color: #3b2a14;
+      color: #ff9100;
+      border: 1.5px solid #ff9100;
   }
   QPushButton#btn_mode_dodge:checked {
-      background-color: #ff9100;
-      color: #1a0f00;
-      border: 1.5px solid #ffffff;
+      background-color: #42280a;
+      color: #ff9100;
+      border: 2px solid #ff9100;
+  }
+  QPushButton#btn_mode_dodge:checked:hover {
+      background-color: #4f310d;
+      color: #ff9100;
+      border: 2px solid #ff9100;
+  }
+
+  QPushButton#btn_mode_goto {
+      background-color: #2a1217;
+      color: #ff5252;
+      border: 1px solid #ff5252;
+      border-radius: 6px;
+      padding: 0px 12px;
+      font-size: 8.5pt;
+      font-weight: bold;
+      min-height: 30px;
+      max-height: 30px;
+  }
+  QPushButton#btn_mode_goto:hover {
+      background-color: #38191f;
+      color: #ff5252;
+      border: 1.5px solid #ff5252;
+  }
+  QPushButton#btn_mode_goto:checked {
+      background-color: #0d381e;
+      color: #00e676;
+      border: 2px solid #00e676;
+  }
+  QPushButton#btn_mode_goto:checked:hover {
+      background-color: #114726;
+      color: #00e676;
+      border: 2px solid #00e676;
+  }
+
+  /* Teclas de Control Modo GoTo estilo teclado */
+  QPushButton#btn_goto_up, QPushButton#btn_goto_down,
+  QPushButton#btn_goto_left, QPushButton#btn_goto_right, QPushButton#btn_goto_center {
+      background-color: #151828;
+      color: #e2e8f0;
+      border: 2px solid #2e3856;
+      border-radius: 10px;
+      font-size: 11pt;
+      font-weight: bold;
+  }
+  QPushButton#btn_goto_up:hover, QPushButton#btn_goto_down:hover,
+  QPushButton#btn_goto_left:hover, QPushButton#btn_goto_right:hover, QPushButton#btn_goto_center:hover {
+      background-color: #1e2238;
+      border-color: #00e676;
+      color: #ffffff;
+  }
+  QPushButton#btn_goto_up:pressed, QPushButton#btn_goto_down:pressed,
+  QPushButton#btn_goto_left:pressed, QPushButton#btn_goto_right:pressed, QPushButton#btn_goto_center:pressed {
+      background-color: #00e676;
+      color: #081a10;
+      border-color: #ffffff;
   }
 
   QPushButton#pushButton_blockAutoData, QPushButton#pushButton_blockAutoData_comm {
@@ -618,10 +789,16 @@ QMenu::item:selected {
        </property>
        <item>
         <widget class="QPushButton" name="btn_nav_infrarrojos">
+         <property name="focusPolicy">
+          <enum>Qt::FocusPolicy::NoFocus</enum>
+         </property>
          <property name="text">
           <string>General</string>
          </property>
          <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
           <bool>true</bool>
          </property>
          <property name="checked">
@@ -631,24 +808,52 @@ QMenu::item:selected {
        </item>
        <item>
         <widget class="QPushButton" name="btn_nav_visualizacion">
+         <property name="focusPolicy">
+          <enum>Qt::FocusPolicy::NoFocus</enum>
+         </property>
          <property name="text">
           <string>Visualización</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
          </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="btn_nav_tuning">
+         <property name="focusPolicy">
+          <enum>Qt::FocusPolicy::NoFocus</enum>
+         </property>
          <property name="text">
           <string>Configuración</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
          </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
+        <item>
+         <widget class="QPushButton" name="btn_nav_goto">
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::NoFocus</enum>
+          </property>
+          <property name="text">
+           <string>Control GoTo</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
        <item>
         <spacer name="spacer_nav_bar">
          <property name="orientation">
@@ -664,6 +869,9 @@ QMenu::item:selected {
        </item>
        <item>
         <widget class="QPushButton" name="btn_mode_balance">
+         <property name="focusPolicy">
+          <enum>Qt::FocusPolicy::NoFocus</enum>
+         </property>
          <property name="text">
           <string>Balance</string>
          </property>
@@ -677,6 +885,9 @@ QMenu::item:selected {
        </item>
        <item>
         <widget class="QPushButton" name="btn_mode_line">
+         <property name="focusPolicy">
+          <enum>Qt::FocusPolicy::NoFocus</enum>
+         </property>
          <property name="text">
           <string>Seguir Línea</string>
          </property>
@@ -690,6 +901,9 @@ QMenu::item:selected {
        </item>
        <item>
         <widget class="QPushButton" name="btn_mode_dodge">
+         <property name="focusPolicy">
+          <enum>Qt::FocusPolicy::NoFocus</enum>
+         </property>
          <property name="text">
           <string>Esquivar</string>
          </property>
@@ -701,13 +915,29 @@ QMenu::item:selected {
          </property>
         </widget>
        </item>
+        <item>
+         <widget class="QPushButton" name="btn_mode_goto">
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::NoFocus</enum>
+          </property>
+          <property name="text">
+           <string>GoTo</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
       </layout>
      </widget>
     </item>
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="MAIN">
        <widget class="QFrame" name="box_dodgeDir">
@@ -1926,6 +2156,18 @@ QMenu::item:selected {
          </property>
          <item>
           <widget class="QLabel" name="label_title_3d">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>26</height>
+            </size>
+           </property>
            <property name="font">
             <font>
              <pointsize>10</pointsize>
@@ -1945,6 +2187,12 @@ QMenu::item:selected {
          </item>
          <item>
           <widget class="QFrame" name="frame_3d_viewport">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
            <property name="styleSheet">
             <string notr="true">QFrame#frame_3d_viewport { background-color: #101018; border-top: 2px solid #3d405b; border-left: 2px solid #3d405b; border-bottom: 2px solid #080810; border-right: 2px solid #080810; border-radius: 6px; }</string>
            </property>
@@ -1966,6 +2214,12 @@ QMenu::item:selected {
             </property>
             <item>
              <widget class="QQuickWidget" name="AutoWidget">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
               <property name="resizeMode">
                <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
               </property>
@@ -2016,7 +2270,7 @@ QMenu::item:selected {
             <string notr="true">color: #00f2c3; font-weight: bold; padding-bottom: 2px;</string>
            </property>
            <property name="text">
-            <string>TEST DE COMANDOS INDIVIDUALES</string>
+            <string>COMANDOS MANUALES</string>
            </property>
           </widget>
          </item>
@@ -2051,7 +2305,7 @@ QMenu::item:selected {
             </font>
            </property>
            <property name="text">
-            <string>⏸ BLOQUEAR ENVÍO AUTOMÁTICO</string>
+            <string>BLOQUEAR ENVÍO AUTOMÁTICO</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -2111,10 +2365,35 @@ QMenu::item:selected {
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="pushButton_cmdParam_minus">
+             <property name="minimumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QSpinBox" name="spinBox_cmdParam">
              <property name="minimumSize">
               <size>
-               <width>110</width>
+               <width>80</width>
                <height>28</height>
               </size>
              </property>
@@ -2123,6 +2402,31 @@ QMenu::item:selected {
              </property>
              <property name="maximum">
               <number>10000</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_cmdParam_plus">
+             <property name="minimumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>28</width>
+               <height>28</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>+</string>
              </property>
             </widget>
            </item>
@@ -2143,7 +2447,7 @@ QMenu::item:selected {
             </font>
            </property>
            <property name="text">
-            <string>🚀 ENVIAR COMANDO</string>
+            <string>ENVIAR COMANDO</string>
            </property>
           </widget>
          </item>
@@ -2652,10 +2956,10 @@ QMenu::item:selected {
        <widget class="QFrame" name="box_balance">
         <property name="geometry">
          <rect>
-          <x>30</x>
-          <y>30</y>
-          <width>270</width>
-          <height>780</height>
+          <x>20</x>
+          <y>20</y>
+          <width>258</width>
+          <height>760</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_box_balance">
@@ -3055,10 +3359,10 @@ QMenu::item:selected {
        <widget class="QFrame" name="box_linea">
         <property name="geometry">
          <rect>
-          <x>324</x>
-          <y>30</y>
-          <width>270</width>
-          <height>780</height>
+          <x>294</x>
+          <y>20</y>
+          <width>258</width>
+          <height>760</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_box_linea">
@@ -3449,10 +3753,10 @@ QMenu::item:selected {
        <widget class="QFrame" name="box_esquivar">
         <property name="geometry">
          <rect>
-          <x>618</x>
-          <y>30</y>
-          <width>270</width>
-          <height>780</height>
+          <x>568</x>
+          <y>20</y>
+          <width>258</width>
+          <height>760</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_box_esquivar">
@@ -3752,7 +4056,14 @@ QMenu::item:selected {
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_30">
               <item>
-               <widget class="QSpinBox" name="setCornerDist"/>
+               <widget class="QSpinBox" name="setCornerDist">
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+                <property name="value">
+                 <number>800</number>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QPushButton" name="sendCornerDist">
@@ -3807,7 +4118,7 @@ QMenu::item:selected {
                  <number>10000</number>
                 </property>
                 <property name="value">
-                 <number>20</number>
+                 <number>9</number>
                 </property>
                </widget>
               </item>
@@ -3864,7 +4175,7 @@ QMenu::item:selected {
                  <number>10000</number>
                 </property>
                 <property name="value">
-                 <number>25</number>
+                 <number>5</number>
                 </property>
                </widget>
               </item>
@@ -3981,7 +4292,7 @@ QMenu::item:selected {
                  <number>10000</number>
                 </property>
                 <property name="value">
-                 <number>4</number>
+                 <number>40</number>
                 </property>
                </widget>
               </item>
@@ -4015,10 +4326,10 @@ QMenu::item:selected {
        <widget class="QFrame" name="box_motores">
         <property name="geometry">
          <rect>
-          <x>912</x>
-          <y>30</y>
-          <width>270</width>
-          <height>780</height>
+          <x>842</x>
+          <y>20</y>
+          <width>258</width>
+          <height>760</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_box_motores">
@@ -4333,6 +4644,59 @@ QMenu::item:selected {
           </widget>
          </item>
          <item>
+          <spacer name="verticalSpacer_motores">
+           <property name="orientation">
+            <enum>Qt::Orientation::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QFrame" name="box_motores_rot">
+        <property name="geometry">
+         <rect>
+          <x>1116</x>
+          <y>20</y>
+          <width>258</width>
+          <height>760</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_box_motores_rot">
+         <property name="spacing">
+          <number>6</number>
+         </property>
+         <property name="leftMargin">
+          <number>10</number>
+         </property>
+         <property name="topMargin">
+          <number>10</number>
+         </property>
+         <property name="rightMargin">
+          <number>10</number>
+         </property>
+         <property name="bottomMargin">
+          <number>10</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_sensors_motores_rot">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>MOTORES (ROTACIÓN)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QFrame" name="item_pwm_lrot">
            <layout class="QVBoxLayout" name="layout_item_pwm_lrot">
             <property name="spacing">
@@ -4576,7 +4940,7 @@ QMenu::item:selected {
           </widget>
          </item>
          <item>
-          <spacer name="verticalSpacer_motores">
+          <spacer name="verticalSpacer_motores_rot">
            <property name="orientation">
             <enum>Qt::Orientation::Vertical</enum>
            </property>
@@ -4590,8 +4954,738 @@ QMenu::item:selected {
          </item>
         </layout>
        </widget>
+
       </widget>
-      <widget class="QWidget" name="DEBUG_PAGE">
+            <widget class="QWidget" name="GOTO_PAGE">
+       <layout class="QVBoxLayout" name="verticalLayout_gotoPage">
+        <property name="spacing">
+         <number>12</number>
+        </property>
+        <property name="leftMargin">
+         <number>16</number>
+        </property>
+        <property name="topMargin">
+         <number>12</number>
+        </property>
+        <property name="rightMargin">
+         <number>16</number>
+        </property>
+        <property name="bottomMargin">
+         <number>12</number>
+        </property>
+        <item>
+         <widget class="QFrame" name="frame_gotoHeader">
+          <property name="styleSheet">
+           <string notr="true">#frame_gotoHeader { background-color: #161827; border: 1px solid #2e3553; border-radius: 10px; padding: 6px 12px; }</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_gotoHeader">
+           <item>
+            <widget class="QLabel" name="label_gotoTitle">
+             <property name="font">
+              <font>
+               <pointsize>13</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color: #ff5252;</string>
+             </property>
+             <property name="text">
+              <string>MODO GOTO - CONTROL AUTÓNOMO / REMOTO</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="spacer_gotoHeader">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_gotoStatusBadge">
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: #2a1217; color: #ff5252; border: 1px solid #ff5252; border-radius: 12px; padding: 4px 14px; font-weight: bold;</string>
+             </property>
+             <property name="text">
+              <string>● GOTO STANDBY</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_goto_activate">
+             <property name="focusPolicy">
+              <enum>Qt::FocusPolicy::NoFocus</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton#btn_goto_activate { background-color: #ff5252; color: #1a080a; border: none; border-radius: 6px; font-weight: bold; padding: 6px 14px; } QPushButton#btn_goto_activate:hover { background-color: #ff6e6e; } QPushButton#btn_goto_activate:pressed { background-color: #e04545; }</string>
+             </property>
+             <property name="text">
+              <string>Activar Modo GoTo</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_gotoContent" stretch="5,6">
+          <property name="spacing">
+           <number>16</number>
+          </property>
+          <item>
+           <widget class="QFrame" name="frame_gotoKeypad">
+            <property name="styleSheet">
+             <string notr="true">#frame_gotoKeypad { background-color: #121422; border: 1px solid #23273e; border-radius: 12px; }</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_keypadBox">
+             <property name="spacing">
+              <number>10</number>
+             </property>
+             <property name="leftMargin">
+              <number>16</number>
+             </property>
+             <property name="topMargin">
+              <number>16</number>
+             </property>
+             <property name="rightMargin">
+              <number>16</number>
+             </property>
+             <property name="bottomMargin">
+              <number>16</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label_keypadTitle">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: #8c93a8; letter-spacing: 1px;</string>
+               </property>
+               <property name="text">
+                <string>CRUCETA DE MOVIMIENTO (TECLADO / MOUSE)</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="spacer_keypadTop">
+               <property name="orientation">
+                <enum>Qt::Orientation::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <layout class="QGridLayout" name="gridLayout_arrowKeys">
+               <property name="spacing">
+                <number>10</number>
+               </property>
+               <item row="0" column="1">
+                <widget class="QPushButton" name="btn_goto_up">
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>90</width>
+                   <height>75</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>▲&#10;+ Setpoint</string>
+                 </property>
+                 <property name="toolTip">
+                  <string>Flecha Arriba: Aumentar inclinación / avance</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QPushButton" name="btn_goto_left">
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>90</width>
+                   <height>75</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>◄&#10;Girar Izq</string>
+                 </property>
+                 <property name="toolTip">
+                  <string>Flecha Izquierda: Rotar sobre propio eje a la izquierda</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QPushButton" name="btn_goto_down">
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>90</width>
+                   <height>75</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>▼&#10;- Setpoint</string>
+                 </property>
+                 <property name="toolTip">
+                  <string>Flecha Abajo: Reducir inclinación</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QPushButton" name="btn_goto_right">
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>90</width>
+                   <height>75</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>►&#10;Girar Der</string>
+                 </property>
+                 <property name="toolTip">
+                  <string>Flecha Derecha: Rotar sobre propio eje a la derecha</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QPushButton" name="btn_goto_center">
+                 <property name="focusPolicy">
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>90</width>
+                   <height>38</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">font-size: 8pt; color: #00bcd4; border-color: #00bcd4;</string>
+                 </property>
+                 <property name="text">
+                  <string>⟲ 0.0°</string>
+                 </property>
+                 <property name="toolTip">
+                  <string>Centrar setpoint a 0.0°</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="spacer_keypadBottom">
+               <property name="orientation">
+                <enum>Qt::Orientation::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QFrame" name="frame_gotoLegend">
+               <property name="styleSheet">
+                <string notr="true">#frame_gotoLegend { background-color: #171b2d; border: 1px dashed #2f3758; border-radius: 8px; padding: 6px; }</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_gotoLegend">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <property name="leftMargin">
+                 <number>8</number>
+                </property>
+                <property name="topMargin">
+                 <number>6</number>
+                </property>
+                <property name="rightMargin">
+                 <number>8</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>6</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="label_legend1">
+                  <property name="styleSheet">
+                   <string notr="true">color: #7e87a2; font-size: 8pt;</string>
+                  </property>
+                  <property name="text">
+                   <string>&lt;b&gt;Atajos activos en esta pestaña:&lt;/b&gt;</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_legend2">
+                  <property name="styleSheet">
+                   <string notr="true">color: #a4adc7; font-size: 8pt;</string>
+                  </property>
+                  <property name="text">
+                   <string>• &lt;b&gt;↑ Arriba:&lt;/b&gt; Suma setpoint progresivo</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_legend3">
+                  <property name="styleSheet">
+                   <string notr="true">color: #a4adc7; font-size: 8pt;</string>
+                  </property>
+                  <property name="text">
+                   <string>• &lt;b&gt;↓ Abajo:&lt;/b&gt; Baja setpoint progresivo</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_legend4">
+                  <property name="styleSheet">
+                   <string notr="true">color: #a4adc7; font-size: 8pt;</string>
+                  </property>
+                  <property name="text">
+                   <string>• &lt;b&gt;← / →:&lt;/b&gt; Rota sobre su propio eje (mantiene balance)</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_legend5">
+                  <property name="styleSheet">
+                   <string notr="true">color: #00f2c3; font-size: 8pt;</string>
+                  </property>
+                  <property name="text">
+                   <string>• &lt;b&gt;R:&lt;/b&gt; Resetear setpoint a 0.0°</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_gotoRight">
+            <property name="spacing">
+             <number>12</number>
+            </property>
+            <item>
+             <widget class="QFrame" name="frame_gotoTelemetry">
+              <property name="styleSheet">
+               <string notr="true">#frame_gotoTelemetry { background-color: #121422; border: 1px solid #23273e; border-radius: 12px; }</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_teleBox">
+               <property name="spacing">
+                <number>10</number>
+               </property>
+               <property name="leftMargin">
+                <number>16</number>
+               </property>
+               <property name="topMargin">
+                <number>14</number>
+               </property>
+               <property name="rightMargin">
+                <number>16</number>
+               </property>
+               <property name="bottomMargin">
+                <number>14</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="label_teleTitle">
+                 <property name="font">
+                  <font>
+                   <pointsize>10</pointsize>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: #8c93a8; letter-spacing: 1px;</string>
+                 </property>
+                 <property name="text">
+                  <string>TELEMETRÍA DE ÁNGULOS EN TIEMPO REAL</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_anglesDisplay">
+                 <property name="spacing">
+                  <number>12</number>
+                 </property>
+                 <item>
+                  <widget class="QFrame" name="box_gotoSetpoint">
+                   <property name="styleSheet">
+                    <string notr="true">#box_gotoSetpoint { background-color: #171b2d; border: 1.5px solid #00bcd4; border-radius: 10px; padding: 8px; }</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_spDisplay">
+                    <property name="spacing">
+                     <number>4</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="label_spTitle">
+                      <property name="styleSheet">
+                       <string notr="true">color: #00bcd4; font-size: 8pt; font-weight: bold;</string>
+                      </property>
+                      <property name="text">
+                       <string>ÁNGULO COLOCADO (SETPOINT)</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="lbl_goto_setpoint_deg">
+                      <property name="font">
+                       <font>
+                        <pointsize>18</pointsize>
+                        <bold>true</bold>
+                       </font>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">color: #00f2c3;</string>
+                      </property>
+                      <property name="text">
+                       <string>-10.00°</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="lbl_goto_setpoint_raw">
+                      <property name="styleSheet">
+                       <string notr="true">color: #7b85a3; font-size: 8pt;</string>
+                      </property>
+                      <property name="text">
+                       <string>Valor crudo: -1000</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="box_gotoActual">
+                   <property name="styleSheet">
+                    <string notr="true">#box_gotoActual { background-color: #171b2d; border: 1.5px solid #3d7bfd; border-radius: 10px; padding: 8px; }</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_actDisplay">
+                    <property name="spacing">
+                     <number>4</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="label_actTitle">
+                      <property name="styleSheet">
+                       <string notr="true">color: #79a6ff; font-size: 8pt; font-weight: bold;</string>
+                      </property>
+                      <property name="text">
+                       <string>ÁNGULO ACTUAL DEL AUTITO</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="lbl_goto_current_deg">
+                      <property name="font">
+                       <font>
+                        <pointsize>18</pointsize>
+                        <bold>true</bold>
+                       </font>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">color: #ffffff;</string>
+                      </property>
+                      <property name="text">
+                       <string>0.00°</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="lbl_goto_error">
+                      <property name="styleSheet">
+                       <string notr="true">color: #ffb74d; font-size: 8pt;</string>
+                      </property>
+                      <property name="text">
+                       <string>Error: 0.00°</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="box_gotoYaw">
+                   <property name="styleSheet">
+                    <string notr="true">#box_gotoYaw { background-color: #171b2d; border: 1.5px solid #bd00ff; border-radius: 10px; padding: 8px; }</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_yawDisplay">
+                    <property name="spacing">
+                     <number>4</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="label_yawTitle">
+                      <property name="styleSheet">
+                       <string notr="true">color: #bd00ff; font-size: 8pt; font-weight: bold;</string>
+                      </property>
+                      <property name="text">
+                       <string>YAW (ROTACIÓN RELATIVA)</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="lbl_goto_yaw_deg">
+                      <property name="font">
+                       <font>
+                        <pointsize>18</pointsize>
+                        <bold>true</bold>
+                       </font>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">color: #e040fb;</string>
+                      </property>
+                      <property name="text">
+                       <string>0.00°</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="lbl_goto_yaw_desc">
+                      <property name="styleSheet">
+                       <string notr="true">color: #7b85a3; font-size: 8pt;</string>
+                      </property>
+                      <property name="text">
+                       <string>Ref. inicio GoTo (gz)</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="btn_goto_reset_yaw">
+                      <property name="focusPolicy">
+                       <enum>Qt::FocusPolicy::NoFocus</enum>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>22</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font-size: 7.5pt; color: #e040fb; border: 1px solid #bd00ff; border-radius: 4px; padding: 2px;</string>
+                      </property>
+                      <property name="text">
+                       <string>⟲ Reset Yaw</string>
+                      </property>
+                      <property name="toolTip">
+                       <string>Poner a 0.0° la referencia del ángulo de Yaw</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_gotoSettings">
+              <property name="styleSheet">
+               <string notr="true">#frame_gotoSettings { background-color: #121422; border: 1px solid #23273e; border-radius: 12px; }</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_settingsBox">
+               <property name="spacing">
+                <number>12</number>
+               </property>
+               <property name="leftMargin">
+                <number>16</number>
+               </property>
+               <property name="topMargin">
+                <number>14</number>
+               </property>
+               <property name="rightMargin">
+                <number>16</number>
+               </property>
+               <property name="bottomMargin">
+                <number>14</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="label_settingsTitle">
+                 <property name="font">
+                  <font>
+                   <pointsize>10</pointsize>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: #8c93a8; letter-spacing: 1px;</string>
+                 </property>
+                 <property name="text">
+                  <string>AJUSTES DE SENSIBILIDAD Y GIRO</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QGridLayout" name="gridLayout_settingsInputs">
+                 <property name="spacing">
+                  <number>10</number>
+                 </property>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_stepDesc">
+                   <property name="text">
+                    <string>Paso de Setpoint por pulsación:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QDoubleSpinBox" name="spinBox_gotoStep">
+                   <property name="decimals">
+                    <number>2</number>
+                   </property>
+                   <property name="minimum">
+                    <double>0.050000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>2.000000000000000</double>
+                   </property>
+                   <property name="singleStep">
+                    <double>0.050000000000000</double>
+                   </property>
+                   <property name="value">
+                    <double>0.250000000000000</double>
+                   </property>
+                   <property name="suffix">
+                    <string>°</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_turnDesc">
+                   <property name="text">
+                    <string>Velocidad de Giro (PWM):</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QSpinBox" name="spinBox_gotoTurnIntensity">
+                   <property name="minimum">
+                    <number>100</number>
+                   </property>
+                   <property name="maximum">
+                    <number>600</number>
+                   </property>
+                   <property name="singleStep">
+                    <number>25</number>
+                   </property>
+                   <property name="value">
+                    <number>250</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_turnDurationDesc">
+                   <property name="text">
+                    <string>Cantidad de Giro por pulsación:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QSpinBox" name="spinBox_gotoTurnDuration">
+                   <property name="minimum">
+                    <number>50</number>
+                   </property>
+                   <property name="maximum">
+                    <number>2000</number>
+                   </property>
+                   <property name="singleStep">
+                    <number>25</number>
+                   </property>
+                   <property name="value">
+                    <number>200</number>
+                   </property>
+                   <property name="suffix">
+                    <string> ms</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <spacer name="spacer_gotoRightBottom">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+<widget class="QWidget" name="DEBUG_PAGE">
        <layout class="QVBoxLayout" name="verticalLayout_debug">
         <property name="spacing">
          <number>6</number>
@@ -4828,7 +5922,7 @@ QMenu::item:selected {
                </font>
               </property>
               <property name="text">
-               <string>⏸ BLOQUEAR ENVÍO AUTOMÁTICO (TEST MANUAL)</string>
+               <string>BLOQUEAR ENVÍO AUTOMÁTICO (TEST MANUAL)</string>
               </property>
               <property name="checkable">
                <bool>true</bool>
@@ -5087,6 +6181,8 @@ QStatusBar::item { border: none; }</string>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

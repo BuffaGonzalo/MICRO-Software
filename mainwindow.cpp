@@ -86,6 +86,47 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btn_nav_tuning, &QPushButton::clicked, this, [this]() {
         ui->stackedWidget->setCurrentIndex(2);
     });
+    connect(ui->btn_nav_goto, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentIndex(3);
+        this->setFocus();
+    });
+    connect(ui->btn_mode_goto, &QPushButton::clicked, this, &MainWindow::on_btn_mode_goto_clicked);
+
+    // Conexiones de controles del Modo GoTo
+    if (ui->btn_goto_activate) connect(ui->btn_goto_activate, &QPushButton::clicked, this, &MainWindow::on_btn_mode_goto_clicked);
+    if (ui->btn_goto_up) connect(ui->btn_goto_up, &QPushButton::clicked, this, &MainWindow::on_btn_goto_up_clicked);
+    if (ui->btn_goto_down) connect(ui->btn_goto_down, &QPushButton::clicked, this, &MainWindow::on_btn_goto_down_clicked);
+    if (ui->btn_goto_left) {
+        connect(ui->btn_goto_left, &QPushButton::pressed, this, &MainWindow::on_btn_goto_left_pressed);
+        connect(ui->btn_goto_left, &QPushButton::released, this, &MainWindow::on_btn_goto_left_released);
+    }
+    if (ui->btn_goto_right) {
+        connect(ui->btn_goto_right, &QPushButton::pressed, this, &MainWindow::on_btn_goto_right_pressed);
+        connect(ui->btn_goto_right, &QPushButton::released, this, &MainWindow::on_btn_goto_right_released);
+    }
+    if (ui->btn_goto_center) connect(ui->btn_goto_center, &QPushButton::clicked, this, &MainWindow::on_btn_goto_center_clicked);
+    if (ui->spinBox_gotoStep) {
+        connect(ui->spinBox_gotoStep, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+                this, &MainWindow::on_spinBox_gotoStep_valueChanged);
+    }
+    if (ui->spinBox_gotoTurnIntensity) {
+        connect(ui->spinBox_gotoTurnIntensity, QOverload<int>::of(&QSpinBox::valueChanged),
+                this, &MainWindow::on_spinBox_gotoTurnIntensity_valueChanged);
+    }
+    if (ui->spinBox_gotoTurnDuration) {
+        connect(ui->spinBox_gotoTurnDuration, QOverload<int>::of(&QSpinBox::valueChanged),
+                this, &MainWindow::on_spinBox_gotoTurnDuration_valueChanged);
+    }
+    if (ui->btn_goto_reset_yaw) {
+        connect(ui->btn_goto_reset_yaw, &QPushButton::clicked, this, &MainWindow::on_btn_goto_reset_yaw_clicked);
+    }
+
+    m_gotoTurnKeepAliveTimer = new QTimer(this);
+    m_gotoTurnKeepAliveTimer->setInterval(100);
+    connect(m_gotoTurnKeepAliveTimer, &QTimer::timeout, this, [this]() {
+        if (m_isRotatingLeft) sendGoToTurn(m_gotoTurnIntensity, m_gotoTurnDuration);
+        else if (m_isRotatingRight) sendGoToTurn(-m_gotoTurnIntensity, m_gotoTurnDuration);
+    });
 
     connect(ui->stackedWidget, &QStackedWidget::currentChanged, this, &MainWindow::updateNavSelection);
     updateNavSelection(ui->stackedWidget->currentIndex());
@@ -103,6 +144,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     ui->comboBox_PORT->installEventFilter(this);
+    qApp->installEventFilter(this);
 
     //connects del puerto serial
     connect(QSerialPort1,&QSerialPort::readyRead,this,&MainWindow::dataReceived);
@@ -193,10 +235,29 @@ MainWindow::MainWindow(QWidget *parent)
         ui->comboBox_CMD->addItem("SETFRONTKD (0xCE)", SETFRONTKD);
         ui->comboBox_CMD->addItem("SETDODGEMODE (0xCF)", SETDODGEMODE);
         ui->comboBox_CMD->addItem("SETROBOTMODE (0xD2)", SETROBOTMODE);
+        ui->comboBox_CMD->addItem("SETGOTOTURN (0xD3)", SETGOTOTURN);
 
         connect(ui->comboBox_CMD, QOverload<int>::of(&QComboBox::currentIndexChanged),
                 this, &MainWindow::on_comboBox_CMD_currentIndexChanged);
         on_comboBox_CMD_currentIndexChanged(0);
+    }
+
+    if (ui->spinBox_cmdParam) {
+        ui->spinBox_cmdParam->setSingleStep(1);
+    }
+    if (ui->pushButton_cmdParam_minus) {
+        connect(ui->pushButton_cmdParam_minus, &QPushButton::clicked, this, [this]() {
+            if (ui->spinBox_cmdParam) {
+                ui->spinBox_cmdParam->stepDown();
+            }
+        });
+    }
+    if (ui->pushButton_cmdParam_plus) {
+        connect(ui->pushButton_cmdParam_plus, &QPushButton::clicked, this, [this]() {
+            if (ui->spinBox_cmdParam) {
+                ui->spinBox_cmdParam->stepUp();
+            }
+        });
     }
 }
 
@@ -569,6 +630,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         if (std::abs(gz_grados_seg) > 1.2f && dt > 0.0 && dt < 0.5) {
             yawAcumulado += gz_grados_seg * static_cast<float>(dt);
         }
+        m_gotoRelativeYaw = yawAcumulado - m_gotoStartYaw;
+        updateGoToAngleDisplays();
         // Imprimir los ángulos finales en la consola de Qt Creator
         qDebug() << "Angulos Calculados -> Pitch:" << pitch << " | Roll:" << roll << " | Yaw:" << yawAcumulado << " | dt:" << dt;
 
@@ -769,6 +832,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             w.ui8[0] = datosRx[12]; w.ui8[1] = datosRx[13];
             w.ui8[2] = datosRx[14]; w.ui8[3] = datosRx[15];
             ui->setSetpoint->setValue(w.i32);
+            m_currentSetpoint = w.i32;
+            updateGoToAngleDisplays();
 
             // 3. Extra (indices 16 a 29)
             w.ui8[0] = datosRx[16]; w.ui8[1] = datosRx[17]; ui->setLineKp->setValue(w.i16[0]);
@@ -834,6 +899,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
         w.ui8[0] = datosRx[18]; w.ui8[1] = datosRx[19]; w.ui8[2] = datosRx[20]; w.ui8[3] = datosRx[21];
         float stm_angle = w.i32 / 100.0f; // Escala x100 -> real
         ui->angle_data->display(QString::number(stm_angle, 'f', 2));
+        m_currentAngle = stm_angle;
+        updateGoToAngleDisplays();
 
         // 5b. Extraer Turn Offset del STM32 (Nuevo)
         w.ui8[0] = datosRx[22]; w.ui8[1] = datosRx[23]; w.ui8[2] = datosRx[24]; w.ui8[3] = datosRx[25];
@@ -924,6 +991,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETDODGEMODE:
     case SETSOFTAP:
         if(datosRx[2]==ACK){
+            m_isSoftApMode = true;
             str="COMANDO ACEPTADO Y GUARDADO (ACK)!!!";
             addLogEntry(str, "RX");
             ui->textBrowserProcessed->append(str);
@@ -939,9 +1007,20 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             case 1: modeStr = "BALANCE"; break;
             case 2: modeStr = "SEGUIR LINEA"; break;
             case 3: modeStr = "ESQUIVAR"; break;
+            case 4: modeStr = "GOTO"; break;
+            case 5: modeStr = "3D SCREEN"; break;
             default: modeStr = QString::number(currentMode); break;
             }
             str = QString("***MODO DEL ROBOT CONFIRMADO (ACK): %1***").arg(modeStr);
+            addLogEntry(str, "RX");
+            ui->textBrowserProcessed->append(str);
+        }
+        break;
+    }
+
+    case SETGOTOTURN: {
+        if (datosRx[2] == ACK) {
+            str = "***GIRO GOTO CONFIRMADO (ACK)***";
             addLogEntry(str, "RX");
             ui->textBrowserProcessed->append(str);
         }
@@ -1166,6 +1245,11 @@ void MainWindow::OnUdpRxData(){
         QHostAddress cleanAddr(RemoteAddress.toIPv4Address());
         ui->lineEdit_device_ip->setText(cleanAddr.toString());
         ui->lineEdit_device_port->setText(QString().number(RemotePort, 10));
+        if (cleanAddr.toString().startsWith("192.168.4.")) {
+            m_isSoftApMode = true;
+        } else if (!cleanAddr.isNull() && cleanAddr.toString() != "0.0.0.0") {
+            m_isSoftApMode = false;
+        }
 
         // --- RESET de la MeF al inicio de cada datagrama ---
         // Cada AT+CIPSEND del ESP01 genera exactamente un datagrama UDP completo.
@@ -1256,6 +1340,14 @@ void MainWindow::OnUdpRxData(){
     }
 }
 
+bool MainWindow::isSoftApActive() const {
+    if (m_isSoftApMode) return true;
+    if (ui->lineEdit_device_ip && ui->lineEdit_device_ip->text().trimmed().startsWith("192.168.4.")) return true;
+    if (RemoteAddress.toString().contains("192.168.4.")) return true;
+    if (QTcpSocketClient && QTcpSocketClient->peerAddress().toString().contains("192.168.4.")) return true;
+    return false;
+}
+
 void MainWindow::OnTcpNewConnection() {
     if(QTcpSocketClient) {
         QTcpSocketClient->disconnect();
@@ -1270,12 +1362,17 @@ void MainWindow::OnTcpNewConnection() {
 
         QHostAddress cleanAddr(QTcpSocketClient->peerAddress().toIPv4Address());
         ui->lineEdit_device_ip->setText(cleanAddr.toString());
+        if (cleanAddr.toString().startsWith("192.168.4.")) {
+            m_isSoftApMode = true;
+        } else if (!cleanAddr.isNull() && cleanAddr.toString() != "0.0.0.0") {
+            m_isSoftApMode = false;
+        }
 
         addLogEntry("CLIENT CONNECTED VIA TCP (" + cleanAddr.toString() + ")", "RX");
         ui->textBrowserUnProcessed->append("CLIENT CONNECTED VIA TCP (" + cleanAddr.toString() + ")");
 
         ui->pushButton_connectUdp->setText("DISCONNECT");
-        statusMode->setText("ESTADO --> CONECTADO STATION TCP");
+        statusMode->setText(isSoftApActive() ? "ESTADO --> CONECTADO SOFTAP" : "ESTADO --> CONECTADO STATION TCP");
         statusMode->setStyleSheet("color: #00f2c3; font-weight: bold; font-size: 11px; padding-left: 5px;");
         m_lastRxTime = QDateTime::currentMSecsSinceEpoch();
         paramsSynced = false;
@@ -1421,14 +1518,14 @@ void MainWindow::getData(){
     // --- 2. ACTUALIZAR ESTADO VISUAL ---
     qint64 now = QDateTime::currentMSecsSinceEpoch();
     if(isTcpActive) {
-        statusMode->setText("ESTADO --> CONECTADO STATION TCP");
+        statusMode->setText(isSoftApActive() ? "ESTADO --> CONECTADO SOFTAP" : "ESTADO --> CONECTADO STATION TCP");
         statusMode->setStyleSheet("color: #00f2c3; font-weight: bold; font-size: 11px; padding-left: 5px;");
     } else if(isSerialActive) {
         statusMode->setText("ESTADO --> CONECTADO SERIE");
         statusMode->setStyleSheet("color: #1d8cf8; font-weight: bold; font-size: 11px; padding-left: 5px;");
     } else if (isUdpActive) {
         if (m_lastRxTime > 0 && (now - m_lastRxTime) < 3000) {
-            statusMode->setText("ESTADO --> CONECTADO STATION UDP");
+            statusMode->setText(isSoftApActive() ? "ESTADO --> CONECTADO SOFTAP" : "ESTADO --> CONECTADO STATION UDP");
             statusMode->setStyleSheet("color: #00f2c3; font-weight: bold; font-size: 11px; padding-left: 5px;");
         } else {
             statusMode->setText("ESTADO --> CONECTANDO...");
@@ -1439,11 +1536,13 @@ void MainWindow::getData(){
     // Bloqueo de telemetría para permitir testeo limpio de comandos individuales
     if (m_isCommBlocked) {
         if (isTcpActive) {
-            statusMode->setText("ESTADO --> CONECTADO STATION TCP [ENVÍO BLOQUEADO]");
+            statusMode->setText(isSoftApActive() ? "ESTADO --> CONECTADO SOFTAP [ENVÍO BLOQUEADO]"
+                                                 : "ESTADO --> CONECTADO STATION TCP [ENVÍO BLOQUEADO]");
         } else if (isSerialActive) {
             statusMode->setText("ESTADO --> CONECTADO SERIE [ENVÍO BLOQUEADO]");
         } else if (isUdpActive) {
-            statusMode->setText("ESTADO --> CONECTADO STATION UDP [ENVÍO BLOQUEADO]");
+            statusMode->setText(isSoftApActive() ? "ESTADO --> CONECTADO SOFTAP [ENVÍO BLOQUEADO]"
+                                                 : "ESTADO --> CONECTADO STATION UDP [ENVÍO BLOQUEADO]");
         }
         isWaitingReply = false;
         return;
@@ -1469,7 +1568,22 @@ void MainWindow::getData(){
 
     sendCommand(buf, 1);
 }
-bool MainWindow::eventFilter(QObject *watched, QEvent *event){ //utilizado para mostrar los puestos disponibles
+bool MainWindow::eventFilter(QObject *watched, QEvent *event){
+    if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease) {
+        if (ui->stackedWidget && ui->stackedWidget->currentIndex() == 3) {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+            int key = keyEvent->key();
+            if (key == Qt::Key_Up || key == Qt::Key_Down || key == Qt::Key_Left || key == Qt::Key_Right || key == Qt::Key_R) {
+                if (event->type() == QEvent::KeyPress) {
+                    keyPressEvent(keyEvent);
+                } else {
+                    keyReleaseEvent(keyEvent);
+                }
+                return true; // Consumir evento para evitar cualquier navegacion o cambio de modo indirecto
+            }
+        }
+    }
+
     if(watched == ui->comboBox_PORT) {
         if (event->type() == QEvent::MouseButtonPress) {
             ui->comboBox_PORT->clear();
@@ -1561,6 +1675,12 @@ void MainWindow::on_pushButton_connectUdp_clicked()
     }catch(...){
         QMessageBox::information(this, tr("SERVER PORT"),tr("Can't OPEN Port."));
         return;
+    }
+
+    if (ui->lineEdit_device_ip->text().trimmed().startsWith("192.168.4.")) {
+        m_isSoftApMode = true;
+    } else if (!ui->lineEdit_device_ip->text().trimmed().isEmpty()) {
+        m_isSoftApMode = false;
     }
 
     ui->pushButton_connectUdp->setText("DISCONNECT");
@@ -1699,6 +1819,7 @@ void MainWindow::on_sendDodgeDir_clicked() {
 }
 
 void MainWindow::on_pushButton_setSoftAp_clicked() {
+    m_isSoftApMode = true;
     uint8_t payload[4];
     uint8_t index = 0;
     payload[index++] = SETSOFTAP;
@@ -1853,6 +1974,7 @@ void MainWindow::updateNavSelection(int index) {
     ui->btn_nav_infrarrojos->setChecked(index == 0);
     ui->btn_nav_visualizacion->setChecked(index == 1);
     ui->btn_nav_tuning->setChecked(index == 2);
+    if (ui->btn_nav_goto) ui->btn_nav_goto->setChecked(index == 3);
 }
 
 void MainWindow::sendRobotMode(uint8_t modeId) {
@@ -1867,14 +1989,19 @@ void MainWindow::sendRobotMode(uint8_t modeId) {
     case 1: modeName = "BALANCE"; break;
     case 2: modeName = "SEGUIR LINEA"; break;
     case 3: modeName = "ESQUIVAR"; break;
+    case 4: modeName = "GOTO"; break;
+    case 5: modeName = "3D SCREEN"; break;
     default: modeName = QString("MODO %1").arg(modeId); break;
     }
 
     addLogEntry("***COMANDO MODO ENVIADO: " + modeName + "***", "TX");
     ui->textBrowserProcessed->append("***ENVIANDO MODO AL ROBOT: " + modeName + "...***");
 
-    if (modeId >= 1 && modeId <= 3) {
+    if (modeId >= 1 && modeId <= 4) {
         updateRobotModeUI(modeId);
+    }
+    if (modeId == 4) {
+        ui->stackedWidget->setCurrentIndex(3);
     }
 }
 
@@ -1882,25 +2009,76 @@ void MainWindow::updateRobotModeUI(uint8_t mode) {
     ui->btn_mode_balance->blockSignals(true);
     ui->btn_mode_line->blockSignals(true);
     ui->btn_mode_dodge->blockSignals(true);
+    if (ui->btn_mode_goto) ui->btn_mode_goto->blockSignals(true);
 
     ui->btn_mode_balance->setChecked(mode == 1);
     ui->btn_mode_line->setChecked(mode == 2);
     ui->btn_mode_dodge->setChecked(mode == 3);
+    if (ui->btn_mode_goto) ui->btn_mode_goto->setChecked(mode == 4);
 
     ui->btn_mode_balance->blockSignals(false);
     ui->btn_mode_line->blockSignals(false);
     ui->btn_mode_dodge->blockSignals(false);
+    if (ui->btn_mode_goto) ui->btn_mode_goto->blockSignals(false);
+
+    static uint8_t lastKnownMode = 255;
+    if (mode == 4 && lastKnownMode != 4) {
+        resetGoToYaw();
+    }
+    lastKnownMode = mode;
+
+    if (ui->label_gotoStatusBadge) {
+        if (mode == 4) {
+            ui->label_gotoStatusBadge->setText("● GOTO ACTIVO");
+            ui->label_gotoStatusBadge->setStyleSheet("background-color: #0d381e; color: #00e676; border: 1.5px solid #00e676; border-radius: 12px; padding: 4px 14px; font-weight: bold;");
+            if (ui->label_gotoTitle) {
+                ui->label_gotoTitle->setStyleSheet("color: #00e676;");
+            }
+            if (ui->btn_goto_activate) {
+                ui->btn_goto_activate->setText("● Modo Activo");
+                ui->btn_goto_activate->setStyleSheet("QPushButton#btn_goto_activate { background-color: #00e676; color: #081a10; border: none; border-radius: 6px; font-weight: bold; padding: 6px 14px; } QPushButton#btn_goto_activate:hover { background-color: #26ff8a; }");
+            }
+        } else {
+            ui->label_gotoStatusBadge->setText("● GOTO STANDBY");
+            ui->label_gotoStatusBadge->setStyleSheet("background-color: #2a1217; color: #ff5252; border: 1px solid #ff5252; border-radius: 12px; padding: 4px 14px; font-weight: bold;");
+            if (ui->label_gotoTitle) {
+                ui->label_gotoTitle->setStyleSheet("color: #ff5252;");
+            }
+            if (ui->btn_goto_activate) {
+                ui->btn_goto_activate->setText("Activar Modo GoTo");
+                ui->btn_goto_activate->setStyleSheet("QPushButton#btn_goto_activate { background-color: #ff5252; color: #1a080a; border: none; border-radius: 6px; font-weight: bold; padding: 6px 14px; } QPushButton#btn_goto_activate:hover { background-color: #ff6e6e; } QPushButton#btn_goto_activate:pressed { background-color: #e04545; }");
+            }
+        }
+    }
 }
 
 void MainWindow::on_btn_mode_balance_clicked() {
+    if (ui->stackedWidget && ui->stackedWidget->currentIndex() == 3) {
+        if (ui->btn_mode_balance && !ui->btn_mode_balance->underMouse()) {
+            if (ui->btn_mode_goto) ui->btn_mode_goto->setChecked(true);
+            return;
+        }
+    }
     sendRobotMode(1);
 }
 
 void MainWindow::on_btn_mode_line_clicked() {
+    if (ui->stackedWidget && ui->stackedWidget->currentIndex() == 3) {
+        if (ui->btn_mode_line && !ui->btn_mode_line->underMouse()) {
+            if (ui->btn_mode_goto) ui->btn_mode_goto->setChecked(true);
+            return;
+        }
+    }
     sendRobotMode(2);
 }
 
 void MainWindow::on_btn_mode_dodge_clicked() {
+    if (ui->stackedWidget && ui->stackedWidget->currentIndex() == 3) {
+        if (ui->btn_mode_dodge && !ui->btn_mode_dodge->underMouse()) {
+            if (ui->btn_mode_goto) ui->btn_mode_goto->setChecked(true);
+            return;
+        }
+    }
     sendRobotMode(3);
 }
 
@@ -2576,13 +2754,13 @@ void MainWindow::toggleBlockAutoData(bool blocked) {
     if (ui->pushButton_blockAutoData) {
         ui->pushButton_blockAutoData->blockSignals(true);
         ui->pushButton_blockAutoData->setChecked(blocked);
-        ui->pushButton_blockAutoData->setText(blocked ? "🚫 ENVÍO BLOQUEADO (Click para reanudar)" : "⏸ BLOQUEAR ENVÍO AUTOMÁTICO");
+        ui->pushButton_blockAutoData->setText(blocked ? "ENVÍO BLOQUEADO (Click para reanudar)" : "BLOQUEAR ENVÍO AUTOMÁTICO");
         ui->pushButton_blockAutoData->blockSignals(false);
     }
     if (ui->pushButton_blockAutoData_comm) {
         ui->pushButton_blockAutoData_comm->blockSignals(true);
         ui->pushButton_blockAutoData_comm->setChecked(blocked);
-        ui->pushButton_blockAutoData_comm->setText(blocked ? "🚫 ENVÍO BLOQUEADO (Click para reanudar)" : "⏸ BLOQUEAR ENVÍO AUTOMÁTICO (TEST MANUAL)");
+        ui->pushButton_blockAutoData_comm->setText(blocked ? "ENVÍO BLOQUEADO (Click para reanudar)" : "BLOQUEAR ENVÍO AUTOMÁTICO (TEST MANUAL)");
         ui->pushButton_blockAutoData_comm->blockSignals(false);
     }
 
@@ -2648,9 +2826,9 @@ void MainWindow::on_pushButton_sendCommand_clicked() {
 
     QString cmdName = ui->comboBox_CMD->currentText();
     QString medium = "DESCONECTADO";
-    if (QTcpSocketClient && QTcpSocketClient->isOpen()) medium = "STATION TCP";
+    if (QTcpSocketClient && QTcpSocketClient->isOpen()) medium = isSoftApActive() ? "SOFTAP TCP" : "STATION TCP";
     else if (QSerialPort1 && QSerialPort1->isOpen()) medium = "SERIAL";
-    else if (QUdpSocket1 && QUdpSocket1->isOpen()) medium = "STATION UDP";
+    else if (QUdpSocket1 && QUdpSocket1->isOpen()) medium = isSoftApActive() ? "SOFTAP UDP" : "STATION UDP";
 
     QString logMsg = QString("*** COMANDO ENVIADO POR %1: %2 ***").arg(medium, cmdName);
     if (!isGetCommand || paramVal != 0) {
@@ -2692,4 +2870,237 @@ void MainWindow::on_pushButton_sendCommand_clicked() {
         ui->listWidget_cmdHistory->addItem(newItem);
         ui->listWidget_cmdHistory->scrollToBottom();
     }
+}
+
+
+// =========================================================
+// MODO GOTO: CONTROL AUTÓNOMO / REMOTO DESDE PC
+// =========================================================
+
+void MainWindow::on_btn_mode_goto_clicked() {
+    sendRobotMode(4);
+    ui->stackedWidget->setCurrentIndex(3);
+    resetGoToYaw();
+    this->setFocus();
+}
+
+void MainWindow::on_btn_nav_goto_clicked() {
+    ui->stackedWidget->setCurrentIndex(3);
+    resetGoToYaw();
+    this->setFocus();
+}
+
+void MainWindow::on_btn_goto_up_clicked() {
+    m_currentSetpoint += m_gotoStep;
+    sendGoToSetpoint(m_currentSetpoint);
+    updateGoToAngleDisplays();
+}
+
+void MainWindow::on_btn_goto_down_clicked() {
+    m_currentSetpoint -= m_gotoStep;
+    sendGoToSetpoint(m_currentSetpoint);
+    updateGoToAngleDisplays();
+}
+
+void MainWindow::on_btn_goto_left_pressed() {
+    m_isRotatingLeft = true;
+    m_isRotatingRight = false;
+    sendGoToTurn(m_gotoTurnIntensity, m_gotoTurnDuration);
+    if (m_gotoTurnKeepAliveTimer && !m_gotoTurnKeepAliveTimer->isActive()) {
+        m_gotoTurnKeepAliveTimer->start();
+    }
+}
+
+void MainWindow::on_btn_goto_left_released() {
+    m_isRotatingLeft = false;
+    if (!m_isRotatingRight) {
+        if (m_gotoTurnKeepAliveTimer) m_gotoTurnKeepAliveTimer->stop();
+        sendGoToTurn(0, 0);
+    }
+}
+
+void MainWindow::on_btn_goto_right_pressed() {
+    m_isRotatingRight = true;
+    m_isRotatingLeft = false;
+    sendGoToTurn(-m_gotoTurnIntensity, m_gotoTurnDuration);
+    if (m_gotoTurnKeepAliveTimer && !m_gotoTurnKeepAliveTimer->isActive()) {
+        m_gotoTurnKeepAliveTimer->start();
+    }
+}
+
+void MainWindow::on_btn_goto_right_released() {
+    m_isRotatingRight = false;
+    if (!m_isRotatingLeft) {
+        if (m_gotoTurnKeepAliveTimer) m_gotoTurnKeepAliveTimer->stop();
+        sendGoToTurn(0, 0);
+    }
+}
+
+void MainWindow::on_btn_goto_center_clicked() {
+    m_currentSetpoint = 0;
+    sendGoToSetpoint(0);
+    updateGoToAngleDisplays();
+}
+
+void MainWindow::on_spinBox_gotoStep_valueChanged(double val) {
+    m_gotoStep = qRound(val * 100.0);
+}
+
+void MainWindow::on_spinBox_gotoTurnIntensity_valueChanged(int val) {
+    m_gotoTurnIntensity = (int16_t)val;
+}
+
+void MainWindow::on_spinBox_gotoTurnDuration_valueChanged(int val) {
+    m_gotoTurnDuration = (uint16_t)val;
+}
+
+void MainWindow::on_btn_goto_reset_yaw_clicked() {
+    resetGoToYaw();
+}
+
+void MainWindow::resetGoToYaw() {
+    m_gotoStartYaw = yawAcumulado;
+    m_gotoRelativeYaw = 0.0f;
+    updateGoToAngleDisplays();
+}
+
+void MainWindow::sendGoToSetpoint(int32_t sp_val) {
+    uint8_t payload[10];
+    uint8_t index = 0;
+    _udat w;
+    payload[index++] = SETSETPOINT;
+    w.i32 = sp_val;
+    payload[index++] = w.ui8[0];
+    payload[index++] = w.ui8[1];
+    sendCommand(payload, index);
+
+    if (ui->setSetpoint) {
+        ui->setSetpoint->blockSignals(true);
+        ui->setSetpoint->setValue(sp_val);
+        ui->setSetpoint->blockSignals(false);
+    }
+    QString logMsg = QString("***SETPOINT GOTO ENVIADO: %1 (%2°)***").arg(sp_val).arg(sp_val / 100.0, 0, 'f', 2);
+    addLogEntry(logMsg, "TX");
+    ui->textBrowserProcessed->append(logMsg);
+}
+
+void MainWindow::sendGoToTurn(int16_t turn_val, uint16_t turn_ms) {
+    uint8_t payload[10];
+    uint8_t index = 0;
+    _udat w_val, w_ms;
+    payload[index++] = SETGOTOTURN;
+    w_val.i16[0] = turn_val;
+    payload[index++] = w_val.ui8[0];
+    payload[index++] = w_val.ui8[1];
+    w_ms.ui16[0] = turn_ms;
+    payload[index++] = w_ms.ui8[0];
+    payload[index++] = w_ms.ui8[1];
+    sendCommand(payload, index);
+}
+
+void MainWindow::updateGoToAngleDisplays() {
+    if (ui->lbl_goto_setpoint_deg) {
+        float sp_deg = m_currentSetpoint / 100.0f;
+        ui->lbl_goto_setpoint_deg->setText(QString("%1%2°")
+            .arg(sp_deg >= 0 ? "+" : "")
+            .arg(QString::number(sp_deg, 'f', 2)));
+    }
+    if (ui->lbl_goto_setpoint_raw) {
+        ui->lbl_goto_setpoint_raw->setText(QString("Valor crudo: %1").arg(m_currentSetpoint));
+    }
+    if (ui->lbl_goto_current_deg) {
+        ui->lbl_goto_current_deg->setText(QString("%1%2°")
+            .arg(m_currentAngle >= 0 ? "+" : "")
+            .arg(QString::number(m_currentAngle, 'f', 2)));
+    }
+    if (ui->lbl_goto_error) {
+        float err_deg = (m_currentSetpoint / 100.0f) - m_currentAngle;
+        ui->lbl_goto_error->setText(QString("Error: %1%2°")
+            .arg(err_deg >= 0 ? "+" : "")
+            .arg(QString::number(err_deg, 'f', 2)));
+    }
+    if (ui->lbl_goto_yaw_deg) {
+        ui->lbl_goto_yaw_deg->setText(QString("%1%2°")
+            .arg(m_gotoRelativeYaw >= 0 ? "+" : "")
+            .arg(QString::number(m_gotoRelativeYaw, 'f', 2)));
+    }
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+    if (ui->stackedWidget && ui->stackedWidget->currentIndex() == 3) {
+        switch (event->key()) {
+        case Qt::Key_Up:
+            if (ui->btn_goto_up) ui->btn_goto_up->setDown(true);
+            on_btn_goto_up_clicked();
+            event->accept();
+            return;
+        case Qt::Key_Down:
+            if (ui->btn_goto_down) ui->btn_goto_down->setDown(true);
+            on_btn_goto_down_clicked();
+            event->accept();
+            return;
+        case Qt::Key_Left:
+            if (!event->isAutoRepeat()) {
+                if (ui->btn_goto_left) ui->btn_goto_left->setDown(true);
+                on_btn_goto_left_pressed();
+            }
+            event->accept();
+            return;
+        case Qt::Key_Right:
+            if (!event->isAutoRepeat()) {
+                if (ui->btn_goto_right) ui->btn_goto_right->setDown(true);
+                on_btn_goto_right_pressed();
+            }
+            event->accept();
+            return;
+        case Qt::Key_R:
+            if (!event->isAutoRepeat()) {
+                if (ui->btn_goto_center) ui->btn_goto_center->setDown(true);
+                on_btn_goto_center_clicked();
+            }
+            event->accept();
+            return;
+        default:
+            break;
+        }
+    }
+    QMainWindow::keyPressEvent(event);
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *event) {
+    if (ui->stackedWidget && ui->stackedWidget->currentIndex() == 3) {
+        switch (event->key()) {
+        case Qt::Key_Up:
+            if (ui->btn_goto_up) ui->btn_goto_up->setDown(false);
+            event->accept();
+            return;
+        case Qt::Key_Down:
+            if (ui->btn_goto_down) ui->btn_goto_down->setDown(false);
+            event->accept();
+            return;
+        case Qt::Key_Left:
+            if (!event->isAutoRepeat()) {
+                if (ui->btn_goto_left) ui->btn_goto_left->setDown(false);
+                on_btn_goto_left_released();
+            }
+            event->accept();
+            return;
+        case Qt::Key_Right:
+            if (!event->isAutoRepeat()) {
+                if (ui->btn_goto_right) ui->btn_goto_right->setDown(false);
+                on_btn_goto_right_released();
+            }
+            event->accept();
+            return;
+        case Qt::Key_R:
+            if (!event->isAutoRepeat()) {
+                if (ui->btn_goto_center) ui->btn_goto_center->setDown(false);
+            }
+            event->accept();
+            return;
+        default:
+            break;
+        }
+    }
+    QMainWindow::keyReleaseEvent(event);
 }

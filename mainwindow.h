@@ -21,6 +21,7 @@
 #include <QQuickItem>
 
 #include <QElapsedTimer>
+#include <QKeyEvent>
 
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
@@ -40,6 +41,10 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
 
 private slots:
 
@@ -142,6 +147,24 @@ private slots:
     void sendRobotMode(uint8_t modeId);
     void updateRobotModeUI(uint8_t mode);
     void updateNavSelection(int index);
+
+    void on_btn_mode_goto_clicked();
+    void on_btn_nav_goto_clicked();
+    void on_btn_goto_up_clicked();
+    void on_btn_goto_down_clicked();
+    void on_btn_goto_left_pressed();
+    void on_btn_goto_left_released();
+    void on_btn_goto_right_pressed();
+    void on_btn_goto_right_released();
+    void on_btn_goto_center_clicked();
+    void on_spinBox_gotoStep_valueChanged(double val);
+    void on_spinBox_gotoTurnIntensity_valueChanged(int val);
+    void on_spinBox_gotoTurnDuration_valueChanged(int val);
+    void on_btn_goto_reset_yaw_clicked();
+    void resetGoToYaw();
+    void sendGoToTurn(int16_t turn_val, uint16_t turn_ms = 0);
+    void sendGoToSetpoint(int32_t sp_val);
+    void updateGoToAngleDisplays();
 
 
     void on_pushButton_exportExcel_clicked();
@@ -252,6 +275,18 @@ private:
     uint16_t      m_calIr3 = 0;
     uint16_t      m_calIr5 = 0;
 
+    // Variables Modo GoTo
+    int32_t       m_currentSetpoint = -1000;
+    float         m_currentAngle = 0.0f;
+    float         m_gotoStartYaw = 0.0f;
+    float         m_gotoRelativeYaw = 0.0f;
+    int           m_gotoStep = 25; // Centésimas de grado (25 = 0.25°)
+    int16_t       m_gotoTurnIntensity = 250;
+    uint16_t      m_gotoTurnDuration = 200; // Duración en ms
+    bool          m_isRotatingLeft = false;
+    bool          m_isRotatingRight = false;
+    QTimer       *m_gotoTurnKeepAliveTimer = nullptr;
+
     void initPIDChart();
     void updatePIDChart(double time, double p, double i, double d, double out, double pLine, double dLine, double outLine);
     void updateMPUChart(double time, double ax, double ay, double az, double gx, double gy, double gz, double pitch, double roll, double yaw);
@@ -270,6 +305,8 @@ private:
     QTcpServer *QTcpServer1;
     QTcpSocket *QTcpSocketClient = nullptr;
     void sendTcp(uint8_t *tx, uint8_t length);
+    bool m_isSoftApMode = false;
+    bool isSoftApActive() const;
 
     //otras
     bool firExe; //bool utilizado para dibujar el fondo del radar
@@ -358,6 +395,7 @@ private:
         SETDODGEMODE = 0xCF,
         SETSOFTAP = 0xD1,
         SETROBOTMODE = 0xD2,
+        SETGOTOTURN = 0xD3,
         EXPORTIRCSV  = 0xCA,
 
         UNKNOWCMD=0xFF,

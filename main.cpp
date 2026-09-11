@@ -3,6 +3,8 @@
 #include <QApplication>
 #include <QSurfaceFormat>
 
+#include <QStyleFactory>
+
 int main(int argc, char *argv[])
 {
     QSurfaceFormat format;
@@ -11,7 +13,7 @@ int main(int argc, char *argv[])
     QSurfaceFormat::setDefaultFormat(format);
 
     QApplication a(argc, argv);
-    //a.setStyle("fusion"); //linea para colocar el color de la ventana segun el tema de windows
+    a.setStyle(QStyleFactory::create("Fusion")); // Estilo Fusion nativo de Qt para funcionamiento correcto de todos los controles y spinboxes
     MainWindow w;
     w.show();
     return a.exec();
