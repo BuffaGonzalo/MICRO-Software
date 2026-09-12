@@ -62,6 +62,7 @@ private slots:
     void on_pushButton_connectSerial_clicked();
 
     void on_pushButton_connectUdp_clicked();
+    void on_pushButton_protocol_wifi_clicked();
 
     void getData();
 
@@ -141,15 +142,29 @@ private slots:
     void toggleBlockAutoData(bool blocked);
     void on_actionConn_triggered();
     void on_actionOpenDebug_triggered();
+    void on_actionDocu_triggered();
+    void on_actionAcercaDe_triggered();
     void on_btn_mode_balance_clicked();
     void on_btn_mode_line_clicked();
     void on_btn_mode_dodge_clicked();
     void sendRobotMode(uint8_t modeId);
     void updateRobotModeUI(uint8_t mode);
     void updateNavSelection(int index);
+    void switchNavTab(int targetIndex);
+    bool requestConfigPassword();
 
-    void on_btn_mode_goto_clicked();
+    void on_btn_password_accept_clicked();
+    void on_btn_password_cancel_clicked();
+
+    bool confirmJoystickExit();
+    void on_btn_joystick_exit_confirm_clicked();
+    void on_btn_joystick_exit_cancel_clicked();
+
+    void on_btn_nav_infrarrojos_clicked();
+    void on_btn_nav_visualizacion_clicked();
+    void on_btn_nav_tuning_clicked();
     void on_btn_nav_goto_clicked();
+    void on_btn_mode_goto_clicked();
     void on_btn_goto_up_clicked();
     void on_btn_goto_down_clicked();
     void on_btn_goto_left_pressed();
@@ -218,6 +233,9 @@ private:
     qint64 m_lastRxTime = 0;
 
     QDialog *myDebugDialog;
+    QDialog *myHelpDialog;
+    QDialog *myPasswordDialog;
+    QDialog *myJoystickExitDialog;
 
     //timers
     QTimer  *timer1;
@@ -293,6 +311,7 @@ private:
     void updateIRChart(double time, double ir1, double ir2, double ir3, double ir4, double ir5, double ir6, double ir7, double ir8);
     void updatePIDChartRange();
     void resetInterface();
+    void initHelpContent();
 
     //variables comunicacion udp
     QUdpSocket *QUdpSocket1;
@@ -307,6 +326,8 @@ private:
     void sendTcp(uint8_t *tx, uint8_t length);
     bool m_isSoftApMode = false;
     bool isSoftApActive() const;
+    bool m_isTcpMode = false;
+    void updateProtocolUI();
 
     //otras
     bool firExe; //bool utilizado para dibujar el fondo del radar
@@ -396,6 +417,7 @@ private:
         SETSOFTAP = 0xD1,
         SETROBOTMODE = 0xD2,
         SETGOTOTURN = 0xD3,
+        SETJOYSTICKTURN = 0xD3,
         EXPORTIRCSV  = 0xCA,
 
         UNKNOWCMD=0xFF,

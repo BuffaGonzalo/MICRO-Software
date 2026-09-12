@@ -30,6 +30,52 @@ MainWindow::MainWindow(QWidget *parent)
     ui->DEBUG_PAGE->show();
     myDebugDialog->adjustSize();
 
+    myHelpDialog = new QDialog(this);
+    myHelpDialog->setWindowTitle("HELP - MCC25");
+    myHelpDialog->setWindowFlags(Qt::Window);
+    myHelpDialog->setStyleSheet(this->styleSheet());
+    ui->stackedWidget->removeWidget(ui->HELP_PAGE);
+    QVBoxLayout *helpLayout = new QVBoxLayout(myHelpDialog);
+    helpLayout->setContentsMargins(0, 0, 0, 0);
+    helpLayout->addWidget(ui->HELP_PAGE);
+    ui->HELP_PAGE->show();
+    myHelpDialog->resize(720, 560);
+
+    myPasswordDialog = new QDialog(this);
+    myPasswordDialog->setWindowTitle("ACCESO A CONFIGURACIÓN");
+    myPasswordDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+    myPasswordDialog->setModal(true);
+    myPasswordDialog->setStyleSheet(this->styleSheet());
+    ui->stackedWidget->removeWidget(ui->PASSWORD_PAGE);
+    QVBoxLayout *passwordLayout = new QVBoxLayout(myPasswordDialog);
+    passwordLayout->setContentsMargins(0, 0, 0, 0);
+    passwordLayout->addWidget(ui->PASSWORD_PAGE);
+    ui->PASSWORD_PAGE->show();
+    myPasswordDialog->resize(440, 240);
+
+    connect(ui->lineEdit_configPassword, &QLineEdit::returnPressed, this, &MainWindow::on_btn_password_accept_clicked);
+    connect(ui->btn_password_accept, &QPushButton::clicked, this, &MainWindow::on_btn_password_accept_clicked);
+    connect(ui->btn_password_cancel, &QPushButton::clicked, this, &MainWindow::on_btn_password_cancel_clicked);
+
+    myJoystickExitDialog = new QDialog(this);
+    myJoystickExitDialog->setWindowTitle("MODO JOYSTICK ACTIVO");
+    myJoystickExitDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+    myJoystickExitDialog->setModal(true);
+    myJoystickExitDialog->setStyleSheet(this->styleSheet());
+    ui->stackedWidget->removeWidget(ui->JOYSTICK_EXIT_PAGE);
+    QVBoxLayout *joystickExitLayout = new QVBoxLayout(myJoystickExitDialog);
+    joystickExitLayout->setContentsMargins(0, 0, 0, 0);
+    joystickExitLayout->addWidget(ui->JOYSTICK_EXIT_PAGE);
+    ui->JOYSTICK_EXIT_PAGE->show();
+    myJoystickExitDialog->resize(440, 220);
+
+    connect(ui->btn_joystick_exit_cancel, &QPushButton::clicked, this, &MainWindow::on_btn_joystick_exit_cancel_clicked, Qt::UniqueConnection);
+    connect(ui->btn_joystick_exit_confirm, &QPushButton::clicked, this, &MainWindow::on_btn_joystick_exit_confirm_clicked, Qt::UniqueConnection);
+
+    initHelpContent();
+
+    connect(ui->actionHELP, &QAction::triggered, this, &MainWindow::on_actionDocu_triggered);
+
     // Limitar los logs a los últimos 50 comandos
     ui->textBrowserProcessed->document()->setMaximumBlockCount(50);
     ui->textBrowserUnProcessed->document()->setMaximumBlockCount(50);
@@ -76,24 +122,29 @@ MainWindow::MainWindow(QWidget *parent)
     ui->bar_ir6->setValue(0);   ui->bar_ir6->setFormat("0 / 4095");
 
     
-    // Navegación de pantallas superior (Header Tabs)
-    connect(ui->btn_nav_infrarrojos, &QPushButton::clicked, this, [this]() {
-        ui->stackedWidget->setCurrentIndex(0);
-    });
-    connect(ui->btn_nav_visualizacion, &QPushButton::clicked, this, [this]() {
-        ui->stackedWidget->setCurrentIndex(1);
-    });
-    connect(ui->btn_nav_tuning, &QPushButton::clicked, this, [this]() {
-        ui->stackedWidget->setCurrentIndex(2);
-    });
-    connect(ui->btn_nav_goto, &QPushButton::clicked, this, [this]() {
-        ui->stackedWidget->setCurrentIndex(3);
-        this->setFocus();
-    });
-    connect(ui->btn_mode_goto, &QPushButton::clicked, this, &MainWindow::on_btn_mode_goto_clicked);
+    // Configurar foco seguro para MainWindow
+    this->setFocusPolicy(Qt::StrongFocus);
 
-    // Conexiones de controles del Modo GoTo
-    if (ui->btn_goto_activate) connect(ui->btn_goto_activate, &QPushButton::clicked, this, &MainWindow::on_btn_mode_goto_clicked);
+    // Desactivar autoExclusive y foco en los botones de navegación y modos para que las flechas jamás cambien de pestaña
+    ui->btn_nav_infrarrojos->setAutoExclusive(false);
+    ui->btn_nav_visualizacion->setAutoExclusive(false);
+    ui->btn_nav_tuning->setAutoExclusive(false);
+    ui->btn_nav_goto->setAutoExclusive(false);
+    ui->btn_mode_balance->setAutoExclusive(false);
+    ui->btn_mode_line->setAutoExclusive(false);
+    ui->btn_mode_dodge->setAutoExclusive(false);
+    ui->btn_mode_goto->setAutoExclusive(false);
+
+    ui->btn_nav_infrarrojos->setFocusPolicy(Qt::NoFocus);
+    ui->btn_nav_visualizacion->setFocusPolicy(Qt::NoFocus);
+    ui->btn_nav_tuning->setFocusPolicy(Qt::NoFocus);
+    ui->btn_nav_goto->setFocusPolicy(Qt::NoFocus);
+    ui->btn_mode_balance->setFocusPolicy(Qt::NoFocus);
+    ui->btn_mode_line->setFocusPolicy(Qt::NoFocus);
+    ui->btn_mode_dodge->setFocusPolicy(Qt::NoFocus);
+    ui->btn_mode_goto->setFocusPolicy(Qt::NoFocus);
+
+    // Conexiones de controles del Modo Joystick
     if (ui->btn_goto_up) connect(ui->btn_goto_up, &QPushButton::clicked, this, &MainWindow::on_btn_goto_up_clicked);
     if (ui->btn_goto_down) connect(ui->btn_goto_down, &QPushButton::clicked, this, &MainWindow::on_btn_goto_down_clicked);
     if (ui->btn_goto_left) {
@@ -186,6 +237,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Iniciar desconectado por defecto (requerimiento de usuario)
     ui->pushButton_connectUdp->setText("CONNECT");
+    updateProtocolUI();
 
     // Inicializar lista de comandos individuales
     if (ui->comboBox_CMD) {
@@ -235,7 +287,7 @@ MainWindow::MainWindow(QWidget *parent)
         ui->comboBox_CMD->addItem("SETFRONTKD (0xCE)", SETFRONTKD);
         ui->comboBox_CMD->addItem("SETDODGEMODE (0xCF)", SETDODGEMODE);
         ui->comboBox_CMD->addItem("SETROBOTMODE (0xD2)", SETROBOTMODE);
-        ui->comboBox_CMD->addItem("SETGOTOTURN (0xD3)", SETGOTOTURN);
+        ui->comboBox_CMD->addItem("SETJOYSTICKTURN (0xD3)", SETGOTOTURN);
 
         connect(ui->comboBox_CMD, QOverload<int>::of(&QComboBox::currentIndexChanged),
                 this, &MainWindow::on_comboBox_CMD_currentIndexChanged);
@@ -244,20 +296,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     if (ui->spinBox_cmdParam) {
         ui->spinBox_cmdParam->setSingleStep(1);
-    }
-    if (ui->pushButton_cmdParam_minus) {
-        connect(ui->pushButton_cmdParam_minus, &QPushButton::clicked, this, [this]() {
-            if (ui->spinBox_cmdParam) {
-                ui->spinBox_cmdParam->stepDown();
-            }
-        });
-    }
-    if (ui->pushButton_cmdParam_plus) {
-        connect(ui->pushButton_cmdParam_plus, &QPushButton::clicked, this, [this]() {
-            if (ui->spinBox_cmdParam) {
-                ui->spinBox_cmdParam->stepUp();
-            }
-        });
     }
 }
 
@@ -989,12 +1027,35 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
     case SETFRONTKP:
     case SETFRONTKD:
     case SETDODGEMODE:
-    case SETSOFTAP:
         if(datosRx[2]==ACK){
-            m_isSoftApMode = true;
             str="COMANDO ACEPTADO Y GUARDADO (ACK)!!!";
             addLogEntry(str, "RX");
             ui->textBrowserProcessed->append(str);
+        }
+        break;
+
+    case SETSOFTAP:
+        ui->pushButton_setSoftAp->setText("MODO SOFTAP");
+        ui->pushButton_setSoftAp->setEnabled(true);
+        if(datosRx[2]==ACK){
+            m_isSoftApMode = true;
+            str="COMANDO ACEPTADO: Robot cambiando a Modo SoftAP (SSID: MICRO)";
+            addLogEntry(str, "RX");
+            ui->textBrowserProcessed->append(str);
+            statusMode->setText("ESTADO --> ROBOT EN MODO SOFTAP");
+            statusMode->setStyleSheet("color: #e14eca; font-weight: bold; font-size: 11px; padding-left: 5px;");
+            QMessageBox::information(this, "Modo SoftAP Activado",
+                                     "El robot aceptó el comando y está reiniciando su módulo Wi-Fi en Modo SoftAP.\n\n"
+                                     "• Red Wi-Fi: MICRO\n"
+                                     "• Contraseña: 12345678\n"
+                                     "• Servidor TCP: 192.168.4.1 : 80\n\n"
+                                     "Ya puedes conectarte a la red 'MICRO' desde tu dispositivo o Hercules para enviar nuevas credenciales.");
+        } else {
+            str="ERROR: Comando SETSOFTAP no aceptado por el robot";
+            addLogEntry(str, "CHK_ERROR");
+            ui->textBrowserProcessed->append(str);
+            QMessageBox::warning(this, "Error de Comando",
+                                 "El robot no pudo procesar la orden de cambio a Modo SoftAP.");
         }
         break;
 
@@ -1007,7 +1068,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
             case 1: modeStr = "BALANCE"; break;
             case 2: modeStr = "SEGUIR LINEA"; break;
             case 3: modeStr = "ESQUIVAR"; break;
-            case 4: modeStr = "GOTO"; break;
+            case 4: modeStr = "JOYSTICK"; break;
             case 5: modeStr = "3D SCREEN"; break;
             default: modeStr = QString::number(currentMode); break;
             }
@@ -1020,7 +1081,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source){
 
     case SETGOTOTURN: {
         if (datosRx[2] == ACK) {
-            str = "***GIRO GOTO CONFIRMADO (ACK)***";
+            str = "***GIRO JOYSTICK CONFIRMADO (ACK)***";
             addLogEntry(str, "RX");
             ui->textBrowserProcessed->append(str);
         }
@@ -1183,16 +1244,22 @@ void MainWindow::sendTcp(uint8_t *txData, uint8_t length) {
 void MainWindow::sendCommand(uint8_t *buf, uint8_t length) {
     bool sent = false;
 
-    if (QTcpSocketClient && QTcpSocketClient->isOpen()) {
-        sendTcp(buf, length);
-        sent = true;
-        m_countSent++;
-    } else if (QSerialPort1->isOpen()) {
+    if (m_isTcpMode) {
+        if (QTcpSocketClient && QTcpSocketClient->isOpen()) {
+            sendTcp(buf, length);
+            sent = true;
+            m_countSent++;
+        }
+    } else {
+        if (QUdpSocket1->isOpen()) {
+            sendUdp(buf, length);
+            sent = true;
+            m_countSent++;
+        }
+    }
+
+    if (!sent && QSerialPort1->isOpen()) {
         sendSerial(buf, length);
-        sent = true;
-        m_countSent++;
-    } else if (QUdpSocket1->isOpen()) {
-        sendUdp(buf, length);
         sent = true;
         m_countSent++;
     }
@@ -1372,6 +1439,7 @@ void MainWindow::OnTcpNewConnection() {
         ui->textBrowserUnProcessed->append("CLIENT CONNECTED VIA TCP (" + cleanAddr.toString() + ")");
 
         ui->pushButton_connectUdp->setText("DISCONNECT");
+        ui->pushButton_protocol_wifi->setEnabled(false);
         statusMode->setText(isSoftApActive() ? "ESTADO --> CONECTADO SOFTAP" : "ESTADO --> CONECTADO STATION TCP");
         statusMode->setStyleSheet("color: #00f2c3; font-weight: bold; font-size: 11px; padding-left: 5px;");
         m_lastRxTime = QDateTime::currentMSecsSinceEpoch();
@@ -1384,7 +1452,10 @@ void MainWindow::OnTcpNewConnection() {
 void MainWindow::OnTcpDisconnected() {
     addLogEntry("CLIENT DISCONNECTED FROM TCP", "RX");
     ui->textBrowserUnProcessed->append("CLIENT DISCONNECTED FROM TCP");
-    if(QUdpSocket1->isOpen()) {
+    if (m_isTcpMode && QTcpServer1 && QTcpServer1->isListening()) {
+        statusMode->setText("ESTADO --> ESCUCHANDO TCP...");
+        statusMode->setStyleSheet("color: #ffd600; font-weight: bold; font-size: 11px; padding-left: 5px;");
+    } else if(QUdpSocket1->isOpen()) {
         statusMode->setText("ESTADO --> CONECTANDO...");
         statusMode->setStyleSheet("color: #ffd600; font-weight: bold; font-size: 11px; padding-left: 5px;");
     } else {
@@ -1492,9 +1563,9 @@ void MainWindow::OnTcpRxData() {
 
 void MainWindow::getData(){
     // --- 1. GUARDIA DE SEGURIDAD (Frena el spam) ---
-    bool isTcpActive = (QTcpSocketClient && QTcpSocketClient->isOpen() && QTcpSocketClient->state() == QAbstractSocket::ConnectedState);
+    bool isTcpActive = (m_isTcpMode && QTcpSocketClient && QTcpSocketClient->isOpen() && QTcpSocketClient->state() == QAbstractSocket::ConnectedState);
     bool isSerialActive = (QSerialPort1 && QSerialPort1->isOpen());
-    bool isUdpActive = (QUdpSocket1 && QUdpSocket1->isOpen());
+    bool isUdpActive = (!m_isTcpMode && QUdpSocket1 && QUdpSocket1->isOpen());
 
     if(!isSerialActive && !isUdpActive && !isTcpActive) {
         statusMode->setText("ESTADO --> DESCONECTADO");
@@ -1569,17 +1640,25 @@ void MainWindow::getData(){
     sendCommand(buf, 1);
 }
 bool MainWindow::eventFilter(QObject *watched, QEvent *event){
-    if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease) {
+    if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease || event->type() == QEvent::ShortcutOverride) {
         if (ui->stackedWidget && ui->stackedWidget->currentIndex() == 3) {
             QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
             int key = keyEvent->key();
             if (key == Qt::Key_Up || key == Qt::Key_Down || key == Qt::Key_Left || key == Qt::Key_Right || key == Qt::Key_R) {
+                if (event->type() == QEvent::ShortcutOverride) {
+                    event->accept();
+                    return true;
+                }
                 if (event->type() == QEvent::KeyPress) {
                     keyPressEvent(keyEvent);
                 } else {
                     keyReleaseEvent(keyEvent);
                 }
-                return true; // Consumir evento para evitar cualquier navegacion o cambio de modo indirecto
+                return true; // Consumir evento para evitar cualquier navegación o cambio de pestaña indirecto
+            } else if (key == Qt::Key_Tab || key == Qt::Key_Backtab) {
+                // Bloquear tabulación para no perder el foco ni saltar a botones de cabecera
+                event->accept();
+                return true;
             }
         }
     }
@@ -1638,7 +1717,7 @@ void MainWindow::on_pushButton_connectUdp_clicked()
     int Port;
     bool ok;
 
-    if(QUdpSocket1->isOpen() || (QTcpServer1 && QTcpServer1->isListening())){
+    if(QUdpSocket1->isOpen() || (QTcpServer1 && QTcpServer1->isListening()) || (QTcpSocketClient && QTcpSocketClient->isOpen())){
         if(QUdpSocket1->isOpen()) {
             QUdpSocket1->close();
         }
@@ -1652,6 +1731,7 @@ void MainWindow::on_pushButton_connectUdp_clicked()
             QTcpSocketClient = nullptr;
         }
         ui->pushButton_connectUdp->setText("CONNECT");
+        ui->pushButton_protocol_wifi->setEnabled(true);
         statusMode->setText("ESTADO --> DESCONECTADO");
         statusMode->setStyleSheet("color: #fd5d93; font-weight: bold; font-size: 11px; padding-left: 5px;");
         m_lastRxTime = 0;
@@ -1666,12 +1746,22 @@ void MainWindow::on_pushButton_connectUdp_clicked()
     }
 
     try{
-        QUdpSocket1->abort();
-        QUdpSocket1->bind(Port);
-        QUdpSocket1->open(QUdpSocket::ReadWrite);
-
-        if(QTcpServer1->isListening()) QTcpServer1->close();
-        QTcpServer1->listen(QHostAddress::Any, Port);
+        if (m_isTcpMode) {
+            if (QUdpSocket1->isOpen()) QUdpSocket1->close();
+            if (QTcpServer1->isListening()) QTcpServer1->close();
+            QTcpServer1->listen(QHostAddress::Any, Port);
+        } else {
+            if (QTcpServer1->isListening()) QTcpServer1->close();
+            if (QTcpSocketClient) {
+                QTcpSocketClient->disconnect();
+                QTcpSocketClient->close();
+                QTcpSocketClient->deleteLater();
+                QTcpSocketClient = nullptr;
+            }
+            QUdpSocket1->abort();
+            QUdpSocket1->bind(Port);
+            QUdpSocket1->open(QUdpSocket::ReadWrite);
+        }
     }catch(...){
         QMessageBox::information(this, tr("SERVER PORT"),tr("Can't OPEN Port."));
         return;
@@ -1684,16 +1774,51 @@ void MainWindow::on_pushButton_connectUdp_clicked()
     }
 
     ui->pushButton_connectUdp->setText("DISCONNECT");
-    statusMode->setText("ESTADO --> CONECTANDO...");
-    statusMode->setStyleSheet("color: #ffd600; font-weight: bold; font-size: 11px; padding-left: 5px;");
-    paramsSynced = false;
-    uint8_t b = GETINTERNALDATA;
-    sendCommand(&b, 1);
-    if(QUdpSocket1->isOpen()){
-        clientAddress.setAddress(ui->lineEdit_device_ip->text());
-        if(puertoremoto==0)
-            puertoremoto=ui->lineEdit_device_port->text().toInt();
-        QUdpSocket1->writeDatagram("r", 1, clientAddress, puertoremoto);
+    ui->pushButton_protocol_wifi->setEnabled(false);
+
+    if (m_isTcpMode) {
+        statusMode->setText("ESTADO --> ESCUCHANDO TCP...");
+        statusMode->setStyleSheet("color: #ffd600; font-weight: bold; font-size: 11px; padding-left: 5px;");
+        addLogEntry("***ESCUCHANDO CONEXIONES TCP EN PUERTO " + QString::number(Port) + "***", "INFO");
+        ui->textBrowserUnProcessed->append("***ESCUCHANDO CONEXIONES TCP EN PUERTO " + QString::number(Port) + "***");
+    } else {
+        statusMode->setText("ESTADO --> CONECTANDO UDP...");
+        statusMode->setStyleSheet("color: #ffd600; font-weight: bold; font-size: 11px; padding-left: 5px;");
+        paramsSynced = false;
+        uint8_t b = GETINTERNALDATA;
+        sendCommand(&b, 1);
+        if(QUdpSocket1->isOpen()){
+            clientAddress.setAddress(ui->lineEdit_device_ip->text());
+            if(puertoremoto==0)
+                puertoremoto=ui->lineEdit_device_port->text().toInt();
+            QUdpSocket1->writeDatagram("r", 1, clientAddress, puertoremoto);
+        }
+    }
+}
+
+void MainWindow::on_pushButton_protocol_wifi_clicked()
+{
+    if (QUdpSocket1->isOpen() || (QTcpServer1 && QTcpServer1->isListening()) || (QTcpSocketClient && QTcpSocketClient->isOpen())) {
+        QMessageBox::warning(this, "Protocolo WiFi", "Debe desconectar la conexión actual antes de cambiar de protocolo.");
+        ui->pushButton_protocol_wifi->setChecked(m_isTcpMode);
+        return;
+    }
+    m_isTcpMode = ui->pushButton_protocol_wifi->isChecked();
+    updateProtocolUI();
+}
+
+void MainWindow::updateProtocolUI()
+{
+    ui->pushButton_protocol_wifi->blockSignals(true);
+    ui->pushButton_protocol_wifi->setChecked(m_isTcpMode);
+    ui->pushButton_protocol_wifi->blockSignals(false);
+
+    if (m_isTcpMode) {
+        ui->pushButton_protocol_wifi->setText("PROTOCOLO: TCP");
+        ui->label_udp->setText("WIFI - TCP");
+    } else {
+        ui->pushButton_protocol_wifi->setText("PROTOCOLO: UDP");
+        ui->label_udp->setText("WIFI - UDP");
     }
 }
 
@@ -1819,11 +1944,33 @@ void MainWindow::on_sendDodgeDir_clicked() {
 }
 
 void MainWindow::on_pushButton_setSoftAp_clicked() {
-    m_isSoftApMode = true;
+    bool isConnOpen = (m_isTcpMode && QTcpSocketClient && QTcpSocketClient->isOpen())
+                   || (!m_isTcpMode && QUdpSocket1 && QUdpSocket1->isOpen())
+                   || (QSerialPort1 && QSerialPort1->isOpen());
+
+    if (!isConnOpen) {
+        QMessageBox::warning(this, "Conexión Requerida",
+                             "No hay ninguna conexión activa con el robot (TCP, UDP o Serial).\n"
+                             "Conéctate primero para enviar la solicitud de cambio a SoftAP.");
+        return;
+    }
+
+    ui->pushButton_setSoftAp->setText("ENVIANDO...");
+    ui->pushButton_setSoftAp->setEnabled(false);
+
+    // Watchdog de 3 segundos por si no llega respuesta del robot
+    QTimer::singleShot(3000, this, [this]() {
+        if (ui->pushButton_setSoftAp->text() == "ENVIANDO...") {
+            ui->pushButton_setSoftAp->setText("MODO SOFTAP");
+            ui->pushButton_setSoftAp->setEnabled(true);
+        }
+    });
+
     uint8_t payload[4];
     uint8_t index = 0;
     payload[index++] = SETSOFTAP;
     sendCommand(payload, index);
+
     addLogEntry("***COMANDO ENVIADO: CAMBIO A MODO SOFTAP***", "TX");
     ui->textBrowserProcessed->append("***SOLICITANDO CAMBIO A MODO SOFTAP EN EL ROBOT...***");
 }
@@ -1989,7 +2136,7 @@ void MainWindow::sendRobotMode(uint8_t modeId) {
     case 1: modeName = "BALANCE"; break;
     case 2: modeName = "SEGUIR LINEA"; break;
     case 3: modeName = "ESQUIVAR"; break;
-    case 4: modeName = "GOTO"; break;
+    case 4: modeName = "JOYSTICK"; break;
     case 5: modeName = "3D SCREEN"; break;
     default: modeName = QString("MODO %1").arg(modeId); break;
     }
@@ -2002,6 +2149,8 @@ void MainWindow::sendRobotMode(uint8_t modeId) {
     }
     if (modeId == 4) {
         ui->stackedWidget->setCurrentIndex(3);
+        resetGoToYaw();
+        this->setFocus();
     }
 }
 
@@ -2029,24 +2178,16 @@ void MainWindow::updateRobotModeUI(uint8_t mode) {
 
     if (ui->label_gotoStatusBadge) {
         if (mode == 4) {
-            ui->label_gotoStatusBadge->setText("● GOTO ACTIVO");
+            ui->label_gotoStatusBadge->setText("● JOYSTICK ACTIVO");
             ui->label_gotoStatusBadge->setStyleSheet("background-color: #0d381e; color: #00e676; border: 1.5px solid #00e676; border-radius: 12px; padding: 4px 14px; font-weight: bold;");
             if (ui->label_gotoTitle) {
                 ui->label_gotoTitle->setStyleSheet("color: #00e676;");
             }
-            if (ui->btn_goto_activate) {
-                ui->btn_goto_activate->setText("● Modo Activo");
-                ui->btn_goto_activate->setStyleSheet("QPushButton#btn_goto_activate { background-color: #00e676; color: #081a10; border: none; border-radius: 6px; font-weight: bold; padding: 6px 14px; } QPushButton#btn_goto_activate:hover { background-color: #26ff8a; }");
-            }
         } else {
-            ui->label_gotoStatusBadge->setText("● GOTO STANDBY");
+            ui->label_gotoStatusBadge->setText("● JOYSTICK STANDBY");
             ui->label_gotoStatusBadge->setStyleSheet("background-color: #2a1217; color: #ff5252; border: 1px solid #ff5252; border-radius: 12px; padding: 4px 14px; font-weight: bold;");
             if (ui->label_gotoTitle) {
                 ui->label_gotoTitle->setStyleSheet("color: #ff5252;");
-            }
-            if (ui->btn_goto_activate) {
-                ui->btn_goto_activate->setText("Activar Modo GoTo");
-                ui->btn_goto_activate->setStyleSheet("QPushButton#btn_goto_activate { background-color: #ff5252; color: #1a080a; border: none; border-radius: 6px; font-weight: bold; padding: 6px 14px; } QPushButton#btn_goto_activate:hover { background-color: #ff6e6e; } QPushButton#btn_goto_activate:pressed { background-color: #e04545; }");
             }
         }
     }
@@ -2092,6 +2233,155 @@ void MainWindow::on_actionOpenDebug_triggered()
     myDebugDialog->show();
     myDebugDialog->raise();
     myDebugDialog->activateWindow();
+}
+
+void MainWindow::on_actionDocu_triggered()
+{
+    ui->tabWidget_help->setCurrentWidget(ui->tab_DOCU);
+    ui->HELP_PAGE->show();
+    if (!myHelpDialog->isVisible()) {
+        myHelpDialog->resize(720, 560);
+    }
+    myHelpDialog->show();
+    myHelpDialog->raise();
+    myHelpDialog->activateWindow();
+}
+
+void MainWindow::on_actionAcercaDe_triggered()
+{
+    ui->tabWidget_help->setCurrentWidget(ui->tab_ACERCA_DE);
+    ui->HELP_PAGE->show();
+    if (!myHelpDialog->isVisible()) {
+        myHelpDialog->resize(720, 560);
+    }
+    myHelpDialog->show();
+    myHelpDialog->raise();
+    myHelpDialog->activateWindow();
+}
+
+void MainWindow::initHelpContent()
+{
+    ui->textBrowser_docu->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    ui->textBrowser_docu->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->textBrowser_acerca->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    ui->textBrowser_acerca->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    QString docuHtml = R"(
+<div style="font-family: 'Segoe UI', sans-serif; color: #e2e2e2; line-height: 1.5; padding: 12px;">
+    <h2 style="color: #00f2c3; border-bottom: 2px solid #e14eca; padding-bottom: 6px; margin-top: 0; font-size: 18px; font-weight: bold;">
+        Funciones del Autito - Centro de Control MCC25
+    </h2>
+    <p style="color: #a0a5b5; font-size: 12px; margin-bottom: 14px;">
+        Este software supervisa y comanda un autito robótico de tipo <b>péndulo invertido auto-balanceado de 2 ruedas</b>. A continuación se detallan todas sus funciones principales y modos de operación:
+    </p>
+
+    <div style="background-color: #1a1a28; border-left: 4px solid #00f2c3; padding: 10px 14px; margin-bottom: 12px; border-radius: 4px;">
+        <h3 style="color: #00f2c3; margin: 0 0 6px 0; font-size: 14px; font-weight: bold;">1. Modo Balance (Péndulo Invertido)</h3>
+        <p style="margin: 0; font-size: 12px; color: #d0d2dc;">
+            <b>• Descripción:</b> Mantiene el equilibrio dinámico vertical del robot sobre sus dos ruedas sin volcarse.<br>
+            <b>• Principio Físico:</b> La Unidad de Medición Inercial (IMU con giroscopio y acelerómetro) registra continuamente el ángulo de inclinación (Pitch) y la velocidad angular.<br>
+            <b>• Algoritmo:</b> Lazo cerrado de control PID en cascada. El algoritmo calcula en tiempo real el torque y velocidad necesarios para que los motores DC contrarresten la gravedad y estabilicen el centro de masa.
+        </p>
+    </div>
+
+    <div style="background-color: #1a1a28; border-left: 4px solid #e14eca; padding: 10px 14px; margin-bottom: 12px; border-radius: 4px;">
+        <h3 style="color: #e14eca; margin: 0 0 6px 0; font-size: 14px; font-weight: bold;">2. Modo Seguir Línea</h3>
+        <p style="margin: 0; font-size: 12px; color: #d0d2dc;">
+            <b>• Descripción:</b> Navegación autónoma siguiendo pistas o circuitos demarcados en el piso mediante cinta reflectiva o línea negra.<br>
+            <b>• Sensores:</b> Barra frontal compuesta por 8 sensores infrarrojos reflectivos (IR1 a IR8).<br>
+            <b>• Lógica:</b> Mediante ponderación espacial de los sensores activos, se calcula la desviación de la línea (error lineal y cuadrático). Un controlador PD diferencial ajusta las velocidades relativas entre la rueda izquierda y derecha para mantener la trayectoria sin perder el auto-balance.
+        </p>
+    </div>
+
+    <div style="background-color: #1a1a28; border-left: 4px solid #ff8d72; padding: 10px 14px; margin-bottom: 12px; border-radius: 4px;">
+        <h3 style="color: #ff8d72; margin: 0 0 6px 0; font-size: 14px; font-weight: bold;">3. Modo Esquivar (Evasión de Obstáculos)</h3>
+        <p style="margin: 0; font-size: 12px; color: #d0d2dc;">
+            <b>• Descripción:</b> Detección frontal de obstáculos y ejecución de maniobras evasivas automáticas.<br>
+            <b>• Sensores:</b> Sensores de distancia de ultrasonido / infrarrojos frontales.<br>
+            <b>• Maniobra:</b> Cuando un obstáculo se encuentra a una distancia menor al umbral de seguridad, el autito frena suavemente, rota sobre su eje hacia la dirección configurada (izquierda o derecha), bordea el obstáculo y retoma la navegación normal.
+        </p>
+    </div>
+
+    <div style="background-color: #1a1a28; border-left: 4px solid #00e676; padding: 10px 14px; margin-bottom: 12px; border-radius: 4px;">
+        <h3 style="color: #00e676; margin: 0 0 6px 0; font-size: 14px; font-weight: bold;">4. Modo Control Joystick</h3>
+        <p style="margin: 0; font-size: 12px; color: #d0d2dc;">
+            <b>• Descripción:</b> Control manual y maniobra directa del autito mediante cruceta direccional o teclado en tiempo real.<br>
+            <b>• Funcionalidad:</b> Permite comandar avance, retroceso (ajuste progresivo del setpoint de inclinación) y giros sobre su eje (rotación horaria y antihoraria con intensidad y duración configurables), conservando la estabilidad de auto-balance.
+        </p>
+    </div>
+
+    <div style="background-color: #1a1a28; border-left: 4px solid #1d8cf8; padding: 10px 14px; margin-bottom: 12px; border-radius: 4px;">
+        <h3 style="color: #1d8cf8; margin: 0 0 6px 0; font-size: 14px; font-weight: bold;">5. Gemelo Digital y Visualización 3D</h3>
+        <p style="margin: 0; font-size: 12px; color: #d0d2dc;">
+            <b>• Descripción:</b> Renderizado tridimensional en tiempo real del autito dentro de la interfaz.<br>
+            <b>• Tecnología:</b> Desarrollado con Qt Quick 3D y QML. Refleja fielmente la inclinación espacial (Pitch, Roll y Yaw) del autito en vivo tal como se encuentra en el mundo físico.
+        </p>
+    </div>
+
+    <div style="background-color: #1a1a28; border-left: 4px solid #ba54f5; padding: 10px 14px; margin-bottom: 12px; border-radius: 4px;">
+        <h3 style="color: #ba54f5; margin: 0 0 6px 0; font-size: 14px; font-weight: bold;">6. Telemetría y Sintonización PID en Tiempo Real</h3>
+        <p style="margin: 0; font-size: 12px; color: #d0d2dc;">
+            <b>• Monitoreo:</b> Visualización en vivo de señales PWM, lecturas de los 8 sensores IR, aceleración, velocidades y estado de conexión.<br>
+            <b>• Sintonización en Caliente:</b> Permite modificar las ganancias proporcional (Kp), integral (Ki) y derivativa (Kd) de los lazos de control desde la interfaz gráfica sin necesidad de reprogramar el microcontrolador.<br>
+            <b>• Gráficos Dinámicos:</b> Gráficas de respuesta temporal para evaluar estabilidad y sobreimpulso.
+        </p>
+    </div>
+
+    <div style="background-color: #1a1a28; border-left: 4px solid #ffd600; padding: 10px 14px; margin-bottom: 6px; border-radius: 4px;">
+        <h3 style="color: #ffd600; margin: 0 0 6px 0; font-size: 14px; font-weight: bold;">7. Conectividad Dual (WiFi UDP / Serial)</h3>
+        <p style="margin: 0; font-size: 12px; color: #d0d2dc;">
+            <b>• Comunicación WiFi:</b> Transmisión inalámbrica de alta velocidad mediante datagramas UDP para telemetría y control sin cables.<br>
+            <b>• Conexión Serie:</b> Puerto COM (USB/UART) para calibración en banco de pruebas y consola de logs (TX/RX).
+        </p>
+    </div>
+</div>
+)";
+    ui->textBrowser_docu->setHtml(docuHtml);
+
+    QString acercaHtml = R"(
+<div style="font-family: 'Segoe UI', sans-serif; color: #e2e2e2; line-height: 1.6; padding: 14px;">
+    <div style="text-align: center; margin-bottom: 16px;">
+        <h1 style="color: #00f2c3; margin: 0; font-size: 22px; font-weight: bold; letter-spacing: 1px;">MICRO-Software</h1>
+        <h3 style="color: #e14eca; margin: 4px 0 10px 0; font-size: 14px; font-weight: bold;">Centro de Control, Telemetría y Visualización 3D</h3>
+        <span style="background-color: #27293d; color: #00f2c3; border: 1px solid #00f2c3; border-radius: 12px; padding: 3px 12px; font-size: 11px; font-weight: bold;">MCC25 · Versión 1.0.0</span>
+    </div>
+
+    <div style="background-color: #1a1a28; border: 1px solid #27293d; border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+        <h4 style="color: #00f2c3; margin-top: 0; margin-bottom: 6px; font-size: 13px; font-weight: bold; text-transform: uppercase;">Descripción del Software</h4>
+        <p style="margin: 0; font-size: 12.5px; color: #c4c7d0; text-align: justify;">
+            <b>MICRO-Software</b> es una aplicación de escritorio diseñada para servir como estación de monitoreo y control en tiempo real para un autito robótico tipo péndulo invertido de dos ruedas. Integra representación espacial en 3D (gemelo digital), sintonización en caliente de parámetros de control PID, adquisición de telemetría de sensores inerciales e infrarrojos, y canales de comunicación inalámbrica vía Wi-Fi (protocolo UDP) y cableada mediante interfaz Serie UART.
+        </p>
+    </div>
+
+    <table width="100%" align="center" border="0" cellpadding="0" cellspacing="10" style="width: 100%; border-collapse: separate; border-spacing: 10px; margin-bottom: 12px;">
+        <tr>
+            <td width="50%" align="center" style="width: 50%; background-color: #1a1a28; border: 1px solid #27293d; border-radius: 8px; padding: 12px 14px; text-align: center;">
+                <div style="color: #e14eca; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: center;">Materia</div>
+                <div style="color: #ffffff; font-size: 14px; font-weight: bold; margin-top: 4px; text-align: center;">Microcontroladores (MCC)</div>
+            </td>
+            <td width="50%" align="center" style="width: 50%; background-color: #1a1a28; border: 1px solid #27293d; border-radius: 8px; padding: 12px 14px; text-align: center;">
+                <div style="color: #00f2c3; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: center;">Estudiante</div>
+                <div style="color: #ffffff; font-size: 14px; font-weight: bold; margin-top: 4px; text-align: center;">Gonzalo Martín Buffa</div>
+            </td>
+        </tr>
+        <tr>
+            <td width="50%" align="center" style="width: 50%; background-color: #1a1a28; border: 1px solid #27293d; border-radius: 8px; padding: 12px 14px; text-align: center;">
+                <div style="color: #ff8d72; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: center;">Año</div>
+                <div style="color: #ffffff; font-size: 14px; font-weight: bold; margin-top: 4px; text-align: center;">2025 - 2026</div>
+            </td>
+            <td width="50%" align="center" style="width: 50%; background-color: #1a1a28; border: 1px solid #27293d; border-radius: 8px; padding: 12px 14px; text-align: center;">
+                <div style="color: #00e676; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: center;">Tecnologías</div>
+                <div style="color: #ffffff; font-size: 14px; font-weight: bold; margin-top: 4px; text-align: center;">Qt 6.10.2</div>
+            </td>
+        </tr>
+    </table>
+
+    <div style="text-align: center; color: #6c7293; font-size: 11px; font-weight: bold; margin-top: 10px;">
+        © 2025-2026 Gonzalo Martín Buffa · Proyecto de Microcontroladores
+    </div>
+</div>
+)";
+    ui->textBrowser_acerca->setHtml(acercaHtml);
 }
 
 
@@ -2147,14 +2437,16 @@ void MainWindow::initPIDChart()
     QPen penDLine(QColor("#e14eca")); penDLine.setWidth(2); pid_dLineSeries->setPen(penDLine);
     QPen penOutLine(QColor("#ff8d72")); penOutLine.setWidth(2); pid_outLineSeries->setPen(penOutLine);
 
-    auto setupChartCommon = [](QChart *chart, const QString &title) {
+    auto setupChartCommon = [](QChart *chart, const QString &title = QString()) {
         chart->setTheme(QChart::ChartThemeDark);
-        chart->setTitle(title);
-        chart->setTitleBrush(QBrush(QColor("#e2e2e2")));
-        QFont titleFont = chart->titleFont();
-        titleFont.setBold(true);
-        titleFont.setPointSize(10);
-        chart->setTitleFont(titleFont);
+        if (!title.isEmpty()) {
+            chart->setTitle(title);
+            chart->setTitleBrush(QBrush(QColor("#e2e2e2")));
+            QFont titleFont = chart->titleFont();
+            titleFont.setBold(true);
+            titleFont.setPointSize(10);
+            chart->setTitleFont(titleFont);
+        }
         chart->setBackgroundBrush(QBrush(QColor("#151522")));
         chart->setPlotAreaBackgroundBrush(QBrush(QColor("#10101a")));
         chart->setPlotAreaBackgroundVisible(true);
@@ -2177,7 +2469,7 @@ void MainWindow::initPIDChart()
 
     // 1. Gráfica de Orientación
     chartOrientation_mw = new QChart();
-    setupChartCommon(chartOrientation_mw, "Orientacion (Pitch, Roll, Yaw)");
+    setupChartCommon(chartOrientation_mw, "");
     chartOrientation_mw->addSeries(pid_pitchSeries);
     chartOrientation_mw->addSeries(pid_rollSeries);
     chartOrientation_mw->addSeries(pid_yawSeries);
@@ -2212,7 +2504,7 @@ void MainWindow::initPIDChart()
 
     // 2. Gráfica de Balanceo
     chartBalance_mw = new QChart();
-    setupChartCommon(chartBalance_mw, "Sistema de Balanceo (Kp, Ki, Kd)");
+    setupChartCommon(chartBalance_mw, "");
     chartBalance_mw->addSeries(pid_pSeries);
     chartBalance_mw->addSeries(pid_iSeries);
     chartBalance_mw->addSeries(pid_dSeries);
@@ -2241,7 +2533,7 @@ void MainWindow::initPIDChart()
 
     // 3. Gráfica de Seguimiento de Línea
     chartLine_mw = new QChart();
-    setupChartCommon(chartLine_mw, "Seguimiento de Linea (Kp, Kq)");
+    setupChartCommon(chartLine_mw, "");
     chartLine_mw->addSeries(pid_pLineSeries);
     chartLine_mw->addSeries(pid_dLineSeries);
     chartLine_mw->addSeries(pid_outLineSeries);
@@ -2874,20 +3166,140 @@ void MainWindow::on_pushButton_sendCommand_clicked() {
 
 
 // =========================================================
-// MODO GOTO: CONTROL AUTÓNOMO / REMOTO DESDE PC
+// MODO JOYSTICK: CONTROL MANUAL / REMOTO DESDE PC
 // =========================================================
 
-void MainWindow::on_btn_mode_goto_clicked() {
-    sendRobotMode(4);
-    ui->stackedWidget->setCurrentIndex(3);
-    resetGoToYaw();
-    this->setFocus();
+void MainWindow::switchNavTab(int targetIndex) {
+    int currentIndex = ui->stackedWidget->currentIndex();
+    if (currentIndex == targetIndex) {
+        updateNavSelection(targetIndex);
+        return;
+    }
+
+    // Si actualmente estamos en el Modo Joystick (pestaña 3), proteger contra cambios accidentales
+    if (currentIndex == 3) {
+        QPushButton *senderBtn = qobject_cast<QPushButton*>(sender());
+        // Si el evento fue indirecto (foco, teclado, etc.) y el cursor no está sobre el botón, cancelar
+        if (senderBtn && !senderBtn->underMouse()) {
+            ui->btn_nav_goto->setChecked(true);
+            return;
+        }
+
+        // Preguntar al usuario antes de salir utilizando la ventana pop-up configurada en el .ui
+        if (!confirmJoystickExit()) {
+            ui->btn_nav_goto->setChecked(true);
+            return;
+        }
+
+        // Al confirmar salida, detener giros activos por seguridad
+        m_isRotatingLeft = false;
+        m_isRotatingRight = false;
+        if (m_gotoTurnKeepAliveTimer && m_gotoTurnKeepAliveTimer->isActive()) {
+            m_gotoTurnKeepAliveTimer->stop();
+        }
+        sendGoToTurn(0, 0);
+    }
+
+    // Pestaña de Configuración (índice 2): proteger con contraseña en pop-up
+    if (targetIndex == 2) {
+        if (!requestConfigPassword()) {
+            updateNavSelection(currentIndex);
+            return;
+        }
+    }
+
+    ui->stackedWidget->setCurrentIndex(targetIndex);
+    updateNavSelection(targetIndex);
+    if (targetIndex == 3) {
+        resetGoToYaw();
+        this->setFocus();
+    }
+}
+
+void MainWindow::on_btn_nav_infrarrojos_clicked() {
+    switchNavTab(0);
+}
+
+void MainWindow::on_btn_nav_visualizacion_clicked() {
+    switchNavTab(1);
+}
+
+void MainWindow::on_btn_nav_tuning_clicked() {
+    switchNavTab(2);
+}
+
+bool MainWindow::requestConfigPassword() {
+    if (!myPasswordDialog) return true;
+
+    ui->lineEdit_configPassword->clear();
+    ui->label_passwordFeedback->clear();
+
+    myPasswordDialog->adjustSize();
+    if (this->isVisible()) {
+        QPoint center = this->geometry().center();
+        myPasswordDialog->move(center.x() - myPasswordDialog->width() / 2,
+                               center.y() - myPasswordDialog->height() / 2);
+    }
+
+    ui->lineEdit_configPassword->setFocus();
+
+    int result = myPasswordDialog->exec();
+    return (result == QDialog::Accepted);
+}
+
+void MainWindow::on_btn_password_accept_clicked() {
+    if (!myPasswordDialog || !myPasswordDialog->isVisible()) return;
+
+    QString entered = ui->lineEdit_configPassword->text().trimmed();
+    if (entered.compare("mcc25", Qt::CaseInsensitive) == 0 ||
+        entered == "1234" ||
+        entered.compare("admin", Qt::CaseInsensitive) == 0) {
+        myPasswordDialog->accept();
+    } else {
+        ui->label_passwordFeedback->setText("Contraseña incorrecta. Intente nuevamente.");
+        ui->lineEdit_configPassword->selectAll();
+        ui->lineEdit_configPassword->setFocus();
+    }
+}
+
+void MainWindow::on_btn_password_cancel_clicked() {
+    if (!myPasswordDialog) return;
+    myPasswordDialog->reject();
+}
+
+bool MainWindow::confirmJoystickExit() {
+    if (!myJoystickExitDialog) return true;
+
+    myJoystickExitDialog->adjustSize();
+    if (this->isVisible()) {
+        QPoint center = this->geometry().center();
+        myJoystickExitDialog->move(center.x() - myJoystickExitDialog->width() / 2,
+                                   center.y() - myJoystickExitDialog->height() / 2);
+    }
+
+    ui->btn_joystick_exit_cancel->setFocus();
+
+    int result = myJoystickExitDialog->exec();
+    return (result == QDialog::Accepted);
+}
+
+void MainWindow::on_btn_joystick_exit_confirm_clicked() {
+    if (!myJoystickExitDialog) return;
+    myJoystickExitDialog->accept();
+}
+
+void MainWindow::on_btn_joystick_exit_cancel_clicked() {
+    if (!myJoystickExitDialog) return;
+    myJoystickExitDialog->reject();
 }
 
 void MainWindow::on_btn_nav_goto_clicked() {
-    ui->stackedWidget->setCurrentIndex(3);
-    resetGoToYaw();
-    this->setFocus();
+    switchNavTab(3);
+}
+
+void MainWindow::on_btn_mode_goto_clicked() {
+    sendRobotMode(4);
+    switchNavTab(3);
 }
 
 void MainWindow::on_btn_goto_up_clicked() {
@@ -2975,11 +3387,9 @@ void MainWindow::sendGoToSetpoint(int32_t sp_val) {
     sendCommand(payload, index);
 
     if (ui->setSetpoint) {
-        ui->setSetpoint->blockSignals(true);
         ui->setSetpoint->setValue(sp_val);
-        ui->setSetpoint->blockSignals(false);
     }
-    QString logMsg = QString("***SETPOINT GOTO ENVIADO: %1 (%2°)***").arg(sp_val).arg(sp_val / 100.0, 0, 'f', 2);
+    QString logMsg = QString("***SETPOINT JOYSTICK ENVIADO: %1 (%2°)***").arg(sp_val).arg(sp_val / 100.0, 0, 'f', 2);
     addLogEntry(logMsg, "TX");
     ui->textBrowserProcessed->append(logMsg);
 }
